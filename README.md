@@ -32,7 +32,7 @@ AlliN 一个辅助平常渗透测试项目或者攻防项目快速打点的综�
 
 
 
-默认扫描会在当前目录以 --host 或者 --project 创建文件夹并保存文件。
+默认扫描会在当前目录以 --host 或者 --project 创建文件夹并保存文件, 默认不创建文件夹。
 
 - res_alivedomain.txt  自动保存全部输出
 - 文件夹内部
@@ -169,7 +169,17 @@ python AlliN.py --host "10.0.0.1-10.0.0.2" -u '/login/index.jsp' -p 80
 
 ```
 
-### -uf
+
+### -H
+
+添加一个自定义header，目前只支持添加一个
+
+样例：
+```
+python AlliN.py -f domain.txt -H "Cookie: xxxxx; UxxxxxxxN=Sxxxxp"
+```
+
+### --uf
 
 和-u 参数功能一样，可添加成多个路径。
 
@@ -204,6 +214,14 @@ urlpathlist 里面有 index.php 、index.jsp
 `-o answer.txt`
 
 
+### --oJ
+
+将结果以json格式输出。
+
+样例：
+`--oJ answer.json
+
+`
 
 ### --nocert
 
