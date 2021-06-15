@@ -27,12 +27,14 @@ AlliN 一个辅助平常渗透测试项目或者攻防项目快速打点的综�
 ## 使用技巧
 
 - pyinstaller 之后可以跨平台使用
+  - Linux 编译时推荐使用含有低版本GLIBC编译，提高更多兼容性
+  - Windows 编译使用python2 版本编译，减缓出现缺少dll情况
 - 建议在VPS上使用，也减少网络问题。
 - 内网使用时，请将`Account`类中API账号置空
 
 
 
-默认扫描会在当前目录以 --host 或者 --project 创建文件夹并保存文件, 默认不创建文件夹。
+使用 --project 创建文件夹并保存文件
 
 - res_alivedomain.txt  自动保存全部输出
 - 文件夹内部
@@ -169,7 +171,6 @@ python AlliN.py --host "10.0.0.1-10.0.0.2" -u '/login/index.jsp' -p 80
 
 ```
 
-
 ### -H
 
 添加一个自定义header，目前只支持添加一个
@@ -186,7 +187,7 @@ python AlliN.py -f domain.txt -H "Cookie: xxxxx; UxxxxxxxN=Sxxxxp"
 样例：
 
 ```python
-python AlliN.py --host "10.0.0.1-10.0.0.2" -uf urlpath.list -p 80
+python AlliN.py --host "10.0.0.1-10.0.0.2" --uf urlpath.list -p 80
 urlpathlist 里面有 index.php 、index.jsp
 访问方式为：
 10.0.0.1/index.php => 10.0.0.1/index.jsp =>10.0.0.2/index.php => 10.0.0.2/index.jsp
@@ -616,5 +617,5 @@ python3 AlliN_pro.py -f AllIP.txt -m cdnscan
 后续也会直接在正常输出中显示。
 
 
-> 部分代码为现有一些github项目整合而来。由于抄了比较多的项目这边就不一一写上了，在此谢过。
+> 部分功能模块代码为现有一些github项目整合而来。由于抄了比较多的项目这边就不一一写上了，在此谢过 :)。
 
