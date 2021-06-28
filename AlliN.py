@@ -4507,7 +4507,7 @@ def duprm(*subs):
     return subdomain
 
 
-# class of  subscan
+# class of subscan
 class subscanProcess:
     def __init__(self, query):
         self.query = query
@@ -4520,6 +4520,7 @@ class subscanProcess:
             from urllib.parse import quote
         context = ssl._create_unverified_context()
         domains = set()
+        result = []
         try:
             crt = urllib2.OpenerDirector()
             crt.add_handler(urllib2.HTTPSHandler())
@@ -4540,7 +4541,7 @@ class subscanProcess:
                 crt_result, re.IGNORECASE):
                 domain = domain.split("@")[-1]
                 domains.add(domain)
-            result = []
+
             # split url for subdomains
             for res in list(domains):
                 # print res.split("."+query)
@@ -4552,10 +4553,10 @@ class subscanProcess:
             certing = PASSAT("CERT Request error") + " | "
             sys.stdout.write(certing)
             sys.stdout.flush()
-            result = []
         return result
 
     def vtsubdomain(self):
+        result = []
         try:
             urlapi = "https://www.virustotal.com/vtapi/v2/domain/report?apikey=%s&domain=%s" % (self.apikey, self.query)
             ho = urllib2.OpenerDirector()
@@ -4572,24 +4573,22 @@ class subscanProcess:
                     ho.add_handler(SocksiPyHandler(socks.SOCKS4, proxy_h, int(proxy_port) ))
             r = ho.open(req, timeout=30)
             r = json.loads(r.read())
-            result = []
             if "subdomains" in r.keys() :
                 for res in r["subdomains"]:
-                    result.append(res.split("."+self.query)[0])
+                    result.append(res.split("." + self.query)[0])
             vtsing = info("VTS Request ") + str(len(result)) + " | "
             sys.stdout.write(vtsing)
             sys.stdout.flush()
         except Exception as e:
-            # print(e)
             vtsing = PASSAT("VTS Request error")  + " | "
             sys.stdout.write(vtsing)
             sys.stdout.flush()
-            result = []
         return result
 
 
     def passivetotal_get(self, path, json_using=True):
-        """passivetotal api for get subdomain
+        """
+        passivetotal api for get subdomain
         """
 
         keylist = Account().Riskiqkey()
@@ -4621,7 +4620,6 @@ class subscanProcess:
                 b2encode = b2encode.encode("gb2312")
                 base64string = base64.b64encode(b2encode).decode("utf-8")
 
-            # print(base64string)
             
             try:
                 if json_using:
@@ -4656,11 +4654,82 @@ class subscanProcess:
                 return None
         result = readapi()
         while result =="402" or result == "401" or result == "timeout" :
-            if len(keylist)<1:
+            if len(keylist) < 1:
                 pass
             result=readapi()
         return result
 
+    def bing_domain(self):
+        result = set()
+        try:
+            bing_header = copy.deepcopy(headers)
+
+            # Location banner of bing
+            ho = urllib2.OpenerDirector()
+            ho.add_handler(urllib2.HTTPSHandler())
+            ho.add_handler(urllib2.HTTPSHandler(context=_create_unverified_https_context()))
+            req = urllib2.Request("https://bing.com", headers=bing_header)
+            if proxy_type and proxy_host:
+                if proxy_type == "http":
+                    ho.add_handler(urllib2.ProxyHandler({"https":proxy_host}))
+                elif proxy_type == "socks5":
+                    proxy_h, proxy_port = proxy_host.split(":")
+                    ho.add_handler(SocksiPyHandler(socks.SOCKS5, proxy_h, int(proxy_port) ))
+                elif proxy_type == "socks4":
+                    proxy_h, proxy_port = proxy_host.split(":")
+                    ho.add_handler(SocksiPyHandler(socks.SOCKS4, proxy_h, int(proxy_port) ))
+            r = ho.open(req, timeout=3)
+            localhost = r.info()["Location"]
+
+            # Get domain
+            localhost = re.search(r"https:\/\/(.*?)\.bing\.com", localhost).group()
+
+            req = urllib2.Request(localhost, headers=bing_header)
+            r = ho.open(req, timeout=3)
+
+            bing_header.update({
+                "Cookie": r.info()["Set-Cookie"]
+            })
+
+            first = 0
+            while True:
+                urlapi = localhost + "/search?q=site:%s&first=%d&count=50" % (self.query, first)
+                try:
+                    req = urllib2.Request(urlapi, headers=bing_header)
+                    r = ho.open(req, timeout=15)
+                except Exception as e:
+                    break
+
+                data = r.read().decode()
+                pattern = re.compile(r"\<a.*?href=\"(.*?)\".*?\>")
+                patchs = pattern.findall(data)
+                for res in patchs:
+                    patch = re.findall(r"(\w+?)\." + re.escape(self.query), res)
+                    if len(patch) > 0:
+                        result.add(patch[0])
+
+                if not re.search(r"\<div class=\"sw_next\"\>", data):
+                    break
+
+                first += 50
+
+                # Search limit
+                if first > 10000:
+                    break
+
+                # delay loop
+                time.sleep(0.5)
+
+            binging = info("BING Request ") + str(len(result)) + " | "
+            sys.stdout.write(binging)
+            sys.stdout.flush()
+
+        except Exception as e:
+            binging = PASSAT("BING Request error")  + " | "
+            sys.stdout.write(binging)
+            sys.stdout.flush()
+
+        return result
 
 def to_ips(raw):
     if containenglish(raw):
@@ -4977,7 +5046,6 @@ def ip2num(ip):
 
 def num2ip(num):
     return "%s.%s.%s.%s" % ((num >> 24) & 0xff, (num >> 16) & 0xff, (num >> 8) & 0xff, (num & 0xff))
-    #return "%s.%s.%s.%s" % ((num & 0xff000000)>>24,(num & 0x00ff0000)>>16,(num & 0x00000ff00)>>8,num & 0x000000ff)
 
 def gen_ip(ip):
     if type(ip) is not list:
@@ -5061,7 +5129,6 @@ class Fingerident:
                 else:
                     self.trie[u].child[i] = self.trie[self.trie[u].fail].child[i]
 
-        # print(self.total)
 
     def build_Chinses_trie(self):
 
@@ -5473,7 +5540,7 @@ def checkbackground(body, title, url):
     except ModuleNotFoundError:
         from urllib.parse import urlparse
 
-    # TODO: delete when domain variable has splited
+    # TODO: delete it when domain variable has splited
     try:
         path = urlparse(url).path.lower()
         bak_url_list = ("/login;jsessionid=", "/login.aspx?returnurl=", "/auth/login",
@@ -5889,17 +5956,11 @@ class ThreadUrl(threading.Thread):
                     self.cookies = cookielib.CookieJar()
 
                     ho = urllib2.OpenerDirector()
-                    # ho.add_handler(urllib2.HTTPHandler(debuglevel=1))==
                     ho.add_handler(urllib2.HTTPCookieProcessor(self.cookies))
                     ho.add_handler(urllib2.HTTPHandler())
                     
 
-                    try:
-                        ho.add_handler(urllib2.HTTPSHandler(context=_create_unverified_https_context()))
-                    except Exception as identifier:
-
-                        # this code for python2.6!
-                        ho.add_handler(urllib2.HTTPSHandler())
+                    ho.add_handler(urllib2.HTTPSHandler(context=_create_unverified_https_context()))
 
                     if proxy_type and proxy_host:
                         if proxy_type == "http":
@@ -5910,33 +5971,6 @@ class ThreadUrl(threading.Thread):
                         elif proxy_type == "socks4":
                             proxy_h, proxy_port = proxy_host.split(":")
                             ho.add_handler(SocksiPyHandler(socks.SOCKS4, proxy_h, int(proxy_port) ))
-
-
-                    
-                    self.lock.acquire(1)
-                    scaned += 1
-                    progress.current += 1
-                    self.lock.release()
-
-                    # Process for Windows
-                    self.lock.acquire(1)
-                    if progress_num != 0:
-                        if progress_num - temp != 0:
-                            temp = progress_num
-                        else:
-                            if (progress_num <= scaned or self.queue.empty()) and platform.system() == "Windows":
-                                self.lock.release()
-                                for i in range(30):
-                                    erase()
-                                    lines = "wait %d s to exit press Control+C to exit \r"%(30-i)
-                                    sys.stdout.write(info(lines))
-                                    sys.stdout.flush()
-                                    time.sleep(1)
-                                sys.stdout.flush()
-                                raise ValueError("origin is comming")
-                    self.lock.release()
-                    progress()
-
 
                     # debug domain
                     first_domain = domain
@@ -5962,7 +5996,13 @@ class ThreadUrl(threading.Thread):
                         req.get_method = lambda: "HEAD"
 
                     r = ho.open(req, timeout=args.timeout)
-                    # print(r)
+
+                    self.lock.acquire(1)
+                    scaned += 1
+                    progress.current += 1
+                    self.lock.release()
+                    progress()
+
                     if "Host" in new_headers.keys():
                         del new_headers["Host"]
                     # Adapter python3
@@ -6238,7 +6278,6 @@ class ThreadUrl(threading.Thread):
                     p7 = re.compile("Copyright.*\.? ", re.IGNORECASE)
                     p8 = re.compile("<h1.*?>(.*?)</h1>", re.IGNORECASE)
                     self.p9 = len(resp)
-                    # p11 = re.compile("location.href=["\"](.*?)["\"]", re.IGNORECASE)
                     # this is to not redirct because js
                     p11 = re.compile("qwejiqweuqwoeuioqwueiousdaoyqwehuy7ducihgf7yudiwhscuyihcuyhbdsyh", re.IGNORECASE)
 
@@ -6308,7 +6347,6 @@ class ThreadUrl(threading.Thread):
                         else:
                             # get title from meta name
                             if len(target4) != 0 and target4[0] != "":
-                                #print("target4")
                                 resp_title = "<title>" + target4[0] + "</title>"
                             else:
                                 # get title from windows.location
@@ -6336,7 +6374,6 @@ class ThreadUrl(threading.Thread):
                                         resp_title = "<title>" + target6[0].replace("=", "") + "</title>"
                                     else:
                                         if len(target7) != 0 and target7[0] != "":
-                                            #print("target7")
                                             resp_title = "<title>" + target7[0] + "</title>"
                                         else:
                                             if len(target8) != 0 and target8[0] != "":
@@ -6368,13 +6405,10 @@ class ThreadUrl(threading.Thread):
                                                     continue
                                                 else:
                                                     if self.p9 == 0 or self.p9 <=3:
-                                                        # print("target9")
                                                         resp_title = "<title>None</title>"
                                                     elif self.p9 <= 100:
-                                                        # print("target9.1")
                                                         resp_title = "<title>" + resp  + "</title>"
                                                     else:
-                                                        # print("target10")
                                                         resp_title = "<title>" + resp[0:10] + "</title>"
 
                     resp_title = resp_title.replace("\n","").replace("\t","").replace("\r","").strip()
@@ -6421,13 +6455,14 @@ class ThreadUrl(threading.Thread):
                         else:
                             if (progress_num <= scaned or self.queue.empty()) and platform.system() == "Windows":
                                 self.lock.release()
-                                for i in range(30):
+                                for i in range(int(args.timeout+5)):
                                     erase()
-                                    lines = "Wait %d s to exit press Control+C to exit \r"%(30-i)
+                                    lines = "Wait %d s to exit press Control+C to exit \r" % (args.timeout+5-i)
                                     sys.stdout.write(info(lines))
                                     sys.stdout.flush()
                                     time.sleep(1)
                                 sys.stdout.flush()
+                                self.lock.acquire(1)
                                 print(info("\n\nTask completed\n"))
                                 raise ValueError("Terminal task")
 
@@ -6451,7 +6486,6 @@ class ThreadUrl(threading.Thread):
                         pass
                 except ValueError as e:
                     if "Terminal task" in e.__str__():
-                        progress.dones()
                         self.watch.watch(1)
                     pass
 
@@ -6788,7 +6822,6 @@ class infoscan:
                 self.result['cnnicinfo'] = cnnic_result
                 return cnnic_result
             except Exception as e:
-                # print(e)
                 progress.total +=1
                 progress()
                 time.sleep(1)
@@ -7048,7 +7081,7 @@ class infoscan:
         # Microsoft cloud
         microsoft_vps = [(880957440, 880957695)]    
 
-        vps_list = [("Wy_vps", wy_vps), ("Ali_vps", ali_vps), ("Tencent_vps", tencent_vps), ("Huawei_vps", huawei_vps), ("Qiniu_vps", qiniu_vps), ("Microsoft_vps", microsoft_vps)]
+        vps_list = [("Netease_vps", wy_vps), ("Ali_vps", ali_vps), ("Tencent_vps", tencent_vps), ("Huawei_vps", huawei_vps), ("Qiniu_vps", qiniu_vps), ("Microsoft_vps", microsoft_vps)]
         ch3 = lambda x:sum([256**j*int(i) for j,i in enumerate(x.split(".")[::-1])])
         int_ip = ch3(ip)
         for vps in vps_list:
@@ -7090,7 +7123,6 @@ class infoscan:
                 return getemail
                
             except Exception as e:
-                # print(e)
                 progress.total +=1
                 progress()
                 getemail = None
@@ -7109,6 +7141,8 @@ class infoscan:
         progress.current +=1
         subs = subscanProcess(self.domain)
 
+        bing_results = subs.bing_domain()
+
         try:
             pdns_results = subs.passivetotal_get("/v2/enrichment/subdomains")
             pdns_results = json.loads(pdns_results)
@@ -7121,6 +7155,8 @@ class infoscan:
         vts_results = subs.vtsubdomain()
 
         sub_result = duprm(pdns_results["subdomains"], cert_results, vts_results)
+
+
 
         sys.stdout.write("\r")
         sys.stdout.flush()
@@ -8570,7 +8606,7 @@ def Encapsulation_before_tscan(mf, hr, task_list, method, listport, threadnum, o
 
 # ==============================
 
-def aliveThreadControl(hr, task_list, method, listport=[], threadnum=150, outfile="res_alivedomain.txt", urlpath=None):
+def aliveThreadControl(hr, task_list, method, listport=[], threadnum=200, outfile="res_alivedomain.txt", urlpath=None):
     global progress, progress_num, locks, ca_certs, urllib2
 
     # write file of cacert.pem 
@@ -8620,7 +8656,7 @@ def aliveThreadControl(hr, task_list, method, listport=[], threadnum=150, outfil
         # Add model of subscan and fofa scan --- sfscan
 
         if platform.system() == "Windows" and PYVERSION < "3.0":
-            urlpath=urlpath.decode("gbk")
+            urlpath = urlpath.decode("gbk")
             urlpath = urlpath.encode("utf-8")
         urlpath = urlpath.replace("'", "\"")
 
@@ -8791,6 +8827,8 @@ def aliveThreadControl(hr, task_list, method, listport=[], threadnum=150, outfil
         for sdomain in hr[0].split(","):
             subs = subscanProcess(sdomain)
 
+            bing_results = subs.bing_domain()
+
             try:
                 pdns_results = subs.passivetotal_get("/v2/enrichment/subdomains")
                 pdns_results = json.loads(pdns_results)
@@ -8815,7 +8853,7 @@ def aliveThreadControl(hr, task_list, method, listport=[], threadnum=150, outfil
             # you should input ["www","a","b"]
             # duplicate remove for domain
 
-            sub_result = duprm(pdns_results["subdomains"], cert_results, vts_results)
+            sub_result = duprm(pdns_results["subdomains"], cert_results, vts_results, bing_results)
 
 
             # add host name to sub_result
@@ -8921,9 +8959,7 @@ def AG3(args_v, method, listPort, threadnum, action, outfile, urlpath, **kwargs)
                _StartServer("0.0.0.0", 0)
     except TypeError as e:
         print(traceback.print_exc())
-        #print(info(e.__str__()))
 
-    # nothread
 # --------- Main scope ------------
 
 
@@ -8957,7 +8993,7 @@ def pring_logo():
     /   \     |  |     |  |     |  | |  \ |  | 
    /  ^  \    |  |     |  |     |  | |   \|  | 
   /  /_\  \   |  |     |  |     |  | |  . `  | 
- /  _____  \  |  `----.|  `----.|  | |  |\   |  v2.1.7 #{0}
+ /  _____  \  |  `----.|  `----.|  | |  |\   |  v2.1.8 #{0}
 /__/     \__\ |_______||_______||__| |__| \__| 
 
 """.format(platform.python_version())
@@ -8967,7 +9003,7 @@ def pring_logo():
  █████╗ ██╗     ██╗     ██╗███╗   ██╗
 ██╔══██╗██║     ██║     ██║████╗  ██║
 ███████║██║     ██║     ██║██╔██╗ ██║
-██╔══██║██║     ██║     ██║██║╚██╗██║   v2.1.7 #{0}
+██╔══██║██║     ██║     ██║██║╚██╗██║   v2.1.8 #{0}
 ██║  ██║███████╗███████╗██║██║ ╚████║
 ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝╚═╝  ╚═══╝
 """.format(platform.python_version())
@@ -9001,11 +9037,11 @@ if __name__ == "__main__":
                                        "\npython AlliN.py --host 192.168.1.1/24 -p 443 -m bakscan --dd (head scan)"
                                        "\npython AlliN.py --host 192.168.1.1/24 --nobar"
                                        "\npython AlliN.py -q \"domain='xx.com'\" --host xxx.com -m sfscan"
-                                       , version="%prog 2.1.7")
+                                       , version="%prog 2.1.8")
     parse.add_option("--host", dest="host", action="store", type="string", metavar="host", help="example: 192.168.1.1 /192.168.1.1-192.168.1.254")
     parse.add_option("--domain", dest="domain", type="string", help="example: baidu.com in hostscan")
     parse.add_option("--proxy", dest="proxy", type="string", help="use a proxy to connect, example: http://127.0.0.1:8001 socks5://127.0.0.1:1081")
-    parse.add_option("--timeout", dest="timeout", type="float", help="Set timeout", default=3)
+    parse.add_option("--timeout", dest="timeout", type="float", help="Set timeout", default=3.0)
     parse.add_option("-p", dest="p", type="string", metavar="80,443 or 8080-9000", default="", help="Enter Scan Port")
     parse.add_option("-t", dest="t", type="string", metavar="thread 200", default = "200", help="Set threads")
     parse.add_option("-f", dest="f", type="string", help="Input a file")
@@ -9067,11 +9103,6 @@ if __name__ == "__main__":
     localtimes = time.asctime(time.localtime(time.time()))
     starttime = time.time()
     print("\n")
-
-
-    # processing signal for ctrl+c
-    # signal.signal(signal.SIGINT, quit)
-    # signal.signal(signal.SIGTERM, quit)
 
     args = options
     if len(sys.argv) == 1:

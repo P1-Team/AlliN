@@ -5,13 +5,13 @@
 
 [![asciicast](https://asciinema.org/a/8P9RwnYreRrLFlnS1fHok4Soo.svg)](https://asciinema.org/a/8P9RwnYreRrLFlnS1fHok4Soo)
 
-AlliN 一个辅助平常渗透测试项目或者攻防项目快速打点的综合工具，由之前写的工具AG3改名而来。是一款轻便、小巧、快速、全面的扫描工具。多用于渗透前资产收集和渗透后内网横向渗透。工具从项目上迭代了一些懒人功能（`比如提供扫描资产文件中，可以写绝大部分的各种形式的链接/CIDR,并在此基础上可以添加任意端口和路径`）
+一个辅助平常渗透测试项目或者攻防项目快速打点的综合工具，由之前写的工具AG3改名而来。是一款轻便、小巧、快速、全面的扫描工具。多用于渗透前资产收集和渗透后内网横向渗透。工具从项目上迭代了一些懒人功能（比如提供扫描资产文件中，可以写绝大部分的各种形式的链接/CIDR,并在此基础上可以添加任意端口和路径）
 
 
 主要开发人员
-- @Christasa
-- @Cocoli
 - @Like0x
+- @Christasa
+- @CoColi
 - @MiluOWO
 
 **用于非法用途与开发者无关。**
@@ -19,9 +19,9 @@ AlliN 一个辅助平常渗透测试项目或者攻防项目快速打点的综�
 ## Features
 
 - python2.7 - python3.x 无依赖支持。
-- 被动识别站点的一些架构信息，组件信息, 框架信息，指纹数量1000+。
+- 被动识别站点的一些架构信息，组件信息，框架信息，指纹数量1000+。
 - 被动识别访问站点是否是云上站点。
-- 对导入资产扫描支持相对比较完善。几乎支持任意格式资产。
+- 对导入资产扫描支持相对比较完善，几乎支持任意格式资产。
 
 
 ## 使用技巧
@@ -151,7 +151,7 @@ www.baidu.com:80/123
 
 等 
 
-全部混合在一起也可以识别，并且还可以和-p 参数混用
+全部混合在一起也可以识别，并且还可以和`-p`参数混用
 
 
 
@@ -206,9 +206,7 @@ urlpathlist 里面有 index.php 、index.jsp
 
 ### -o
 
-将结果输出成文件。
-
-目前输出的内容有：各种扫描器输出的结果
+将结果输出成文件
 
 样例：
 
@@ -220,9 +218,8 @@ urlpathlist 里面有 index.php 、index.jsp
 将结果以json格式输出。
 
 样例：
-`--oJ answer.json
+`--oJ answer.json`
 
-`
 
 ### --nocert
 
@@ -525,7 +522,7 @@ nbtscan
 
 #### subscan
 
-子域名扫描，调用riskq接口
+子域名扫描
 
 样例：
 
@@ -592,7 +589,7 @@ Accpet new client from : 14178 192.168.148.1
 Your server port is :33127
 ```
 
-此时你访问vps:33127 就是client上80的内容辣
+此时你访问vps:33127 就是client上80的内容
 
 
 
@@ -602,8 +599,6 @@ Your server port is :33127
 python AlliN.py -m icmpt --sip vps --cip 127.0.0.1 --cport 80
 
 Then you can browse vps_ip:36267 to access target_ip:target_port
-
-
 ```
 
 #### cdnscan
@@ -611,7 +606,7 @@ Then you can browse vps_ip:36267 to access target_ip:target_port
 使用场景: 大量IP需要确认是否为CDN节点时。
 
 ```
-python3 AlliN_pro.py -f AllIP.txt -m cdnscan
+python AlliN.py -f AllIP.txt -m cdnscan
 ```
 
 后续也会直接在正常输出中显示。
