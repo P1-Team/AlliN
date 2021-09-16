@@ -1,7 +1,5 @@
 # ALLiN
 
-[toc]
-
 
 [![asciicast](https://asciinema.org/a/8P9RwnYreRrLFlnS1fHok4Soo.svg)](https://asciinema.org/a/8P9RwnYreRrLFlnS1fHok4Soo)
 
@@ -91,6 +89,14 @@ timeout 请求超时时间，默认为3
 --timeout 3
 ```
 
+### --ctimeout
+
+pscan 模块专用的timeout，默认为0.5，与timeout参数区分开来
+
+```
+--ctimeout 0.5
+```
+
 ### --proxy
 
 ```
@@ -99,6 +105,7 @@ timeout 请求超时时间，默认为3
 ```
 
 可以与Xray联动，但是线程需要设置为5，否则超过Xray最大队列数
+目前代理需要用`pip install PySocks` 安装socks包，将在后期版本去除包依赖
 
 
 ### --project
