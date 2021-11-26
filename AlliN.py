@@ -5059,7 +5059,7 @@ def gen_ip(ip):
     if type(ip) is not list:
         for ips in to_ips(ip.strip()):
             yield ips
-
+        return
     for i in ip:
         for ips in to_ips(i.strip()):
             yield ips
