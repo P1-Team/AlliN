@@ -6196,7 +6196,7 @@ class ThreadUrl(threading.Thread):
                     
 
                     # finger arear
-                    if  "rememberMe=deleteMe" in str(r.info().getheader("Set-Cookie")):
+                    if  "=deleteMe" in str(r.info().getheader("Set-Cookie")):
                         domain += " | " + bingo("Shiro!!")
                     if  "ASPSESSIONID" in str(r.info().getheader("Set-Cookie")):
                         domain += " | " + info("[ ASP.NET ]")
