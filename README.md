@@ -1,17 +1,20 @@
 # ALLiN
 
+[toc]
+
 
 [![asciicast](https://asciinema.org/a/8P9RwnYreRrLFlnS1fHok4Soo.svg)](https://asciinema.org/a/8P9RwnYreRrLFlnS1fHok4Soo)
 
 一个辅助平常渗透测试项目或者攻防项目快速打点的综合工具，由之前写的工具AG3改名而来。是一款轻便、小巧、快速、全面的扫描工具。多用于渗透前资产收集和渗透后内网横向渗透。工具从项目上迭代了一些懒人功能（比如提供扫描资产文件中，可以写绝大部分的各种形式的链接/CIDR,并在此基础上可以添加任意端口和路径）
 
-
-主要开发人员
+<details>
+<summary><b>主要开发人员</b></summary>
 - @Like0x
 - @Christasa
 - @CoColi
 - @MiluOWO
-
+- @F4ourNaceL
+</details>
 **用于非法用途与开发者无关。**
 
 ## Features
@@ -349,6 +352,10 @@ subscan 与 fofascan 的结合体
 
 使用逗号分隔你的域名即可。
 
+#### shscan
+shiro scan 用于爆破shiro的key(目前只支持CBC加密模式)
+
+`python AlliN.py --host example.com -m shscan`
 
 
 #### ddscan
@@ -620,4 +627,5 @@ python AlliN.py -f AllIP.txt -m cdnscan
 
 
 > 部分功能模块代码为现有一些github项目整合而来。由于抄了比较多的项目这边就不一一写上了，在此谢过 :)。
+
 
