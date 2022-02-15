@@ -1,6 +1,5 @@
 # ALLiN
 
-[toc]
 
 
 [![asciicast](https://asciinema.org/a/8P9RwnYreRrLFlnS1fHok4Soo.svg)](https://asciinema.org/a/8P9RwnYreRrLFlnS1fHok4Soo)
