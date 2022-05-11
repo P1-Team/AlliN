@@ -379,7 +379,7 @@ python AlliN.py --host "[fuzz].baidu.top" -f test.txt  -m ddscan --dd
 
 #### hostscan
 
-主要用于这种模式, fuzz  host头部
+主要用于fuzz host头部
 
 ```http
 GET /xxx.html HTTP/1.1
@@ -393,9 +393,16 @@ Connection: close
 ```
 
 ```
-python AlliN.py -m hostscan --host https://1.1.1.1 --domain baidu.com -f dic.txt --nocert --project xx
+python AlliN.py -m hostscan --host https://1.1.1.1 --domain baidu.com -f dic.txt --nocert
 ```
 
+#### vhostscan
+
+与`hostscan`类似,固定host头,切换IP扫描
+
+```
+python AlliN.py -m vhostscan -f dict.txt --domain example.com --nocert
+```
 
 
 #### infoscan
