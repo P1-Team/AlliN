@@ -10713,25 +10713,24 @@ def AG3(args_v, method, listPort, threadnum, action, outfile, urlpath, **kwargs)
 
 
 def parse_range_int(range_string):
-    listPort = []
+    listport = []
     if "-" in range_string and "," in range_string:
-        """
-        -p --hidden-size dongtai fanwei
-        """
+        # -p --hidden-size dynamic scope
         tmpportlist = range_string.split(",")
         for i in tmpportlist:
             if "-" in i:
                 startp, endp = i.split("-")
                 tmpportlist2 = range(int(startp), int(endp) + 1)
+                listport += tmpportlist2
             else:
                 listPort.append(i)
-        listPort += tmpportlist2
+
     elif "-" in range_string:
         startp, endp = range_string.split("-")
-        listPort = range(int(startp), int(endp) + 1)
+        listport = range(int(startp), int(endp) + 1)
     else:
-        listPort = range_string.split(",")
-    return listPort
+        listport = range_string.split(",")
+    return listport
 
 
 def pring_logo():
@@ -10742,7 +10741,7 @@ def pring_logo():
     /   \     |  |     |  |     |  | |  \ |  | 
    /  ^  \    |  |     |  |     |  | |   \|  | 
   /  /_\  \   |  |     |  |     |  | |  . `  | 
- /  _____  \  |  `----.|  `----.|  | |  |\   |  v2.3.0 #{0}
+ /  _____  \  |  `----.|  `----.|  | |  |\   |  v2.3.1 #{0}
 /__/     \__\ |_______||_______||__| |__| \__| 
 
 """.format(
@@ -10754,7 +10753,7 @@ def pring_logo():
  █████╗ ██╗     ██╗     ██╗███╗   ██╗
 ██╔══██╗██║     ██║     ██║████╗  ██║
 ███████║██║     ██║     ██║██╔██╗ ██║
-██╔══██║██║     ██║     ██║██║╚██╗██║   v2.3.0 #{0}
+██╔══██║██║     ██║     ██║██║╚██╗██║   v2.3.1 #{0}
 ██║  ██║███████╗███████╗██║██║ ╚████║
 ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝╚═╝  ╚═══╝
 """.format(
@@ -10792,7 +10791,7 @@ if __name__ == "__main__":
         "\npython AlliN.py --host 192.168.1.1/24 -p 443 -m bakscan --dd (head scan)"
         "\npython AlliN.py --host 192.168.1.1/24 --nobar"
         "\npython AlliN.py -q \"domain='xx.com'\" --host xxx.com -m sfscan",
-        version="%prog 2.3.0",
+        version="%prog 2.3.1",
     )
     parse.add_option(
         "--host",
