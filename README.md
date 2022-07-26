@@ -289,7 +289,11 @@ head方式进行扫描探测
 python AlliN.py --host 192.168.1.1/24 -p 443 --dd
 ```
 
-
+### --tp
+title plus模块扫描，额外增加favicon.ico图标扫描
+```python
+python AlliN.py --host 192.168.1.1/24 --tp
+```
 
 ### --fs
 
@@ -403,79 +407,6 @@ python AlliN.py -m hostscan --host https://1.1.1.1 --domain baidu.com -f dic.txt
 ```
 python AlliN.py -m vhostscan -f dict.txt --domain example.com --nocert
 ```
-
-
-#### infoscan
-
-查询各种信息，目前有：
-
-1. DNS记录(vt)
-2. DNS对应IP解析历史（vt)
-3. whois信息
-4. cnnic信息（ip运营商信息）
-5. shodan 收集的相关ip（按C段分类）
-6. fofa 收集的相关ip（按C段分类）
-7. 检查ip是否为阿里云服务器（or 腾讯云服务器）
-
-样例
-
-```shell
-python AlliN.py --host "baidu.com" -m infoscan 
-```
-
-
-
-```
-
-            _____       ________
-            ___(_)_________  __/________________________ _______
-            __  /__  __ \_  /_ _  __ \_  ___/  ___/  __ `/_  __ \
-            _  / _  / / /  __/ / /_/ /(__  )/ /__ / /_/ /_  / / /
-            /_/  /_/ /_//_/    \____//____/ \___/ \__,_/ /_/ /_/
-
-
-Type "help" for more information.
-infoscan>help
-
-Choose the scan modules:
-[*]SEGE		get C of segement
-
-[*]DNS\1		vdns records scan
-[*]DNS\2		vt resolutions history
-
-[*]WHOIS\1		whois information
-[*]WHOIS\2		cnnic information
-[*]WHOIS\3		email information
-[*]WHOIS\4		riskiq information
-
-[*]SUBDOMAIN		subscan information
-[*]ALLSCAN		all scan
-
-Example: DNS\1\2 WHOIS\2\3
-infoscan>ALLSCAN
- [+]  segement C require successfull
- [+]  vdns records require successfull
- [+]  vt resolutions require successfull
- [+]  whois  require successfull
- [+]  cnnic information  require successfull
- [+]  email search require successfull
- [+]  riskiq search require successfull
- [+]  subdomain require successfull
-```
-
-
-
-因为有用到外链 JS 和CSS 可能加载有点慢。
-
-![](img/image-20200824160445841.png)
-
-![](img/image-20200824160500647.png)
-
-![](img/image-20200824160509097.png)
-
-![](img/image-20200824160417813.png)
-
-
 
 #### fscan
 
