@@ -4351,8 +4351,7 @@ class coding:
     def __init__(self):
         pass
 
-    @staticmethod
-    def powershell(cmd):
+    def powershell(self, cmd):
         try:
             print(info("[*]") + cmd)
             powershell_code = cmd
@@ -4365,8 +4364,7 @@ class coding:
         except ValueError as e:
             print("Cookie ValueError")
 
-    @staticmethod
-    def bash(cmd):
+    def bash(self, cmd):
         try:
             print(info("[*]") + cmd)
             bash_code = cmd
@@ -4378,8 +4376,7 @@ class coding:
         except ValueError as e:
             print("Cookie ValueError")
 
-    @staticmethod
-    def f5(f5_string):
+    def f5(self, f5_string):
         try:
             encoded_string = f5_string
             print(info("[*]") + "String to decode: %s\n" % encoded_string)
@@ -4416,8 +4413,7 @@ class coding:
         except ValueError as e:
             print("Cookie ValueError")
 
-    @staticmethod
-    def seeyon(encrypt_passwd):
+    def seeyon(self, encrypt_passwd):
         try:
             crypt_passwd = encrypt_passwd
             x = "/".join(crypt_passwd.split("/")[1:][1:])
@@ -4673,7 +4669,16 @@ class shiro_key_generate:
 def hcode(method, strings):
     if PYVERSION > "3.0":
         print(bingo("-") + " Please use python 2.x")
-        sys.exit()
+        sys.exit(0)
+
+    if method is None or strings is None:
+        print("Please input method or string value")
+        print("""Example:
+        python AlliN.py -m uncd -e f5 -s 185903296.21520.0000
+        python AlliN.py -m uncd -e bh -s id  # bash
+        python AlliN.py -m uncd -e pw -s hostname  # powershell
+        python AlliN.py -m uncd -e seeyon -s xxx # seeyon""")
+        sys.exit(0)
 
     ucode = coding()
     if method == "f5":
@@ -5584,10 +5589,10 @@ class FaviconDetect:
     def fmix(self, h):
         h ^= h >> 16
     
-        h = (h *0x85ebca6b) & 0xffffffff
+        h = (h * 0x85ebca6b) & 0xffffffff
         h ^= h >> 13
 
-        h = (h *0xc2b2ae35) & 0xffffffff
+        h = (h * 0xc2b2ae35) & 0xffffffff
         h ^= h >> 16
         return h
 
@@ -5626,7 +5631,7 @@ class FaviconDetect:
         while index < 0:
             k1 = block[index]
 
-            k1 = (k1 *c1) & 0xffffffff
+            k1 = (k1 * c1) & 0xffffffff
             k1 = self._rotl(k1, 15)
             k1 = (k1 * c2) & 0xffffffff
 
@@ -5637,7 +5642,7 @@ class FaviconDetect:
             index += 1
 
         tail = []
-        for t in val[nblocks*4: ]:
+        for t in val[nblocks*4:]:
             tail.append(ord(t))
 
         k1 = 0
@@ -5841,7 +5846,7 @@ class Fingerident:
         return key_name    
 
 def service(port):
-    service_list = {2048: 'dls-monitor', 1: 'tcpmux', 2: 'compressnet', 3: 'compressnet', 4: 'sfs', 5: 'rje', 32774: 'sometimes-rpc11', 7: 'echo', 8: 'trojan - Ping Attack', 9: 'discard', 32778: 'sometimes-rpc19', 11: 'systat', 6547: 'PowerChutePLUS', 13: 'daytime', 15: 'netstat / trojan[B2]', 2064: 'dnet-keyproxy', 17: 'quotd', 18: 'msp', 19: 'chargen', 20: 'ftp-data', 21: 'ftp', 22: 'ssh', 23: 'telnet', 24: 'priv-mail / trojan[BO2K]', 25: 'smtp', 26: 'rsftp', 27: 'nsw-fe', 28: 'trojan[amanda]', 29: 'msg-icp', 30: 'trojan[Agent 40421]', 31: 'msg-auth', 33: 'dsp[Display Support Protocol]', 34: 'remote[Remote File]', 35: 'priv-printer', 4132: 'nuts_dem', 37: 'time', 38: 'rap[Resource Location Protocol]', 41: 'graphics', 42: 'nameserver', 43: 'whois', 44: 'mpm-flags', 45: 'mpm', 46: 'mpm-snd', 47: 'ni-ftp', 48: 'auditd', 49: 'bbn-login', 50: 're-mail.ck', 51: 'la-maint', 52: 'xns-time', 53: 'domain', 54: 'xns-ch', 55: 'isi-gl', 56: 'xns-auth', 57: 'priv-terminal / MTP', 58: 'xns-mail', 59: 'priv-file / Backdoor.Sdbot.AJ', 2108: 'rkinit', 61: 'NI MAIL', 62: 'ACA Services', 63: 'whois++', 64: 'covia', 65: 'tacacs-ds', 66: 'Oracle Sql *NET', 67: 'bootps', 68: 'bootpc', 69: 'tftp', 70: 'gopher', 71: 'netrjs-1', 72: 'netrjs-2', 73: 'netrjs-3', 74: 'netrjs-4', 75: 'priv-dial', 76: 'deos', 77: 'priv-RJE', 78: 'vettcp', 79: 'finger', 80: 'http', 81: 'hosts2-ns', 82: 'xfer', 83: 'mit-ml-dev', 84: 'Common Trace Facility', 85: 'mit-ml-dev', 86: 'mfcobol', 87: 'priv-terminal link', 88: 'kerberos', 89: 'su-mit-tg', 90: 'dnsix', 91: 'mit-dov', 92: 'Network printing protocol', 93: 'device control protocol', 94: 'objcall', 95: 'supdup', 96: 'dixie', 97: 'swift-rvf', 98: 'tacnews', 99: 'metagram', 100: 'newacct', 101: 'hostname', 102: 'iso-tsap', 103: 'gppitnp', 104: 'acr-nema', 105: 'csnet-ns', 106: '3com-tsmux', 107: 'rtelnet', 108: 'SNA gateway', 109: 'pop2', 110: 'pop3', 111: 'sunrpc', 112: 'mcidas', 113: 'auth', 114: 'audionews', 115: 'sftp', 116: 'ansanotify', 117: 'uucp-path', 118: 'sqlserv', 119: 'nntp', 120: 'cfdptkt', 121: 'erpc', 122: 'smakynet', 123: 'ntp', 124: 'ansatrader', 125: 'locus-map', 126: 'unitary', 127: 'locus-con', 128: 'gss-xlicen', 129: 'pwdgen', 130: 'cisco-fna', 131: 'cisco-tna', 132: 'cisco-sys', 133: 'statsrv', 134: 'ingres-net', 135: 'loc-srv', 136: 'profile', 137: 'netbios-ns', 138: 'netbios-dgm', 139: 'netbios-ssn', 140: 'emfis-data', 141: 'emfis-cntl', 142: 'bl-idm', 143: 'imap2', 144: 'news', 145: 'uaac', 146: 'iso-tp0', 147: 'iso-ip', 148: 'cronus', 149: 'aed-512', 150: 'SQL-NET', 151: 'hems', 152: 'bftp', 153: 'sgmp', 154: 'netsc-prod', 155: 'netsc-dev', 156: 'SQL servic', 157: 'knet-cmp', 158: 'pcmail-srv', 159: 'nss-routing', 160: 'sgmp-traps', 161: 'snmp', 162: 'snmptrap', 163: 'cmip-man', 164: 'cmip-agent', 165: 'xns-courier', 166: 's-net', 167: 'namp', 168: 'rsvd', 169: 'send', 170: 'print-srv', 171: 'multiplex', 172: 'cl/1', 173: 'xyplex-mux', 174: 'mailq', 175: 'vmnet', 176: 'genrad-mux', 177: 'xdmcp', 178: 'nextstep', 179: 'bgp', 180: 'ris', 181: 'unify', 182: 'audit SITP', 183: 'ocbinder', 184: 'ocserver', 185: 'remote-kis', 186: 'KIS protocol', 187: 'ACI', 188: 'mumps', 189: 'qft', 190: 'gacp', 191: 'prospero', 192: 'osu-nms', 193: 'srmp', 194: 'irc', 195: 'dn6-nlm-aud', 196: 'dn6-smm-red', 197: 'dls', 198: 'dls-mon', 199: 'smux', 200: 'src', 201: 'at-rtmp', 202: 'at-nbp', 203: 'at-3', 204: 'at-echo', 205: 'at-5', 206: 'at-zis', 207: 'at-7', 208: 'at-8', 209: 'tam', 210: 'z39.50', 211: '914c/g', 212: 'anet', 213: 'ipx', 214: 'vmpwscs', 215: 'softpc', 216: 'atls', 217: 'dbase', 218: 'mpp', 219: 'uarps', 220: 'imap3', 221: 'fln-spx', 222: 'rsh-spx', 223: 'cdc', 4321: 'rwhois', 27003: 'flexlm3', 6145: 'statsci2-lm', 13721: 'VeritasNetbackup', 27004: 'flexlm4', 7100: 'font-service', 13715: 'VeritasNetbackup', 4333: 'msql', 27005: 'flexlm5', 243: 'sur-meas', 245: 'link', 246: 'dsp3270', 4343: 'unicall', 49400: 'compaqdiag', 2431: 'venus-se', 2301: 'compaqdiag', 6400: 'crystalreports', 2432: 'codasrv', 6146: 'lonewolf-lm', 2307: 'pehelp', 2433: 'codasrv-se', 13716: 'VeritasNetbackup', 27010: 'flexlm10', 12345: 'NetBus', 27007: 'flexlm7', 12346: 'NetBus', 13701: 'VeritasNetbackup', 6147: 'montage-lm', 4144: 'wincim', 4827: 'squid-htcp', 2049: 'nfs', 13717: 'VeritasNetbackup', 13705: 'VeritasNetbackup', 13706: 'VeritasNetbackup', 6148: 'ricardo-lm', 13718: 'VeritasNetbackup', 13708: 'VeritasNetbackup', 13709: 'VeritasNetbackup', 3128: 'squid-http', 13710: 'VeritasNetbackup', 3421: 'bmap', 2105: 'eklogin', 344: 'pdap', 345: 'pawserv', 346: 'zserv', 347: 'fatserv', 348: 'cis-sgwp', 2106: 'ekshell', 2401: 'cvspserver', 6502: 'netop-rc', 13713: 'VeritasNetbackup', 13714: 'VeritasNetbackup', 371: 'clearcase', 372: 'ulistserv', 373: 'legent-1', 374: 'legent-2', 375: 'hassle', 376: 'nip', 377: 'tnETOS', 378: 'dsETOS', 379: 'is99c', 380: 'is99s', 381: 'hp-collector', 382: 'hp-managed-node', 383: 'hp-alarm-mgr', 384: 'arns', 385: 'ibm-app', 386: 'asa', 387: 'aurp', 388: 'unidata-ldm', 389: 'ldap', 390: 'uis', 391: 'synotics-relay', 392: 'synotics-broker', 393: 'dis', 394: 'embl-ndt', 395: 'netcp', 396: 'netware-ip', 397: 'mptn', 398: 'kryptolan', 399: 'iso-tsap-c2', 400: 'work-sol', 401: 'ups', 402: 'genie', 403: 'decap', 404: 'nced', 405: 'ncld', 406: 'imsp', 407: 'timbuktu', 408: 'prm-sm', 409: 'prm-nm', 410: 'decladebug', 411: 'rmt', 412: 'synoptics-trap', 413: 'smsp', 414: 'infoseek', 415: 'bnet', 416: 'silverplatter', 417: 'onmux', 418: 'hyper-g', 419: 'ariel1', 420: 'smpte', 421: 'ariel2', 422: 'ariel3', 423: 'opc-job-start', 424: 'opc-job-track', 425: 'icad-el', 426: 'smartsdp', 427: 'svrloc', 428: 'ocs_cmu', 429: 'ocs_amu', 430: 'utmpsd', 431: 'utmpcd', 432: 'iasd', 433: 'nnsp', 434: 'mobileip-agent', 435: 'mobilip-mn', 436: 'dna-cml', 437: 'dna-cml', 438: 'dsfgw', 439: 'dasp', 440: 'sgcp', 441: 'decvms-sysmgt', 442: 'cvc_hostd', 443: 'https', 444: 'snpp', 445: 'microsoft-ds', 446: 'ddm-rdb', 447: 'ddm-dfm', 448: 'ddm-byte', 449: 'as-servermap', 450: 'tserver', 451: 'sfs-smp-net', 452: 'sfs-config', 453: 'creativeserver', 454: 'contentserver', 455: 'creativepartnr', 456: 'macon-tcp', 457: 'scohelp', 458: 'appleqtc', 459: 'ampr-rcmd', 460: 'skronk', 461: 'datasurfsrv', 462: 'datasurfsrvsec', 463: 'alpes', 464: 'kpasswd', 465: 'ssmtp', 466: 'digital-vrc', 467: 'mylex-mapd', 468: 'photuris', 469: 'rcp', 470: 'scx-proxy', 471: 'mondex', 472: 'ljk-login', 473: 'hybrid-pop', 474: 'tn-tl-w1', 475: 'tcpnethaspsrv', 6699: 'napster', 5540: 'sdreport', 500: 'isakmp', 501: 'stmf', 502: 'asa-appl-proto', 503: 'intrinsa', 504: 'citadel', 505: 'mailbox-lm', 506: 'ohimsrv', 507: 'crs', 508: 'xvttp', 509: 'snare', 510: 'fcp', 511: 'passgo', 512: 'exec', 513: 'login', 514: 'shell', 515: 'printer', 516: 'videotex', 517: 'talk', 518: 'ntalk', 519: 'utime', 520: 'efs', 521: 'ripng', 522: 'ulp', 523: 'ibm-db2', 524: 'ncp', 525: 'timed', 526: 'tempo', 527: 'stx', 528: 'custix', 529: 'irc-serv', 530: 'courier', 531: 'conference', 532: 'netnews', 533: 'netwall', 534: 'mm-admin', 535: 'iiop', 536: 'opalis-rdv', 537: 'nmsp', 538: 'gdomap', 539: 'apertus-ldp', 540: 'uucp', 541: 'uucp-rlogin', 542: 'commerce', 543: 'klogin', 544: 'kshell', 545: 'ekshell', 546: 'dhcpv6-client', 547: 'dhcpv6-server', 548: 'afpovertcp', 549: 'idfp', 550: 'new-rwho', 551: 'cybercash', 552: 'deviceshare', 553: 'pirp', 554: 'rtsp', 555: 'dsf', 556: 'remotefs', 557: 'openvms-sysipc', 558: 'sdnskmp', 559: 'teedtap', 560: 'rmonitor', 561: 'monitor', 562: 'chshell', 563: 'snews', 564: '9pfs', 565: 'whoami', 566: 'streettalk', 567: 'banyan-rpc', 568: 'ms-shuttle', 569: 'ms-rome', 570: 'meter', 571: 'umeter', 572: 'sonar', 573: 'banyan-vip', 574: 'ftp-agent', 575: 'vemmi', 576: 'ipcd', 577: 'vnas', 578: 'ipdd', 579: 'decbsrv', 580: 'sntp-heartbeat', 581: 'bdp', 582: 'scc-security', 583: 'philips-vc', 584: 'keyserver', 585: 'imap4-ssl', 586: 'password-chg', 587: 'submission', 588: 'cal', 589: 'eyelink', 590: 'tns-cml', 591: 'http-alt', 592: 'eudora-set', 593: 'http-rpc-epmap', 594: 'tpip', 595: 'cab-protocol', 596: 'smsd', 597: 'ptcnameservice', 598: 'sco-websrvrmg3', 599: 'acp', 600: 'ipcserver', 603: 'mnotes', 606: 'urm', 607: 'nqs', 608: 'sift-uft', 609: 'npmp-trap', 610: 'npmp-local', 611: 'npmp-gui', 617: 'sco-dtmgr', 5520: 'sdlog', 17007: 'isode-dua', 628: 'qmqp', 631: 'ipp', 634: 'ginad', 636: 'ldapssl', 637: 'lanserver', 2067: 'dlswpn', 660: 'mac-srvr-admin', 27006: 'flexlm6', 2500: 'rtsserv', 666: 'doom', 2068: 'advocentkvm', 2501: 'rtsclient', 674: 'acap', 3455: 'prsvp', 4660: 'mosmig', 32779: 'sometimes-rpc21', 691: 'resvc', 8888: 'sun-answerbook', 8892: 'seosload', 704: 'elcsd', 706: 'silc', 3531: 'peerenabler', 709: 'entrustmanager', 2766: 'listen', 4557: 'fax', 723: 'omfs', 729: 'netviewdm1', 730: 'netviewdm2', 731: 'netviewdm3', 2784: 'www-dev', 740: 'netcp', 741: 'netgw', 742: 'netrcs', 744: 'flexlm', 47557: 'dbbrowse', 747: 'fujitsu-dev', 748: 'ris-cm', 749: 'kerberos-adm', 750: 'rfile', 751: 'pump', 752: 'qrh', 753: 'rrh', 754: 'tell', 758: 'nlogin', 759: 'con', 760: 'ns', 761: 'rxe', 762: 'quotad', 763: 'cycleserv', 764: 'omserv', 765: 'webster', 767: 'phonebook', 769: 'vid', 770: 'cadlock', 771: 'rtip', 772: 'cycleserv2', 773: 'submit', 774: 'rpasswd', 775: 'entomb', 776: 'wpages', 13783: 'VeritasNetbackup', 780: 'wpgs', 781: 'hp-collector', 782: 'hp-managed-node', 783: 'spamassassin', 786: 'concert', 15126: 'swgps', 5550: 'sdadmind', 800: 'mdbs_daemon', 801: 'device', 4899: 'radmin', 808: 'ccproxy-http', 6969: 'acmsoda', 3456: 'vat', 27374: 'subseven', 32780: 'sometimes-rpc23', 6143: 'watershed-lm', 2065: 'dlsrpn', 7000: 'afs3-fileserver', 7001: 'afs3-callback', 7002: 'afs3-prserver', 7003: 'afs3-vlserver', 7004: 'afs3-kaserver', 7005: 'afs3-volser', 7006: 'afs3-errors', 1509: 'robcad-lm', 7008: 'afs3-update', 7009: 'afs3-rmtsys', 7010: 'ups-onlinet', 871: 'supfilesrv', 873: 'rsync', 16959: 'subseven', 2638: 'sybase', 8080: 'http-proxy', 17300: 'kuang2', 888: 'accessbuilder', 6144: 'statsci1-lm', 4987: 'maybeveritas', 27008: 'flexlm8', 898: 'sun-manageconsole', 901: 'samba-swat', 902: 'iss-realsecure-sensor', 903: 'iss-console-mgr', 5000: 'UPnP', 5001: 'commplex-link', 5002: 'rfe', 5003: 'filemaker', 9100: 'jetdirect', 5010: 'telelpathstart', 5011: 'telelpathattack', 5145: 'rmonitor_secure', 2201: 'ats', 2120: 'kauth', 7070: 'realserver', 4125: 'rww', 44442: 'coldfusion-auth', 7597: 'qaz', 5555: 'freeciv', 950: 'oftep-rpc', 3000: 'ppp', 953: 'rndc', 5050: 'mmcc', 5530: 'sdserv', 2053: 'knetd', 3006: 'deslogind', 9152: 'ms-sql2000', 5060: 'sip', 975: 'securenetpro-sensor', 3457: 'vat-control', 13722: 'VeritasNetbackup', 989: 'ftps-data', 990: 'ftps', 4480: 'proxy-plus', 992: 'telnets', 993: 'imaps', 994: 'ircs', 995: 'pop3s', 996: 'vsinet', 997: 'maitrd', 998: 'busboy', 999: 'garcon / puprouter', 1000: 'cadlock', 3049: 'cfs', 1002: 'windows-icfw', 3052: 'PowerChute', 5101: 'admdog', 5102: 'admeng', 1008: 'ufsd', 13782: 'VeritasNetbackup', 3064: 'dnet-tstproxy', 6543: 'mythtv', 5631: 'pcanywheredata', 1023: 'netvenuechat', 1024: 'kdm', 1025: 'NFS-or-IIS', 1026: 'LSA-or-nterm', 1027: 'IIS', 1029: 'ms-lsa', 1030: 'iad1', 1031: 'iad2', 1032: 'iad3', 1033: 'netinfo', 2903: 'extensisportfolio', 5490: 'connect-proxy', 3086: 'sj3', 1040: 'netsaint', 27665: 'Trinoo_Master', 1043: 'boinc-client', 4672: 'rfa', 2564: 'hp-3000-telnet', 1050: 'java-or-OTGfileshare', 8082: 'blackice-alerts', 7200: 'fodms', 7201: 'dlip', 1058: 'nim', 1059: 'nimreg', 31337: 'Elite', 8081: 'blackice-icecap', 1067: 'instl_boots', 1068: 'instl_bootc', 54320: 'bo2k', 2121: 'ccproxy-ftp', 2627: 'webster', 1076: 'sns_credit', 1080: 'socks', 1083: 'ansoft-lm-1', 1084: 'ansoft-lm-2', 6666: 'irc-serv', 6548: 'PowerChutePLUS', 32770: 'sometimes-rpc3', 5560: 'isqlplus', 3141: 'vmodem', 5190: 'aol', 5191: 'aol-1', 5192: 'aol-2', 5193: 'aol-3', 44334: 'tinyfw', 22370: 'hpnpd', 1103: 'xaudio', 2628: 'dict', 2232: 'ivs-video', 1109: 'kpop', 1110: 'nfsd-status', 1112: 'msql', 32771: 'sometimes-rpc5', 1127: 'supfiledbg', 5308: 'cfengine', 11371: 'pksd', 5232: 'sgi-dgl', 1139: 'cce3x', 5236: 'padl2sim', 32772: 'sometimes-rpc7', 1155: 'nfa', 1158: 'lsnr', 2241: 'ivsd', 3268: 'globalcatLDAP', 1178: 'skkserv', 32773: 'sometimes-rpc9', 7326: 'icb', 5300: 'hacl-hb', 5301: 'hacl-gs', 5302: 'hacl-cfg', 5303: 'hacl-probe', 5304: 'hacl-local', 5305: 'hacl-test', 1212: 'lupa', 6346: 'gnutella', 1214: 'fasttrack', 3264: 'ccmail', 1220: 'quicktime', 3269: 'globalcatLDAPssl', 1222: 'nerv', 1234: 'hotline', 9111: 'DragonIDSConsole', 32775: 'sometimes-rpc13', 1241: 'nessus', 6588: 'analogx', 3292: 'meetingmaker', 4133: 'nuts_bootp', 1248: 'hermes', 32787: 'sometimes-rpc27', 3306: 'mysql', 2600: 'zebrasrv', 32776: 'sometimes-rpc15', 2601: 'zebra', 2602: 'ripd', 9999: 'abyss', 2603: 'ripngd', 3333: 'dec-notes', 2604: 'ospfd', 9090: 'zeus-admin', 2605: 'bgpd', 18183: 'opsec_sam', 32777: 'sometimes-rpc17', 2430: 'venus', 5400: 'pcduo-old', 44443: 'coldfusion-auth', 5405: 'pcduo', 5680: 'canna', 4998: 'maybeveritas', 7464: 'pythonds', 3372: 'msdtc', 18184: 'opsec_lea', 18187: 'opsec_ela', 7273: 'openmanage', 5432: 'postgres', 1337: 'waste', 3389: 'ms-term-serv', 9535: 'man', 1346: 'alta-ana-lm', 1347: 'bbn-mmc', 1348: 'bbn-mmx', 1349: 'sbook', 1350: 'editbench', 1351: 'equationbuilder', 1352: 'lotusnotes', 1353: 'relief', 1354: 'rightbrain', 1355: 'intuitive-edge', 1356: 'cuillamartin', 1357: 'pegboard', 1358: 'connlcli', 1359: 'ftsrv', 1360: 'mimer', 1361: 'linx', 1362: 'timeflies', 1363: 'ndm-requester', 1364: 'ndm-server', 1365: 'adapt-sna', 1366: 'netware-csp', 1367: 'dcs', 1368: 'screencast', 1369: 'gv-us', 1370: 'us-gv', 1371: 'fc-cli', 1372: 'fc-ser', 1373: 'chromagrafx', 1374: 'molly', 1375: 'bytex', 1376: 'ibm-pps', 1377: 'cichlid', 1378: 'elan', 1379: 'dbreporter', 1380: 'telesis-licman', 1381: 'apple-licman', 1383: 'gwha', 1384: 'os-licman', 1385: 'atex_elmd', 1386: 'checksum', 1387: 'cadsi-lm', 1388: 'objective-dbc', 1389: 'iclpv-dm', 1390: 'iclpv-sc', 1391: 'iclpv-sas', 1392: 'iclpv-pm', 1393: 'iclpv-nls', 1394: 'iclpv-nlc', 1395: 'iclpv-wsm', 1396: 'dvl-activemail', 1397: 'audio-activmail', 1398: 'video-activmail', 1399: 'cadkey-licman', 1400: 'cadkey-tablet', 1401: 'goldleaf-licman', 1402: 'prm-sm-np', 1403: 'prm-nm-np', 1404: 'igi-lm', 1405: 'ibm-res', 1406: 'netlabs-lm', 1407: 'dbsa-lm', 1408: 'sophia-lm', 1409: 'here-lm', 1410: 'hiq', 1411: 'af', 1412: 'innosys', 1413: 'innosys-acl', 1414: 'ibm-mqseries', 1415: 'dbstar', 1416: 'novell-lu6.2', 1417: 'timbuktu-srv1', 1418: 'timbuktu-srv2', 1419: 'timbuktu-srv3', 1420: 'timbuktu-srv4', 1421: 'gandalf-lm', 1422: 'autodesk-lm', 1423: 'essbase', 1424: 'hybrid', 1425: 'zion-lm', 1426: 'sas-1', 1427: 'mloadd', 1428: 'informatik-lm', 1429: 'nms', 1430: 'tpdu', 1431: 'rgtp', 1432: 'blueberry-lm', 1433: 'ms-sql-s', 1434: 'ms-sql-m', 1435: 'ibm-cics', 1436: 'sas-2', 1437: 'tabula', 1438: 'eicon-server', 1439: 'eicon-x25', 1440: 'eicon-slp', 1441: 'cadis-1', 1442: 'cadis-2', 1443: 'ies-lm', 1444: 'marcam-lm', 1445: 'proxima-lm', 1446: 'ora-lm', 1447: 'apri-lm', 1448: 'oc-lm', 1449: 'peport', 1450: 'dwf', 1451: 'infoman', 1452: 'gtegsc-lm', 1453: 'genie-lm', 1454: 'interhdl_elmd', 1455: 'esl-lm', 1456: 'dca', 1457: 'valisys-lm', 1458: 'nrcabq-lm', 1459: 'proshare1', 1460: 'proshare2', 1461: 'ibm_wrless_lan', 1462: 'world-lm', 1463: 'nucleus', 1464: 'msl_lmd', 1465: 'pipes', 1466: 'oceansoft-lm', 1467: 'csdmbase', 1468: 'csdm', 1469: 'aal-lm', 1470: 'uaiact', 1471: 'csdmbase', 1472: 'csdm', 1473: 'openmath', 1474: 'telefinder', 1475: 'taligent-lm', 1476: 'clvm-cfg', 1477: 'ms-sna-server', 1478: 'ms-sna-base', 1479: 'dberegister', 1480: 'pacerforum', 1481: 'airs', 1482: 'miteksys-lm', 1483: 'afs', 1484: 'confluent', 1485: 'lansource', 1486: 'nms_topo_serv', 1487: 'localinfosrvr', 1488: 'docstor', 1489: 'dmdocbroker', 1490: 'insitu-conf', 1491: 'anynetgateway', 1492: 'stone-design-1', 1493: 'netmap_lm', 1494: 'citrix-ica', 1495: 'cvc', 1496: 'liberty-lm', 1497: 'rfx-lm', 1498: 'watcom-sql', 1499: 'fhc', 1500: 'vlsi-lm', 1501: 'sas-3', 1502: 'shivadiscovery', 1503: 'imtc-mcs', 1504: 'evb-elm', 1505: 'funkproxy', 1506: 'utcd', 1507: 'symplex', 1508: 'diagmond', 40421: 'trojan[Agent 40421]', 1510: 'mvx-lm', 1511: '3l-l1', 1512: 'wins', 1513: 'fujitsu-dtc', 1514: 'fujitsu-dtcns', 1515: 'ifor-protocol', 1516: 'vpad', 1517: 'vpac', 1518: 'vpvd', 1519: 'vpvc', 1520: 'atm-zip-office', 1521: 'oracle', 1522: 'rna-lm', 1523: 'cichild-lm', 1524: 'ingreslock', 1525: 'orasrv', 1526: 'pdap-np', 1527: 'tlisrv', 1528: 'mciautoreg', 1529: 'support', 1530: 'rap-service', 1531: 'rap-listen', 1532: 'miroconnect', 1533: 'virtual-places', 1534: 'micromuse-lm', 1535: 'ampr-info', 1536: 'ampr-inter', 1537: 'sdsc-lm', 1538: '3ds-lm', 1539: 'intellistor-lm', 1540: 'rds', 1541: 'rds2', 1542: 'gridgen-elmd', 1543: 'simba-cs', 1544: 'aspeclmd', 1545: 'vistium-share', 1546: 'abbaccuray', 1547: 'laplink', 1548: 'axon-lm', 1549: 'shivahose', 1550: '3m-image-lm', 1551: 'hecmtl-db', 1552: 'pciarray', 7007: 'afs3-bos', 6667: 'irc', 32786: 'sometimes-rpc25', 13711: 'VeritasNetbackup', 20005: 'btx', 3462: 'track', 5679: 'activesync', 3632: 'distccd', 6668: 'irc', 1600: 'issd', 2998: 'iss-realsec', 18000: 'biimenu', 5713: 'proshareaudio', 5714: 'prosharevideo', 5715: 'prosharedata', 5716: 'prosharerequest', 5717: 'prosharenotify', 3001: 'nessusd', 26208: 'wnn6_DS', 19150: 'gkrellmd', 5510: 'secureidprop', 3689: 'rendezvous', 3005: 'deslogin', 1650: 'nkd', 1651: 'shiva_confsrvr', 1652: 'xnmp', 8443: 'https-alt', 1661: 'netview-aix-1', 1662: 'netview-aix-2', 1663: 'netview-aix-3', 1664: 'netview-aix-4', 1665: 'netview-aix-5', 1666: 'netview-aix-6', 1667: 'netview-aix-7', 1668: 'netview-aix-8', 1669: 'netview-aix-9', 1670: 'netview-aix-10', 1671: 'netview-aix-11', 1672: 'netview-aix-12', 13712: 'VeritasNetbackup', 1680: 'CarbonCopy', 9876: 'sd', 5800: 'vnc-http', 5801: 'vnc-http-1', 5802: 'vnc-http-2', 5803: 'vnc-http-3', 6558: 'xdsxdm', 1720: 'H.323/Q.931', 1723: 'pptp', 4444: 'krb524', 27009: 'flexlm9', 4045: 'lockd', 4559: 'hylafax', 1755: 'wms', 12000: 'cce4x', 1761: 'landesk-rc', 1762: 'landesk-rc', 1763: 'landesk-rc', 1764: 'landesk-rc', 2112: 'kip', 6401: 'crystalenterprise', 6101: 'VeritasBackupExec', 7937: 'nsrexecd', 7938: 'lgtomapper', 18181: 'opsec_cvp', 18182: 'opsec_ufp', 9991: 'issa', 9992: 'issc', 18185: 'opsec_omi', 6103: 'RETS-or-BackupExec', 5900: 'vnc', 5901: 'vnc-1', 5902: 'vnc-2', 5903: 'vnc-3', 10000: 'snet-sensor-mgmt', 22289: 'wnn6_Cn', 10005: 'stel', 6105: 'isdninfo', 6106: 'isdninfo', 22305: 'wnn6_Kr', 1827: 'pcm', 22321: 'wnn6_Tw', 6110: 'softcm', 6111: 'spc', 3900: 'udt_os', 8000: 'http-alt', 6112: 'dtspc', 8007: 'ajp12', 8009: 'ajp13', 8021: 'ftp-proxy', 22273: 'wnn6', 5977: 'ncd-pref-tcp', 5978: 'ncd-diag-tcp', 5979: 'ncd-conf-tcp', 27000: 'flexlm0', 10082: 'amandaidx', 10083: 'amidxtape', 13702: 'VeritasNetbackup', 1900: 'UPnP', 5997: 'ncd-pref', 5998: 'ncd-diag', 5999: 'ncd-conf', 6000: 'X11', 6001: 'X11:1', 6002: 'X11:2', 6003: 'X11:3', 6004: 'X11:4', 6005: 'X11:5', 6006: 'X11:6', 6007: 'X11:7', 6008: 'X11:8', 6009: 'X11:9', 27001: 'flexlm1', 6017: 'xmail-ctrl', 5100: 'admd', 4224: 'xtell', 1935: 'rtmp', 3984: 'mapper-nodemgr', 3985: 'mapper-mapethd', 3986: 'mapper-ws_ethd', 5632: 'pcanywherestat', 4500: 'sae-urn', 13720: 'VeritasNetbackup', 27002: 'flexlm2', 3999: 'remoteanything', 4000: 'remoteanything', 6050: 'arcserve', 4008: 'netcheque', 2111: 'kx', 6544: 'mythtv', 2809: 'corbaloc', 1984: 'bigbrother', 1986: 'licensedaemon', 1987: 'tr-rsrb-p1', 1988: 'tr-rsrb-p2', 1989: 'tr-rsrb-p3', 1990: 'stun-p1', 1991: 'stun-p2', 1992: 'stun-p3', 1993: 'snmp-tcp-port', 1994: 'stun-port', 1995: 'perf-port', 1996: 'tr-rsrb-port', 1997: 'gdp-port', 1998: 'x25-svc-port', 1999: 'tcp-id-port', 2000: 'callbook', 2001: 'dc', 2002: 'globe', 2003: 'cfingerd', 2004: 'mailbox', 2005: 'deslogin', 2006: 'invokator', 2007: 'dectalk', 2008: 'conf', 2009: 'news', 2010: 'search', 2011: 'raid-cc', 2012: 'ttyinfo', 2013: 'raid-am', 2014: 'troff', 2015: 'cypress', 2016: 'bootserver', 2017: 'cypress-stat', 2018: 'terminaldb', 2019: 'whosockami', 2020: 'xinupageserver', 2021: 'servexec', 2022: 'down', 2023: 'xinuexpansion3', 2024: 'xinuexpansion4', 2025: 'ellpack', 2026: 'scrabble', 2027: 'shadowserver', 2028: 'submitserver', 2030: 'device2', 6141: 'meta-corp', 2032: 'blackboard', 2033: 'glogger', 2034: 'scoremgr', 2035: 'imsldoc', 6142: 'aspentec-lm', 2038: 'objectmanager', 2040: 'lam', 2041: 'interbase', 2042: 'isis', 2043: 'isis-bcast', 2044: 'rimsl', 2045: 'cdfunc', 2046: 'sdfunc', 2047: 'dls'}
+    service_list = {2048: 'dls-monitor', 1: 'tcpmux', 2: 'compressnet', 3: 'compressnet', 4: 'sfs', 5: 'rje', 32774: 'sometimes-rpc11', 7: 'echo', 8: 'trojan - Ping Attack', 9: 'discard', 32778: 'sometimes-rpc19', 11: 'systat', 6547: 'PowerChutePLUS', 13: 'daytime', 15: 'netstat / trojan[B2]', 2064: 'dnet-keyproxy', 17: 'quotd', 18: 'msp', 19: 'chargen', 20: 'ftp-data', 21: 'ftp', 22: 'ssh', 23: 'telnet', 24: 'priv-mail / trojan[BO2K]', 25: 'smtp', 26: 'rsftp', 27: 'nsw-fe', 28: 'trojan[amanda]', 29: 'msg-icp', 30: 'trojan[Agent 40421]', 31: 'msg-auth', 33: 'dsp[Display Support Protocol]', 34: 'remote[Remote File]', 35: 'priv-printer', 4132: 'nuts_dem', 37: 'time', 38: 'rap[Resource Location Protocol]', 41: 'graphics', 42: 'nameserver', 43: 'whois', 44: 'mpm-flags', 45: 'mpm', 46: 'mpm-snd', 47: 'ni-ftp', 48: 'auditd', 49: 'bbn-login', 50: 're-mail.ck', 51: 'la-maint', 52: 'xns-time', 53: 'domain', 54: 'xns-ch', 55: 'isi-gl', 56: 'xns-auth', 57: 'priv-terminal / MTP', 58: 'xns-mail', 59: 'priv-file / Backdoor.Sdbot.AJ', 2108: 'rkinit', 61: 'NI MAIL', 62: 'ACA Services', 63: 'whois++', 64: 'covia', 65: 'tacacs-ds', 66: 'Oracle Sql *NET', 67: 'bootps', 68: 'bootpc', 69: 'tftp', 70: 'gopher', 71: 'netrjs-1', 72: 'netrjs-2', 73: 'netrjs-3', 74: 'netrjs-4', 75: 'priv-dial', 76: 'deos', 77: 'priv-RJE', 78: 'vettcp', 79: 'finger', 80: 'http', 81: 'hosts2-ns', 82: 'xfer', 83: 'mit-ml-dev', 84: 'Common Trace Facility', 85: 'mit-ml-dev', 86: 'mfcobol', 87: 'priv-terminal link', 88: 'kerberos', 89: 'su-mit-tg', 90: 'dnsix', 91: 'mit-dov', 92: 'Network printing protocol', 93: 'device control protocol', 94: 'objcall', 95: 'supdup', 96: 'dixie', 97: 'swift-rvf', 98: 'tacnews', 99: 'metagram', 100: 'newacct', 101: 'hostname', 102: 'iso-tsap', 103: 'gppitnp', 104: 'acr-nema', 105: 'csnet-ns', 106: '3com-tsmux', 107: 'rtelnet', 108: 'SNA gateway', 109: 'pop2', 110: 'pop3', 111: 'sunrpc', 112: 'mcidas', 113: 'auth', 114: 'audionews', 115: 'sftp', 116: 'ansanotify', 117: 'uucp-path', 118: 'sqlserv', 119: 'nntp', 120: 'cfdptkt', 121: 'erpc', 122: 'smakynet', 123: 'ntp', 124: 'ansatrader', 125: 'locus-map', 126: 'unitary', 127: 'locus-con', 128: 'gss-xlicen', 129: 'pwdgen', 130: 'cisco-fna', 131: 'cisco-tna', 132: 'cisco-sys', 133: 'statsrv', 134: 'ingres-net', 135: 'loc-srv', 136: 'profile', 137: 'netbios-ns', 138: 'netbios-dgm', 139: 'netbios-ssn', 140: 'emfis-data', 141: 'emfis-cntl', 142: 'bl-idm', 143: 'imap2', 144: 'news', 145: 'uaac', 146: 'iso-tp0', 147: 'iso-ip', 148: 'cronus', 149: 'aed-512', 150: 'SQL-NET', 151: 'hems', 152: 'bftp', 153: 'sgmp', 154: 'netsc-prod', 155: 'netsc-dev', 156: 'SQL servic', 157: 'knet-cmp', 158: 'pcmail-srv', 159: 'nss-routing', 160: 'sgmp-traps', 161: 'snmp', 162: 'snmptrap', 163: 'cmip-man', 164: 'cmip-agent', 165: 'xns-courier', 166: 's-net', 167: 'namp', 168: 'rsvd', 169: 'send', 170: 'print-srv', 171: 'multiplex', 172: 'cl/1', 173: 'xyplex-mux', 174: 'mailq', 175: 'vmnet', 176: 'genrad-mux', 177: 'xdmcp', 178: 'nextstep', 179: 'bgp', 180: 'ris', 181: 'unify', 182: 'audit SITP', 183: 'ocbinder', 184: 'ocserver', 185: 'remote-kis', 186: 'KIS protocol', 187: 'ACI', 188: 'mumps', 189: 'qft', 190: 'gacp', 191: 'prospero', 192: 'osu-nms', 193: 'srmp', 194: 'irc', 195: 'dn6-nlm-aud', 196: 'dn6-smm-red', 197: 'dls', 198: 'dls-mon', 199: 'smux', 200: 'src', 201: 'at-rtmp', 202: 'at-nbp', 203: 'at-3', 204: 'at-echo', 205: 'at-5', 206: 'at-zis', 207: 'at-7', 208: 'at-8', 209: 'tam', 210: 'z39.50', 211: '914c/g', 212: 'anet', 213: 'ipx', 214: 'vmpwscs', 215: 'softpc', 216: 'atls', 217: 'dbase', 218: 'mpp', 219: 'uarps', 220: 'imap3', 221: 'fln-spx', 222: 'rsh-spx', 223: 'cdc', 4321: 'rwhois', 27003: 'flexlm3', 6145: 'statsci2-lm', 13721: 'VeritasNetbackup', 27004: 'flexlm4', 7100: 'font-service', 13715: 'VeritasNetbackup', 4333: 'msql', 27005: 'flexlm5', 243: 'sur-meas', 245: 'link', 246: 'dsp3270', 4343: 'unicall', 49400: 'compaqdiag', 2431: 'venus-se', 2301: 'compaqdiag', 6400: 'crystalreports', 2432: 'codasrv', 6146: 'lonewolf-lm', 2307: 'pehelp', 2433: 'codasrv-se', 13716: 'VeritasNetbackup', 27010: 'flexlm10', 12345: 'NetBus', 27007: 'flexlm7', 12346: 'NetBus', 13701: 'VeritasNetbackup', 6147: 'montage-lm', 4144: 'wincim', 4827: 'squid-htcp', 2049: 'nfs', 13717: 'VeritasNetbackup', 13705: 'VeritasNetbackup', 13706: 'VeritasNetbackup', 6148: 'ricardo-lm', 13718: 'VeritasNetbackup', 13708: 'VeritasNetbackup', 13709: 'VeritasNetbackup', 3128: 'squid-http', 13710: 'VeritasNetbackup', 3421: 'bmap', 2105: 'eklogin', 344: 'pdap', 345: 'pawserv', 346: 'zserv', 347: 'fatserv', 348: 'cis-sgwp', 2106: 'ekshell', 2401: 'cvspserver', 6502: 'netop-rc', 13713: 'VeritasNetbackup', 13714: 'VeritasNetbackup', 371: 'clearcase', 372: 'ulistserv', 373: 'legent-1', 374: 'legent-2', 375: 'hassle', 376: 'nip', 377: 'tnETOS', 378: 'dsETOS', 379: 'is99c', 380: 'is99s', 381: 'hp-collector', 382: 'hp-managed-node', 383: 'hp-alarm-mgr', 384: 'arns', 385: 'ibm-app', 386: 'asa', 387: 'aurp', 388: 'unidata-ldm', 389: 'ldap', 390: 'uis', 391: 'synotics-relay', 392: 'synotics-broker', 393: 'dis', 394: 'embl-ndt', 395: 'netcp', 396: 'netware-ip', 397: 'mptn', 398: 'kryptolan', 399: 'iso-tsap-c2', 400: 'work-sol', 401: 'ups', 402: 'genie', 403: 'decap', 404: 'nced', 405: 'ncld', 406: 'imsp', 407: 'timbuktu', 408: 'prm-sm', 409: 'prm-nm', 410: 'decladebug', 411: 'rmt', 412: 'synoptics-trap', 413: 'smsp', 414: 'infoseek', 415: 'bnet', 416: 'silverplatter', 417: 'onmux', 418: 'hyper-g', 419: 'ariel1', 420: 'smpte', 421: 'ariel2', 422: 'ariel3', 423: 'opc-job-start', 424: 'opc-job-track', 425: 'icad-el', 426: 'smartsdp', 427: 'svrloc', 428: 'ocs_cmu', 429: 'ocs_amu', 430: 'utmpsd', 431: 'utmpcd', 432: 'iasd', 433: 'nnsp', 434: 'mobileip-agent', 435: 'mobilip-mn', 436: 'dna-cml', 437: 'dna-cml', 438: 'dsfgw', 439: 'dasp', 440: 'sgcp', 441: 'decvms-sysmgt', 442: 'cvc_hostd', 443: 'https', 444: 'snpp', 445: 'microsoft-ds', 446: 'ddm-rdb', 447: 'ddm-dfm', 448: 'ddm-byte', 449: 'as-servermap', 450: 'tserver', 451: 'sfs-smp-net', 452: 'sfs-config', 453: 'creativeserver', 454: 'contentserver', 455: 'creativepartnr', 456: 'macon-tcp', 457: 'scohelp', 458: 'appleqtc', 459: 'ampr-rcmd', 460: 'skronk', 461: 'datasurfsrv', 462: 'datasurfsrvsec', 463: 'alpes', 464: 'kpasswd', 465: 'ssmtp', 466: 'digital-vrc', 467: 'mylex-mapd', 468: 'photuris', 469: 'rcp', 470: 'scx-proxy', 471: 'mondex', 472: 'ljk-login', 473: 'hybrid-pop', 474: 'tn-tl-w1', 475: 'tcpnethaspsrv', 6699: 'napster', 5540: 'sdreport', 500: 'isakmp', 501: 'stmf', 502: 'asa-appl-proto', 503: 'intrinsa', 504: 'citadel', 505: 'mailbox-lm', 506: 'ohimsrv', 507: 'crs', 508: 'xvttp', 509: 'snare', 510: 'fcp', 511: 'passgo', 512: 'exec', 513: 'login', 514: 'shell', 515: 'printer', 516: 'videotex', 517: 'talk', 518: 'ntalk', 519: 'utime', 520: 'efs', 521: 'ripng', 522: 'ulp', 523: 'ibm-db2', 524: 'ncp', 525: 'timed', 526: 'tempo', 527: 'stx', 528: 'custix', 529: 'irc-serv', 530: 'courier', 531: 'conference', 532: 'netnews', 533: 'netwall', 534: 'mm-admin', 535: 'iiop', 536: 'opalis-rdv', 537: 'nmsp', 538: 'gdomap', 539: 'apertus-ldp', 540: 'uucp', 541: 'uucp-rlogin', 542: 'commerce', 543: 'klogin', 544: 'kshell', 545: 'ekshell', 546: 'dhcpv6-client', 547: 'dhcpv6-server', 548: 'afpovertcp', 549: 'idfp', 550: 'new-rwho', 551: 'cybercash', 552: 'deviceshare', 553: 'pirp', 554: 'rtsp', 555: 'dsf', 556: 'remotefs', 557: 'openvms-sysipc', 558: 'sdnskmp', 559: 'teedtap', 560: 'rmonitor', 561: 'monitor', 562: 'chshell', 563: 'snews', 564: '9pfs', 565: 'whoami', 566: 'streettalk', 567: 'banyan-rpc', 568: 'ms-shuttle', 569: 'ms-rome', 570: 'meter', 571: 'umeter', 572: 'sonar', 573: 'banyan-vip', 574: 'ftp-agent', 575: 'vemmi', 576: 'ipcd', 577: 'vnas', 578: 'ipdd', 579: 'decbsrv', 580: 'sntp-heartbeat', 581: 'bdp', 582: 'scc-security', 583: 'philips-vc', 584: 'keyserver', 585: 'imap4-ssl', 586: 'password-chg', 587: 'submission', 588: 'cal', 589: 'eyelink', 590: 'tns-cml', 591: 'http-alt', 592: 'eudora-set', 593: 'http-rpc-epmap', 594: 'tpip', 595: 'cab-protocol', 596: 'smsd', 597: 'ptcnameservice', 598: 'sco-websrvrmg3', 599: 'acp', 600: 'ipcserver', 603: 'mnotes', 606: 'urm', 607: 'nqs', 608: 'sift-uft', 609: 'npmp-trap', 610: 'npmp-local', 611: 'npmp-gui', 617: 'sco-dtmgr', 5520: 'sdlog', 17007: 'isode-dua', 628: 'qmqp', 631: 'ipp', 634: 'ginad', 636: 'ldapssl', 637: 'lanserver', 2067: 'dlswpn', 660: 'mac-srvr-admin', 27006: 'flexlm6', 2500: 'rtsserv', 666: 'doom', 2068: 'advocentkvm', 2501: 'rtsclient', 674: 'acap', 3455: 'prsvp', 4660: 'mosmig', 32779: 'sometimes-rpc21', 691: 'resvc', 8888: 'sun-answerbook', 8892: 'seosload', 704: 'elcsd', 706: 'silc', 3531: 'peerenabler', 709: 'entrustmanager', 2766: 'listen', 4557: 'fax', 723: 'omfs', 729: 'netviewdm1', 730: 'netviewdm2', 731: 'netviewdm3', 2784: 'www-dev', 740: 'netcp', 741: 'netgw', 742: 'netrcs', 744: 'flexlm', 47557: 'dbbrowse', 747: 'fujitsu-dev', 748: 'ris-cm', 749: 'kerberos-adm', 750: 'rfile', 751: 'pump', 752: 'qrh', 753: 'rrh', 754: 'tell', 758: 'nlogin', 759: 'con', 760: 'ns', 761: 'rxe', 762: 'quotad', 763: 'cycleserv', 764: 'omserv', 765: 'webster', 767: 'phonebook', 769: 'vid', 770: 'cadlock', 771: 'rtip', 772: 'cycleserv2', 773: 'submit', 774: 'rpasswd', 775: 'entomb', 776: 'wpages', 13783: 'VeritasNetbackup', 780: 'wpgs', 781: 'hp-collector', 782: 'hp-managed-node', 783: 'spamassassin', 786: 'concert', 15126: 'swgps', 5550: 'sdadmind', 800: 'mdbs_daemon', 801: 'device', 4899: 'radmin', 808: 'ccproxy-http', 6969: 'acmsoda', 3456: 'vat', 27374: 'subseven', 32780: 'sometimes-rpc23', 6143: 'watershed-lm', 2065: 'dlsrpn', 7000: 'afs3-fileserver', 7001: 'afs3-callback', 7002: 'afs3-prserver', 7003: 'afs3-vlserver', 7004: 'afs3-kaserver', 7005: 'afs3-volser', 7006: 'afs3-errors', 1509: 'robcad-lm', 7008: 'afs3-update', 7009: 'afs3-rmtsys', 7010: 'ups-onlinet', 871: 'supfilesrv', 873: 'rsync', 16959: 'subseven', 2638: 'sybase', 8080: 'http-proxy', 17300: 'kuang2', 888: 'accessbuilder', 6144: 'statsci1-lm', 4987: 'maybeveritas', 27008: 'flexlm8', 898: 'sun-manageconsole', 901: 'samba-swat', 902: 'iss-realsecure-sensor', 903: 'iss-console-mgr', 5000: 'UPnP', 5001: 'commplex-link', 5002: 'rfe', 5003: 'filemaker', 9100: 'jetdirect', 5010: 'telelpathstart', 5011: 'telelpathattack', 5145: 'rmonitor_secure', 2201: 'ats', 2120: 'kauth', 7070: 'realserver', 4125: 'rww', 44442: 'coldfusion-auth', 7597: 'qaz', 5555: 'freeciv', 950: 'oftep-rpc', 3000: 'ppp', 953: 'rndc', 5050: 'mmcc', 5530: 'sdserv', 2053: 'knetd', 3006: 'deslogind', 9152: 'ms-sql2000', 5060: 'sip', 975: 'securenetpro-sensor', 3457: 'vat-control', 13722: 'VeritasNetbackup', 989: 'ftps-data', 990: 'ftps', 4480: 'proxy-plus', 992: 'telnets', 993: 'imaps', 994: 'ircs', 995: 'pop3s', 996: 'vsinet', 997: 'maitrd', 998: 'busboy', 999: 'garcon / puprouter', 1000: 'cadlock', 3049: 'cfs', 1002: 'windows-icfw', 3052: 'PowerChute', 5101: 'admdog', 5102: 'admeng', 1008: 'ufsd', 13782: 'VeritasNetbackup', 3064: 'dnet-tstproxy', 6543: 'mythtv', 5631: 'pcanywheredata', 1023: 'netvenuechat', 1024: 'kdm', 1025: 'NFS-or-IIS', 1026: 'LSA-or-nterm', 1027: 'IIS', 1029: 'ms-lsa', 1030: 'iad1', 1031: 'iad2', 1032: 'iad3', 1033: 'netinfo', 2903: 'extensisportfolio', 5490: 'connect-proxy', 3086: 'sj3', 1040: 'netsaint', 27665: 'Trinoo_Master', 1043: 'boinc-client', 4672: 'rfa', 2564: 'hp-3000-telnet', 1050: 'java-or-OTGfileshare', 8082: 'blackice-alerts', 7200: 'fodms', 7201: 'dlip', 1058: 'nim', 1059: 'nimreg', 31337: 'Elite', 8081: 'blackice-icecap', 1067: 'instl_boots', 1068: 'instl_bootc', 54320: 'bo2k', 2121: 'ccproxy-ftp', 2627: 'webster', 1076: 'sns_credit', 1080: 'socks', 1083: 'ansoft-lm-1', 1084: 'ansoft-lm-2', 6666: 'irc-serv', 6548: 'PowerChutePLUS', 32770: 'sometimes-rpc3', 5560: 'isqlplus', 3141: 'vmodem', 5190: 'aol', 5191: 'aol-1', 5192: 'aol-2', 5193: 'aol-3', 44334: 'tinyfw', 22370: 'hpnpd', 1103: 'xaudio', 2628: 'dict', 2232: 'ivs-video', 1109: 'kpop', 1110: 'nfsd-status', 1112: 'msql', 32771: 'sometimes-rpc5', 1127: 'supfiledbg', 5308: 'cfengine', 11371: 'pksd', 5232: 'sgi-dgl', 1139: 'cce3x', 5236: 'padl2sim', 32772: 'sometimes-rpc7', 1155: 'nfa', 1158: 'lsnr', 2241: 'ivsd', 3268: 'globalcatLDAP', 1178: 'skkserv', 32773: 'sometimes-rpc9', 7326: 'icb', 5300: 'hacl-hb', 5301: 'hacl-gs', 5302: 'hacl-cfg', 5303: 'hacl-probe', 5304: 'hacl-local', 5305: 'hacl-test', 1212: 'lupa', 6346: 'gnutella', 1214: 'fasttrack', 3264: 'ccmail', 1220: 'quicktime', 3269: 'globalcatLDAPssl', 1222: 'nerv', 1234: 'hotline', 9111: 'DragonIDSConsole', 32775: 'sometimes-rpc13', 1241: 'nessus', 6588: 'analogx', 3292: 'meetingmaker', 4133: 'nuts_bootp', 1248: 'hermes', 32787: 'sometimes-rpc27', 3306: 'mysql', 2600: 'zebrasrv', 32776: 'sometimes-rpc15', 2601: 'zebra', 2602: 'ripd', 9999: 'abyss', 2603: 'ripngd', 3333: 'dec-notes', 2604: 'ospfd', 9090: 'zeus-admin', 2605: 'bgpd', 18183: 'opsec_sam', 32777: 'sometimes-rpc17', 2430: 'venus', 5400: 'pcduo-old', 44443: 'coldfusion-auth', 5405: 'pcduo', 5680: 'canna', 4998: 'maybeveritas', 7464: 'pythonds', 3372: 'msdtc', 18184: 'opsec_lea', 18187: 'opsec_ela', 7273: 'openmanage', 5432: 'postgres', 1337: 'waste', 3389: 'ms-term-serv', 9535: 'man', 1346: 'alta-ana-lm', 1347: 'bbn-mmc', 1348: 'bbn-mmx', 1349: 'sbook', 1350: 'editbench', 1351: 'equationbuilder', 1352: 'lotusnotes', 1353: 'relief', 1354: 'rightbrain', 1355: 'intuitive-edge', 1356: 'cuillamartin', 1357: 'pegboard', 1358: 'connlcli', 1359: 'ftsrv', 1360: 'mimer', 1361: 'linx', 1362: 'timeflies', 1363: 'ndm-requester', 1364: 'ndm-server', 1365: 'adapt-sna', 1366: 'netware-csp', 1367: 'dcs', 1368: 'screencast', 1369: 'gv-us', 1370: 'us-gv', 1371: 'fc-cli', 1372: 'fc-ser', 1373: 'chromagrafx', 1374: 'molly', 1375: 'bytex', 1376: 'ibm-pps', 1377: 'cichlid', 1378: 'elan', 1379: 'dbreporter', 1380: 'telesis-licman', 1381: 'apple-licman', 1383: 'gwha', 1384: 'os-licman', 1385: 'atex_elmd', 1386: 'checksum', 1387: 'cadsi-lm', 1388: 'objective-dbc', 1389: 'iclpv-dm', 1390: 'iclpv-sc', 1391: 'iclpv-sas', 1392: 'iclpv-pm', 1393: 'iclpv-nls', 1394: 'iclpv-nlc', 1395: 'iclpv-wsm', 1396: 'dvl-activemail', 1397: 'audio-activmail', 1398: 'video-activmail', 1399: 'cadkey-licman', 1400: 'cadkey-tablet', 1401: 'goldleaf-licman', 1402: 'prm-sm-np', 1403: 'prm-nm-np', 1404: 'igi-lm', 1405: 'ibm-res', 1406: 'netlabs-lm', 1407: 'dbsa-lm', 1408: 'sophia-lm', 1409: 'here-lm', 1410: 'hiq', 1411: 'af', 1412: 'innosys', 1413: 'innosys-acl', 1414: 'ibm-mqseries', 1415: 'dbstar', 1416: 'novell-lu6.2', 1417: 'timbuktu-srv1', 1418: 'timbuktu-srv2', 1419: 'timbuktu-srv3', 1420: 'timbuktu-srv4', 1421: 'gandalf-lm', 1422: 'autodesk-lm', 1423: 'essbase', 1424: 'hybrid', 1425: 'zion-lm', 1426: 'sas-1', 1427: 'mloadd', 1428: 'informatik-lm', 1429: 'nms', 1430: 'tpdu', 1431: 'rgtp', 1432: 'blueberry-lm', 1433: 'ms-sql-s', 1434: 'ms-sql-m', 1435: 'ibm-cics', 1436: 'sas-2', 1437: 'tabula', 1438: 'eicon-server', 1439: 'eicon-x25', 1440: 'eicon-slp', 1441: 'cadis-1', 1442: 'cadis-2', 1443: 'ies-lm', 1444: 'marcam-lm', 1445: 'proxima-lm', 1446: 'ora-lm', 1447: 'apri-lm', 1448: 'oc-lm', 1449: 'peport', 1450: 'dwf', 1451: 'infoman', 1452: 'gtegsc-lm', 1453: 'genie-lm', 1454: 'interhdl_elmd', 1455: 'esl-lm', 1456: 'dca', 1457: 'valisys-lm', 1458: 'nrcabq-lm', 1459: 'proshare1', 1460: 'proshare2', 1461: 'ibm_wrless_lan', 1462: 'world-lm', 1463: 'nucleus', 1464: 'msl_lmd', 1465: 'pipes', 1466: 'oceansoft-lm', 1467: 'csdmbase', 1468: 'csdm', 1469: 'aal-lm', 1470: 'uaiact', 1471: 'csdmbase', 1472: 'csdm', 1473: 'openmath', 1474: 'telefinder', 1475: 'taligent-lm', 1476: 'clvm-cfg', 1477: 'ms-sna-server', 1478: 'ms-sna-base', 1479: 'dberegister', 1480: 'pacerforum', 1481: 'airs', 1482: 'miteksys-lm', 1483: 'afs', 1484: 'confluent', 1485: 'lansource', 1486: 'nms_topo_serv', 1487: 'localinfosrvr', 1488: 'docstor', 1489: 'dmdocbroker', 1490: 'insitu-conf', 1491: 'anynetgateway', 1492: 'stone-design-1', 1493: 'netmap_lm', 1494: 'citrix-ica', 1495: 'cvc', 1496: 'liberty-lm', 1497: 'rfx-lm', 1498: 'watcom-sql', 1499: 'fhc', 1500: 'vlsi-lm', 1501: 'sas-3', 1502: 'shivadiscovery', 1503: 'imtc-mcs', 1504: 'evb-elm', 1505: 'funkproxy', 1506: 'utcd', 1507: 'symplex', 1508: 'diagmond', 40421: 'trojan[Agent 40421]', 1510: 'mvx-lm', 1511: '3l-l1', 1512: 'wins', 1513: 'fujitsu-dtc', 1514: 'fujitsu-dtcns', 1515: 'ifor-protocol', 1516: 'vpad', 1517: 'vpac', 1518: 'vpvd', 1519: 'vpvc', 1520: 'atm-zip-office', 1521: 'oracle', 1522: 'rna-lm', 1523: 'cichild-lm', 1524: 'ingreslock', 1525: 'orasrv', 1526: 'pdap-np', 1527: 'tlisrv', 1528: 'mciautoreg', 1529: 'support', 1530: 'rap-service', 1531: 'rap-listen', 1532: 'miroconnect', 1533: 'virtual-places', 1534: 'micromuse-lm', 1535: 'ampr-info', 1536: 'ampr-inter', 1537: 'sdsc-lm', 1538: '3ds-lm', 1539: 'intellistor-lm', 1540: 'rds', 1541: 'rds2', 1542: 'gridgen-elmd', 1543: 'simba-cs', 1544: 'aspeclmd', 1545: 'vistium-share', 1546: 'abbaccuray', 1547: 'laplink', 1548: 'axon-lm', 1549: 'shivahose', 1550: '3m-image-lm', 1551: 'hecmtl-db', 1552: 'pciarray', 7007: 'afs3-bos', 6667: 'irc', 32786: 'sometimes-rpc25', 13711: 'VeritasNetbackup', 20005: 'btx', 3462: 'track', 5679: 'activesync', 3632: 'distccd', 6668: 'irc', 1600: 'issd', 2998: 'iss-realsec', 18000: 'biimenu', 5713: 'proshareaudio', 5714: 'prosharevideo', 5715: 'prosharedata', 5716: 'prosharerequest', 5717: 'prosharenotify', 3001: 'nessusd', 26208: 'wnn6_DS', 19150: 'gkrellmd', 5510: 'secureidprop', 3689: 'rendezvous', 3005: 'deslogin', 1650: 'nkd', 1651: 'shiva_confsrvr', 1652: 'xnmp', 8443: 'https-alt', 1661: 'netview-aix-1', 1662: 'netview-aix-2', 1663: 'netview-aix-3', 1664: 'netview-aix-4', 1665: 'netview-aix-5', 1666: 'netview-aix-6', 1667: 'netview-aix-7', 1668: 'netview-aix-8', 1669: 'netview-aix-9', 1670: 'netview-aix-10', 1671: 'netview-aix-11', 1672: 'netview-aix-12', 13712: 'VeritasNetbackup', 1680: 'CarbonCopy', 9876: 'sd', 5800: 'vnc-http', 5801: 'vnc-http-1', 5802: 'vnc-http-2', 5803: 'vnc-http-3', 6558: 'xdsxdm', 1720: 'H.323/Q.931', 1723: 'pptp', 4444: 'krb524', 27009: 'flexlm9', 4045: 'lockd', 4559: 'hylafax', 1755: 'wms', 12000: 'cce4x', 1761: 'landesk-rc', 1762: 'landesk-rc', 1763: 'landesk-rc', 1764: 'landesk-rc', 2112: 'kip', 6401: 'crystalenterprise', 6101: 'VeritasBackupExec', 7937: 'nsrexecd', 7938: 'lgtomapper', 18181: 'opsec_cvp', 18182: 'opsec_ufp', 9991: 'issa', 9992: 'issc', 18185: 'opsec_omi', 6103: 'RETS-or-BackupExec', 5900: 'vnc', 5901: 'vnc-1', 5902: 'vnc-2', 5903: 'vnc-3', 10000: 'snet-sensor-mgmt', 22289: 'wnn6_Cn', 10005: 'stel', 6105: 'isdninfo', 6106: 'isdninfo', 22305: 'wnn6_Kr', 1827: 'pcm', 22321: 'wnn6_Tw', 6110: 'softcm', 6111: 'spc', 3900: 'udt_os', 8000: 'http-alt', 6112: 'dtspc', 8007: 'ajp12', 8009: 'ajp13', 8021: 'ftp-proxy', 22273: 'wnn6', 5977: 'ncd-pref-tcp', 5978: 'ncd-diag-tcp', 5979: 'ncd-conf-tcp', 27000: 'flexlm0', 10082: 'amandaidx', 10083: 'amidxtape', 13702: 'VeritasNetbackup', 1900: 'UPnP', 5997: 'ncd-pref', 5998: 'ncd-diag', 5999: 'ncd-conf', 6000: 'X11', 6001: 'X11:1', 6002: 'X11:2', 6003: 'X11:3', 6004: 'X11:4', 6005: 'X11:5', 6006: 'X11:6', 6007: 'X11:7', 6008: 'X11:8', 6009: 'X11:9', 27001: 'flexlm1', 6017: 'xmail-ctrl', 5100: 'admd', 4224: 'xtell', 1935: 'rtmp', 3984: 'mapper-nodemgr', 3985: 'mapper-mapethd', 3986: 'mapper-ws_ethd', 5632: 'pcanywherestat', 4500: 'sae-urn', 13720: 'VeritasNetbackup', 27002: 'flexlm2', 3999: 'remoteanything', 4000: 'remoteanything', 6050: 'arcserve', 4008: 'netcheque', 2111: 'kx', 6544: 'mythtv', 2809: 'corbaloc', 1984: 'bigbrother', 1986: 'licensedaemon', 1987: 'tr-rsrb-p1', 1988: 'tr-rsrb-p2', 1989: 'tr-rsrb-p3', 1990: 'stun-p1', 1991: 'stun-p2', 1992: 'stun-p3', 1993: 'snmp-tcp-port', 1994: 'stun-port', 1995: 'perf-port', 1996: 'tr-rsrb-port', 1997: 'gdp-port', 1998: 'x25-svc-port', 1999: 'tcp-id-port', 2000: 'callbook', 2001: 'dc', 2002: 'globe', 2003: 'cfingerd', 2004: 'mailbox', 2005: 'deslogin', 2006: 'invokator', 2007: 'dectalk', 2008: 'conf', 2009: 'news', 2010: 'search', 2011: 'raid-cc', 2012: 'ttyinfo', 2013: 'raid-am', 2014: 'troff', 2015: 'cypress', 2016: 'bootserver', 2017: 'cypress-stat', 2018: 'terminaldb', 2019: 'whosockami', 2020: 'xinupageserver', 2021: 'servexec', 2022: 'down', 2023: 'xinuexpansion3', 2024: 'xinuexpansion4', 2025: 'ellpack', 2026: 'scrabble', 2027: 'shadowserver', 2028: 'submitserver', 2030: 'device2', 6141: 'meta-corp', 2032: 'blackboard', 2033: 'glogger', 2034: 'scoremgr', 2035: 'imsldoc', 6142: 'aspentec-lm', 2038: 'objectmanager', 2040: 'lam', 2041: 'interbase', 2042: 'isis', 2043: 'isis-bcast', 2044: 'rimsl', 2045: 'cdfunc', 2046: 'sdfunc', 2047: 'dls', 2181: 'zookeeper'}
 
     try:
         return service_list[port]
@@ -6457,8 +6462,6 @@ class ThreadUrl(threading.Thread):
                 self.method = "tscan"
             elif self.method == "sfscan":
                 self.method = "tscan"
-            elif self.method == "cdnscan":
-                self.method = "tscan"
             elif self.method == "bakscan":
                 self.method = "tscan"
 
@@ -6957,35 +6960,45 @@ class ThreadUrl(threading.Thread):
                         resp = resp
 
                     # check cdn
-                    if args.m == "cdnscan":
-                        cdntype = None
+                    cdntype = None
+                    try:
+                        if r.info().getheader("processtime") or r.info().getheader(
+                            "X-NWS-LOG-UUID"
+                        ):
+                            cdntype = info("Huawei CDN")
 
-                        try:
-                            if r.info().getheader("processtime") or r.info().getheader(
-                                "X-NWS-LOG-UUID"
-                            ):
-                                cdntype = "Huawei CDN"
+                        if r.info().getheader("Ali-Swift-Global-Savetime"):
+                            cdntype = info("Ali CDN")
 
-                            if r.info().getheader("Ali-Swift-Global-Savetime"):
-                                cdntype = "Ali CDN"
+                        if r.info().getheader("via"):
+                            if "CHN-" in r.info().getheader("via"):
+                                cdntype = inf("Huawei CDN")
+                            if "cloudfront" in r.info().getheader("via"):
+                                cdntype = info("Cloudfront CDN")
 
-                            if r.info().getheader("via"):
-                                if "CHN-" in r.info().getheader("via"):
-                                    cdntype = "Huawei CDN"
-                                if "cloudfront" in r.info().getheader("via"):
-                                    cdntype = "Cloudfront CDN"
+                        if r.info().getheader("Server"):
+                            if "CloudWAF" in r.info().getheader("Server"):
+                                cdntype = info("Huawei CloudWAF")
 
-                            if r.info().getheader("Server"):
-                                if "CloudWAF" in r.info().getheader("Server"):
-                                    cdntype = "Huawei CloudWAF"
+                    except Exception as e:
+                        pass
 
-                        except Exception as e:
-                            pass
-
-                        chunk = (cdntype, (domain, req.origin_req_host, self.outfile))
+                    if cdntype is not None:
+                        res = ("CDN", domain, r.getcode())
+                        chunk = (
+                            res[0],
+                            [
+                                res[1],
+                                cdntype,
+                                res[2],
+                                self.outfile,
+                                self.lock,
+                                0,
+                            ],
+                        )
+                        # chunk = (cdntype, (domain, req.origin_req_host, self.outfile))
                         self.out_queue.put(chunk)
-                        raise ValueError("Terminal cdn scan")
-                    # check cdn over
+                        raise ValueError("Terminate because of cdn")
 
                     # finger arear
                     if "=deleteMe" in str(r.info().getheader("Set-Cookie")):
@@ -7423,7 +7436,7 @@ class ThreadUrl(threading.Thread):
                                 sys.stdout.flush()
                                 self.lock.acquire(1)
                                 print(info("\n\nTask completed\n"))
-                                raise ValueError("Terminal task")
+                                raise ValueError("Terminate task")
 
                     self.lock.release()
 
@@ -7462,7 +7475,7 @@ class ThreadUrl(threading.Thread):
                     if "HTTP Error 400" in e.__str__():
                         pass
                 except ValueError as e:
-                    if "Terminal task" in e.__str__():
+                    if "Terminate task" in e.__str__():
                         self.watch.watch(1)
                     pass
 
@@ -7982,33 +7995,6 @@ class DatamineThread(threading.Thread):
                     print(bingo(domain) + "-------------Write File error")
                 self.lock.release()
 
-            elif self.method == "cdnscan":
-
-                """
-                args[0]: Type of CDN
-                args[1][0]: Domain
-                args[1][1]: Origin request host
-                """
-                type_cdn = args[0]
-                domain = args[1][0]
-                origin_request_host = args[1][1]
-
-                if type_cdn is not None:
-                    self.lock.acquire(1)
-
-                    wpinfo = (
-                        "%s %-20s %s                                            \n"
-                        % (info(type_cdn), origin_request_host, domain)
-                    )
-                    print(wpinfo)
-
-                    try:
-                        resAlivedomainFile.write(fparse(wpinfo.encode()))
-                        resAlivedomainFile.flush()
-                    except:
-                        print(bingo(domain) + "-------------Write File error")
-
-                    self.lock.release()
 
             elif self.method == "shscan":
                 """
@@ -9148,7 +9134,7 @@ def aliveThreadControl(
             method = "subscan"
             urlpath = None
 
-    if method == "tscan" or method == "cdnscan" or method == "shscan":
+    if method == "tscan" or method == "shscan":
         encapsulation_before_tscan(
             "tscan_core", hr, task_list, method, listport, threadnum, outfile, urlpath
         )
@@ -9368,7 +9354,7 @@ def pring_logo():
     /   \     |  |     |  |     |  | |  \ |  | 
    /  ^  \    |  |     |  |     |  | |   \|  | 
   /  /_\  \   |  |     |  |     |  | |  . `  | 
- /  _____  \  |  `----.|  `----.|  | |  |\   |  v2.4.0 #{0}
+ /  _____  \  |  `----.|  `----.|  | |  |\   |  v2.4.1 #{0}
 /__/     \__\ |_______||_______||__| |__| \__| 
 
 """.format(
@@ -9380,7 +9366,7 @@ def pring_logo():
  █████╗ ██╗     ██╗     ██╗███╗   ██╗
 ██╔══██╗██║     ██║     ██║████╗  ██║
 ███████║██║     ██║     ██║██╔██╗ ██║
-██╔══██║██║     ██║     ██║██║╚██╗██║   v2.4.0 #{0}
+██╔══██║██║     ██║     ██║██║╚██╗██║   v2.4.1 #{0}
 ██║  ██║███████╗███████╗██║██║ ╚████║
 ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝╚═╝  ╚═══╝
 """.format(
@@ -9417,7 +9403,7 @@ if __name__ == "__main__":
         "\npython AlliN.py --host 192.168.1.1/24 -p 443 -m bakscan --dd (head scan)"
         "\npython AlliN.py --host 192.168.1.1/24 --nobar"
         "\npython AlliN.py -q \"domain='xx.com'\" --host xxx.com -m sfscan",
-        version="%prog 2.4.0",
+        version="%prog 2.4.1",
     )
     parse.add_option(
         "--host",
@@ -9475,13 +9461,11 @@ if __name__ == "__main__":
         "-e",
         dest="e",
         type="string",
-        default="f5",
         help="""method of encode or decode
                                                 ————————————————
                                                  pw -> powershell encode
                                                  bh -> bash encode
                                                  f5 -> f5 decode
-                                                 default is f5 decode
                                                 ————————————————
                                                  """,
     )
@@ -9551,7 +9535,6 @@ if __name__ == "__main__":
                                                                    hostscan -> hostscan
                                                                    vhostscan -> url travserse based hostscan 
                                                                    icmp tunnel -> icmpt
-                                                                   cdnscan -> cdn check
                                                                    dpscan -> doublepulsar backdoor check
                                                                    shscan -> shiro scan
                                                                    
@@ -9853,19 +9836,6 @@ if __name__ == "__main__":
              | |_) | (_| |   <\__ \ (_| (_| | | | |
              |_.__/ \__,_|_|\_\___/\___\__,_|_| |_|
                                                    
-                                                   
-            """
-            )
-            AG3(hostlist, args.m, listPort, args.t, "list", args.o, args.u)
-        elif args.m == "cdnscan":
-            print(
-                r"""
-
-              ________  _  __                
-             / ___/ _ \/ |/ /__ _______ ____ 
-            / /__/ // /    (_-</ __/ _ `/ _ \
-            \___/____/_/|_/___/\__/\_,_/_//_/
-                                            
                                                    
             """
             )

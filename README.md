@@ -8,11 +8,10 @@
 
 <details>
 <summary><b>主要开发人员</b></summary>
-- @Like0x
-- @Christasa
-- @CoColi
-- @MiluOWO
-- @F4ourNaceL
+<li> @Like0x </li>
+<li> @Christasa </li>
+<li> @CoColi </li>
+<li> @MiluOWO </li>
 </details>
 **用于非法用途与开发者无关。**
 
@@ -551,16 +550,6 @@ python AlliN.py -m icmpt --sip vps --cip 127.0.0.1 --cport 80
 
 Then you can browse vps_ip:36267 to access target_ip:target_port
 ```
-
-#### cdnscan
-
-使用场景: 大量IP需要确认是否为CDN节点时。
-
-```
-python AlliN.py -f AllIP.txt -m cdnscan
-```
-
-后续也会直接在正常输出中显示。
 
 
 > 部分功能模块代码为现有一些github项目整合而来。由于抄了比较多的项目这边就不一一写上了，在此谢过 :)。
