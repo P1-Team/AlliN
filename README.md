@@ -255,10 +255,18 @@ Close the processing bar
 `python AlliN.py --host 192.168.1.1/24 --nobar`
 
 
+### --only-show
+
+Only displays the status codes which are allowed.
+
+Sample:
+
+`--only-show 200,301`
+
 
 ### --hidden
 
-Filter specifies status code. Including 400,401,403,404,500,502.503,501
+Filter specifies status code.
 
 
 Sample:

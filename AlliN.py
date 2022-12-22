@@ -6420,35 +6420,19 @@ class ThreadUrl(threading.Thread):
         self.watch = watches
         self.trie = Trie
 
-        # init paramter of hidden
-        self.error_403 = True
-        self.error_404 = True
-        self.error_400 = True
-        self.error_500 = True
-        self.error_401 = True
-        self.error_502 = True
-        self.error_503 = True
-        self.error_501 = True
+        # init parameters of hidden
+        self.hide_codes = []
+        self.show_codes = []
         if args.hidden:
-            self.hidden = args.hidden.split(",")
-            for errors in self.hidden:
-                errors = errors.strip(" ")
-                if "404" in errors:
-                    self.error_404 = False
-                elif "403" in errors:
-                    self.error_403 = False
-                elif "400" in errors:
-                    self.error_400 = False
-                elif "500" in errors:
-                    self.error_500 = False
-                elif "401" in errors:
-                    self.error_401 = False
-                elif "502" in errors:
-                    self.error_502 = False
-                elif "503" in errors:
-                    self.error_503 = False
-                elif "501" in errors:
-                    self.error_501 = False
+            hidden = args.hidden.split(",")
+            for code in hidden:
+                code = code.strip()
+                self.hide_codes.append(code)
+        if args.only_show:
+            show_codes = args.only_show.split(",")
+            for code in show_codes:
+                code = code.strip()
+                self.show_codes.append(code)
 
     def run(self):
         global progress, progress_num, temp, scaned
@@ -7362,24 +7346,19 @@ class ThreadUrl(threading.Thread):
                         else:
                             res = (resp_title, domain, r.getcode())
                     try:
-                        # for parameter uf to ignore control status code
-                        if res[2] == 404 and not self.error_404:
-                            pass
-                        elif res[2] == 400 and not self.error_400:
-                            pass
-                        elif res[2] == 403 and not self.error_403:
-                            pass
-                        elif res[2] == 500 and not self.error_500:
-                            pass
-                        elif res[2] == 401 and not self.error_401:
-                            pass
-                        elif res[2] == 502 and not self.error_502:
-                            pass
-                        elif res[2] == 503 and not self.error_503:
-                            pass
-                        elif res[2] == 501 and not self.error_501:
-                            pass
-                        else:
+                        # Check the parameter of `hidden` or `only-show`
+
+                        is_visible = True
+
+                        if len(self.show_codes) > 0:
+                            if str(res[2]) not in self.show_codes:
+                                is_visible = False
+
+                        if str(res[2]) in self.hide_codes: 
+                            is_visible = False
+
+
+                        if is_visible:
                             if args.hiddensize:
                                 hiddensize = [
                                     str(i) for i in parse_range_int(args.hiddensize)
@@ -8229,10 +8208,11 @@ def encapsulation_before_tscan(
                             getattr(this_module, mf)(url)
                             continue
 
-                        if "443" in url and ":" in url:
+                        if ":443" in url:
                             bak_temp_url = "http://" + url
                             getattr(this_module, mf)(bak_temp_url)
 
+                            url = url.replace(":443", "")
                             bak_temp_url = "https://" + url.split(":")[0]
                             getattr(this_module, mf)(bak_temp_url)
                         else:
@@ -8561,8 +8541,6 @@ def encapsulation_before_tscan(
             # -u -f
             for url in gen_ip(hr):
 
-                # print "result :{}".format(url)
-
                 tag = True
                 url = url.replace("http://", "").replace("https://", "")
                 for i in listport:
@@ -8610,7 +8588,7 @@ def encapsulation_before_tscan(
                             )
                             getattr(this_module, mf)(bak_temp_url)
                             if tag:
-                                # default with port to Do not repeat the loop with the built-in port
+                                # Avoid repeating the loop with the built-in port which from input
 
                                 bak_temp_url = (
                                     "http://"
@@ -8643,28 +8621,33 @@ def encapsulation_before_tscan(
                         elif "//" not in url and ":" not in url and "/" in url:
                             # www.example.com/login
                             # http://www.example.com/login
-                            urlpath = ""
+
+                            # Fixed: changed the name urlpath to inurlpath, so that it can receive
+                            # the urlpath from `--uf` and the urlparth which from the original URL
+                            inurlpath = ""
                             if len(url.split("/")) > 2:
                                 # www.example.com/login/admin
                                 # http://www.example.com/login/admin
                                 host = url.split("/")[0]
                                 for o in url.split("/")[1:]:
-                                    urlpath += "/" + o
+                                    inurlpath += "/" + o
                             else:
-                                host, urlpath = url.split("/")[0], url.split("/")[1]
+                                host, inurlpath = url.split("/")[0], url.split("/")[1]
                             bak_temp_url = (
                                 "http://"
                                 + host
                                 + ":"
                                 + str(i)
                                 + "/"
-                                + str(urlpath).lstrip("/")
+                                + str(inurlpath).lstrip("/")
+                                + "/"
+                                + str(upath).lstrip("/")
                             )
                             getattr(this_module, mf)(bak_temp_url)
 
                             if i == "443":
                                 bak_temp_url = (
-                                    "https://" + host + "/" + str(urlpath).lstrip("/")
+                                    "https://" + host + "/" + str(inurlpath).lstrip("/")
                                 )
                                 getattr(this_module, mf)(bak_temp_url)
                             else:
@@ -8674,21 +8657,21 @@ def encapsulation_before_tscan(
                                     + ":"
                                     + str(i)
                                     + "/"
-                                    + str(urlpath).lstrip("/")
+                                    + str(inurlpath).lstrip("/")
                                 )
                                 getattr(this_module, mf)(bak_temp_url)
                         elif "//" not in url and ":" in url and "/" in url:
                             # www.example.com:8080/login
-                            urlpath = ""
+                            inurlpath = ""
                             if len(url.split("/")) > 2:
                                 # www.example.com:8080/login/admin
                                 # http://www.example.com:8080/login/admin
                                 host = url.split(":")[0]
                                 port = url.split(":")[1].split("/")[0]
                                 for o in url.split("/")[1:]:
-                                    urlpath += "/" + o
+                                    inurlpath += "/" + o
                             else:
-                                host, port, urlpath = (
+                                host, port, inurlpath = (
                                     url.split(":")[0],
                                     url.split(":")[1].split("/")[0],
                                     url.split(":")[1].split("/")[1],
@@ -8700,11 +8683,13 @@ def encapsulation_before_tscan(
                                 + ":"
                                 + str(i)
                                 + "/"
-                                + str(urlpath).lstrip("/")
+                                + str(inurlpath).lstrip("/")
+                                + "/"
+                                + str(upath).lstrip("/")
                             )
                             getattr(this_module, mf)(bak_temp_url)
                             if tag:
-                                # default with port to Do not repeat the loop with the built-in port
+                                # Avoid repeating the loop with the built-in port which from input
 
                                 bak_temp_url = (
                                     "http://"
@@ -8712,7 +8697,7 @@ def encapsulation_before_tscan(
                                     + ":"
                                     + port
                                     + "/"
-                                    + str(urlpath).lstrip("/")
+                                    + str(inurlpath).lstrip("/")
                                 )
                                 getattr(this_module, mf)(bak_temp_url)
 
@@ -8722,7 +8707,7 @@ def encapsulation_before_tscan(
                                     + ":"
                                     + port
                                     + "/"
-                                    + str(urlpath).lstrip("/")
+                                    + str(inurlpath).lstrip("/")
                                 )
                                 getattr(this_module, mf)(bak_temp_url)
 
@@ -8730,7 +8715,7 @@ def encapsulation_before_tscan(
                             if i == "443":
 
                                 bak_temp_url = (
-                                    "https://" + host + "/" + str(urlpath).lstrip("/")
+                                    "https://" + host + "/" + str(inurlpath).lstrip("/")
                                 )
                                 getattr(this_module, mf)(bak_temp_url)
                             else:
@@ -8741,22 +8726,22 @@ def encapsulation_before_tscan(
                                     + ":"
                                     + str(i)
                                     + "/"
-                                    + str(urlpath).lstrip("/")
+                                    + str(inurlpath).lstrip("/")
                                 )
                                 getattr(this_module, mf)(bak_temp_url)
                         elif "//" in url and len(url.split(":")) > 2 and "/" in url:
 
                             url = url.replace("http://", "").replace("https://", "")
-                            urlpath = ""
+                            inurlpath = ""
                             if len(url.split("/")) > 2:
                                 # www.example.com:8080/login/admin
                                 # http://www.example.com:8080/login/admin
                                 host = url.split(":")[0]
                                 port = url.split(":")[1].split("/")[0]
                                 for o in url.split("/")[1:]:
-                                    urlpath += "/" + o
+                                    inurlpath += "/" + o
                             else:
-                                host, port, urlpath = (
+                                host, port, inurlpath = (
                                     url.split(":")[0],
                                     url.split(":")[1].split("/")[0],
                                     url.split(":")[1].split("/")[1],
@@ -8768,11 +8753,13 @@ def encapsulation_before_tscan(
                                 + ":"
                                 + str(i)
                                 + "/"
-                                + str(urlpath).lstrip("/")
+                                + str(inurlpath).lstrip("/")
+                                + "/"
+                                + str(upath).lstrip("/")
                             )
                             getattr(this_module, mf)(bak_temp_url)
                             if tag:
-                                # default with port to Do not repeat the loop with the built-in port
+                                # Avoid repeating the loop with the built-in port which from input
 
                                 bak_temp_url = (
                                     "http://"
@@ -8780,7 +8767,7 @@ def encapsulation_before_tscan(
                                     + ":"
                                     + port
                                     + "/"
-                                    + str(urlpath).lstrip("/")
+                                    + str(inurlpath).lstrip("/")
                                 )
                                 getattr(this_module, mf)(bak_temp_url)
 
@@ -8790,13 +8777,13 @@ def encapsulation_before_tscan(
                                     + ":"
                                     + port
                                     + "/"
-                                    + str(urlpath).lstrip("/")
+                                    + str(inurlpath).lstrip("/")
                                 )
                                 getattr(this_module, mf)(bak_temp_url)
                                 tag = False
                             if i == "443":
                                 bak_temp_url = (
-                                    "https://" + host + "/" + str(urlpath).lstrip("/")
+                                    "https://" + host + "/" + str(inurlpath).lstrip("/")
                                 )
                                 getattr(this_module, mf)(bak_temp_url)
                             else:
@@ -8806,23 +8793,23 @@ def encapsulation_before_tscan(
                                     + ":"
                                     + str(i)
                                     + "/"
-                                    + str(urlpath).lstrip("/")
+                                    + str(inurlpath).lstrip("/")
                                 )
                                 getattr(this_module, mf)(bak_temp_url)
                         elif "//" in url and len(url.split(":")) == 2 and "/" in url:
                             url = url.replace("http://", "").replace("https://", "")
                             # www.example.com/login
                             # http://www.example.com/login
-                            urlpath = ""
+                            inurlpath = ""
                             if len(url.split("/")) > 2:
                                 # www.example.com/login/admin
                                 # http://www.example.com/login/admin
                                 host = url.split("/")[0]
                                 for o in url.split("/")[1:]:
-                                    urlpath += "/" + o
+                                    inurlpath += "/" + o
                             else:
-                                host, urlpath = url.split("/")[0], url.split("/")[1]
-                            urlpath = urlpath.strip()
+                                host, inurlpath = url.split("/")[0], url.split("/")[1]
+                            inurlpath = inurlpath.strip()
 
                             bak_temp_url = (
                                 "http://"
@@ -8830,12 +8817,14 @@ def encapsulation_before_tscan(
                                 + ":"
                                 + str(i)
                                 + "/"
-                                + str(urlpath).lstrip("/")
+                                + str(inurlpath).lstrip("/")
+                                + "/"
+                                + str(upath).lstrip("/")
                             )
                             getattr(this_module, mf)(bak_temp_url)
                             if i == "443":
                                 bak_temp_url = (
-                                    "https://" + host + "/" + str(urlpath).lstrip("/")
+                                    "https://" + host + "/" + str(inurlpath).lstrip("/")
                                 )
                                 getattr(this_module, mf)(bak_temp_url)
                             else:
@@ -8845,7 +8834,7 @@ def encapsulation_before_tscan(
                                     + ":"
                                     + str(i)
                                     + "/"
-                                    + str(urlpath).lstrip("/")
+                                    + str(inurlpath).lstrip("/")
                                 )
                                 getattr(this_module, mf)(bak_temp_url)
                         else:
@@ -9354,7 +9343,7 @@ def pring_logo():
     /   \     |  |     |  |     |  | |  \ |  | 
    /  ^  \    |  |     |  |     |  | |   \|  | 
   /  /_\  \   |  |     |  |     |  | |  . `  | 
- /  _____  \  |  `----.|  `----.|  | |  |\   |  v2.4.1 #{0}
+ /  _____  \  |  `----.|  `----.|  | |  |\   |  v2.4.2 #{0}
 /__/     \__\ |_______||_______||__| |__| \__| 
 
 """.format(
@@ -9366,7 +9355,7 @@ def pring_logo():
  █████╗ ██╗     ██╗     ██╗███╗   ██╗
 ██╔══██╗██║     ██║     ██║████╗  ██║
 ███████║██║     ██║     ██║██╔██╗ ██║
-██╔══██║██║     ██║     ██║██║╚██╗██║   v2.4.1 #{0}
+██╔══██║██║     ██║     ██║██║╚██╗██║   v2.4.2 #{0}
 ██║  ██║███████╗███████╗██║██║ ╚████║
 ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝╚═╝  ╚═══╝
 """.format(
@@ -9403,7 +9392,7 @@ if __name__ == "__main__":
         "\npython AlliN.py --host 192.168.1.1/24 -p 443 -m bakscan --dd (head scan)"
         "\npython AlliN.py --host 192.168.1.1/24 --nobar"
         "\npython AlliN.py -q \"domain='xx.com'\" --host xxx.com -m sfscan",
-        version="%prog 2.4.1",
+        version="%prog 2.4.2",
     )
     parse.add_option(
         "--host",
@@ -9470,9 +9459,8 @@ if __name__ == "__main__":
                                                  """,
     )
     parse.add_option("-s", dest="s", type="string", help="String of decide")
-    parse.add_option(
-        "--hidden", dest="hidden", type="string", help="Hide http code for urlpath"
-    )
+    parse.add_option("--hidden", dest="hidden", type="string", help="Hide http code for urlpath")
+    parse.add_option("--only-show", dest="only_show", type="string", help="Only show the specified status code")
     parse.add_option(
         "--fs",
         dest="fs",
@@ -9482,12 +9470,8 @@ if __name__ == "__main__":
     )
     parse.add_option("--dd", dest="dd", action="store_true", help="Open head request")
     parse.add_option("--tp", dest="tp", action="store_true", help="Title plus mode, add an extra favicon.ico scan")
-    parse.add_option(
-        "--nocert", dest="nocert", action="store_true", help="Close show cert url"
-    )
-    parse.add_option(
-        "--nobar", dest="nobar", action="store_true", help="Close the ProcessBar"
-    )
+    parse.add_option("--nocert", dest="nocert", action="store_true", help="Close show cert url")
+    parse.add_option("--nobar", dest="nobar", action="store_true", help="Close the ProcessBar")
     parse.add_option(
         "--uninstall",
         dest="uninstall",
@@ -9500,18 +9484,14 @@ if __name__ == "__main__":
         action="store_true",
         help="Version for doublepulsar",
     )
-    parse.add_option(
-        "--hiddensize", dest="hiddensize", type="string", help="Hidden size"
-    )
+    parse.add_option("--hiddensize", dest="hiddensize", type="string", help="Hidden size")
     parse.add_option(
         "-q",
         dest="q",
         type="string",
         help='Domain for fofa example: domain="baidu.com"',
     )
-    parse.add_option(
-        "-H", dest="H", type="string", help='set header, example: -H "key: value"'
-    )
+    parse.add_option("-H", dest="H", type="string", help='set header, example: -H "key: value"')
     parse.add_option(
         "-m",
         dest="m",
