@@ -482,9 +482,7 @@ Subdomain scan
 
 Sample:
 
-
 `python AlliN.py --host "xx.com" -m subscan`
-
 
 
 #### sscan
@@ -493,10 +491,17 @@ Sample:
 
 Sample:
 
-
 `python AlliN.py --host 10.1.1.1/24 -p 80 -m sscan`
 
 
+#### t3scan
+
+`t3scan` is a module of WebLogic information collection, it is based on the protocol of t3 and iiop
+
+Sample:
+`python AlliN.py --host 10.1.1.1/24 -p 7001 -m t3scan`
+
+Notice: Port is necessary
 
 #### uncd
 

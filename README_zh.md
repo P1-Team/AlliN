@@ -491,6 +491,14 @@ tscan-安全版本，去掉了tscan自动识别shiro的功能。
 `python AlliN.py --host 10.1.1.1/24 -p 80 -m sscan`
 
 
+#### t3scan
+
+weblogic 信息扫描模块，扫描t3和iiop协议获得weblogic部署信息
+
+样例:
+`python AlliN.py --host 10.1.1.1/24 -p 7001 -m t3scan`
+
+注: 端口制定是必要的
 
 #### uncd
 
