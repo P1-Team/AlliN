@@ -81,6 +81,9 @@ Samples:
 --host 10.1.1.1-10.2.2.2
 --host 10.1.1.1/24 # any CIDR
 --host 10.1.1.1-255
+--host 2001:db8::/126 # any CIDR
+--host [2001:4860:4860::8888]
+--host 2001:db8::1-2001:db8::5
 --host <arbitrary format of the domain>
 ```
 

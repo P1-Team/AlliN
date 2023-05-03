@@ -3739,7 +3739,7 @@ def rdp_encrypted_pkt(
     pkt = "\x02\xf0\x80"  # X.224
     pkt += "\x64"  # sendDataRequest
     pkt += (
-        "\x00\x08"  # intiator userId .. TODO: for a functional client this isn"t static
+        "\x00\x08"  # intiator userId ..
     )
     pkt += channelId  # channelId = 1003
     pkt += "\x70"  # dataPriority
@@ -4874,6 +4874,10 @@ class subscanProcess:
         self.apikey = Account().Vtapikey()
         self.total = 4
 
+        host_banner = info(query) + " | "
+        sys.stdout.write(host_banner)
+        sys.stdout.flush()        
+
     def crtscan(self):
         try:
             from urllib import quote
@@ -4913,7 +4917,6 @@ class subscanProcess:
 
             # split url for subdomains
             for res in list(domains):
-                # print res.split("."+query)
                 result.append(res.split("." + self.query)[0])
             certing = info("CERT Request ") + str(len(result)) + " | "
             sys.stdout.write(certing)
@@ -5186,13 +5189,36 @@ def check_cloud_server(ip):
                 return vps[0]
     return 0
 
+def parse_ipv6(ipv6_str):
+    if ipv6_str == "::":
+        full_parts = ['0'] * 8
+    if '::' in ipv6_str:
+        left, right = ipv6_str.split('::')
+        left_parts = left.split(':')
+        right_parts = right.split(':')
+
+        if not left_parts[0]:
+            left_parts = ['0'] * (8 - len(right_parts))
+        if not right_parts[0]:
+            right_parts = ['0'] * (8 - len(left_parts))
+        full_parts = left_parts + ['0'] * (8 - len(left_parts) - len(right_parts)) + right_parts
+    else:
+        full_parts = ipv6_str.split(':')
+        if len(full_parts) < 8:
+            full_parts = full_parts + ['0'] * (8 - len(full_parts))
+
+    # Convert the hexadecimal components to integers
+    full_ints = [int(x, 16) for x in full_parts]
+
+    return full_ints
 
 def to_ips(raw):
 
     # TODO: calculate the capacity
-    if containenglish(raw):
+    if is_domain(raw):
         yield raw
 
+    # 192.168.0.1/24
     elif "/" in raw and len(raw.split(".")) == 4 and raw.split("/")[1].isdigit():
         addr, mask = raw.split("/")
         mask = int(mask)
@@ -5205,15 +5231,46 @@ def to_ips(raw):
         )
         start = bin_addr[:mask] + (32 - mask) * "0"
         end = bin_addr[:mask] + (32 - mask) * "1"
-        # num = int(start, 2) ^ int(end, 2)
         for i in range(int(start, 2), int(end, 2) + 1):
             bin_addr = (32 - len(bin(int(i))[2:])) * "0" + bin(i)[2:]
             yield ".".join(
                 [str(int(bin_addr[8 * i : 8 * (i + 1)], 2)) for i in range(0, 4)]
             )
 
+    # 7fff::1/64
+    elif "/" in raw and len(raw.split(":")) > 1 and raw.split("/")[1].isdigit():
+        raw = raw.replace("[", "").replace("]", "")
+        ipv6, prefix_len = raw.split("/")
+        prefix_len = int(prefix_len)
+
+        ipv6_array = parse_ipv6(ipv6)
+
+        ipv6_list = []
+        for i in range(2 ** (128 - prefix_len)):
+            addr = []
+            oversize = False
+
+            for j in range(8):
+                if (j+1) * 16 < prefix_len:
+                    addr.append(ipv6_array[j])
+                elif (j+1) * 16 - 16 < prefix_len and j != 7:
+                    mask = (1 << (prefix_len - (j * 16 - 16))) - 1
+                    addr.append(ipv6_array[j] & mask)
+                else:
+                    addr.append(ipv6_array[j] + (i >> (112 - (j * 16)) & 0xffff))
+
+                if addr[j] > 65535:
+                    oversize = True
+                    break
+            if oversize:
+                break
+
+            yield "[%s]" % ":".join(["{:04x}".format(x) for x in addr])
+
+
     elif "-" in raw:
 
+        # IPV4
         if re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}-\d{1,3}$", raw):
             addr, end = raw.split("-")
             end = int(end)
@@ -5222,21 +5279,43 @@ def to_ips(raw):
             # num = end - start
             for i in range(start, end + 1):
                 yield prefix + "." + str(i)
-
+        # IPV4
         elif re.match(
             r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}-\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$",
             raw,
         ):
             start, end = [ip2num(x) for x in raw.split("-")]
-            # num = end - start
             for num in range(start, end + 1):
                 if not num & 0xFF:
                     continue
                 yield num2ip(num)
+        # IPv6
+        elif re.match(
+            r"(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))-",
+            raw
+        ):
+            start_ipv6, end_ipv6 = raw.split("-")
+            start_array = parse_ipv6(start_ipv6)
+            end_array = parse_ipv6(end_ipv6)
+
+            ipv6_list = []
+            while start_array <= end_array:
+                start_array[-1] += 1
+                for i in range(7, -1, -1):
+                    if start_array[i] > 65535:
+                        start_array[i] -= 65536
+                        start_array[i-1] += 1
+                    else:
+                        break
+                yield "[%s]" % ":".join(["{:04x}".format(x) for x in start_array])
 
         else:
             print("warning - parse {}".format(raw))
             yield raw
+
+    elif re.match(r"(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))", raw) and "[" not in raw:
+        yield "[%s]" % raw
+
     else:
         yield raw
 
@@ -5449,8 +5528,9 @@ def unzip(data):
     return data
 
 
-def containenglish(str0):
-    return bool(re.search("[a-z]", str0))
+def is_domain(raw):
+    return bool(re.search("[a-z]", raw) and 
+        not re.search(r"(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))", raw))
 
 
 def openFile(filename):
@@ -5467,7 +5547,7 @@ def openFile(filename):
             pass
 
         line = line.strip("\n")
-        if "/" in line and "//" not in line and not containenglish(line):
+        if "/" in line and "//" not in line and not is_domain(line):
             tempiplist = to_ips(line)
             hostlist += list(tempiplist)
         elif "//" in line:
@@ -6587,8 +6667,9 @@ class ThreadUrl(threading.Thread):
                 if result == 0:
                     open_ports[port] = "open"
                 elif result == 10061:
-                    # close
                     pass
+
+                # TODO: add port identification
 
                 sock.close()
                 port_list = sorted(open_ports)
@@ -6978,17 +7059,7 @@ class ThreadUrl(threading.Thread):
                                         # http://www.example.com/test/2.php -> http://www.example.com/test/1.php
                                         if len(domain.split("//")[1].split("/")) > 1:
                                             # http://www.example.com/ -> http://www.example.com/1.php
-                                            domain = (
-                                                domain.split("//")[0]
-                                                + "//"
-                                                + "/".join(
-                                                    domain.split("//")[1].split("/")[
-                                                        :-1
-                                                    ]
-                                                )
-                                                + "/"
-                                                + toLocation
-                                            )
+                                            domain = (domain.split("//")[0] + "//" + "/".join(domain.split("//")[1].split("/")[:-1]) + "/" + toLocation)
 
                                         else:
                                             domain = domain + "/" + toLocation
@@ -7127,7 +7198,7 @@ class ThreadUrl(threading.Thread):
                         if len(replaceip[0]) > 0:
                             replaceip_final = replaceip[0][0]
 
-                    if not containenglish(replaceip_final):
+                    if not is_domain(replaceip_final):
                         if check_cloud_server(replaceip_final) != 0:
                             domain += " | " + info(
                                 "[ " + check_cloud_server(replaceip_final) + " ]"
@@ -8412,31 +8483,15 @@ def encapsulation_before_tscan(
                                 urlpath += "/" + o
                         else:
                             host, urlpath = url.split("/")[0], url.split("/")[1]
-                        bak_temp_url = (
-                            "http://"
-                            + host
-                            + ":"
-                            + str(i)
-                            + "/"
-                            + str(urlpath).lstrip("/")
-                        )
+                        bak_temp_url = ("http://" + host + ":" + str(i) + "/" + str(urlpath).lstrip("/"))
                         getattr(this_module, mf)(bak_temp_url)
 
                         if i == "443":
 
-                            bak_temp_url = (
-                                "https://" + host + "/" + str(urlpath).lstrip("/")
-                            )
+                            bak_temp_url = ("https://" + host + "/" + str(urlpath).lstrip("/"))
                             getattr(this_module, mf)(bak_temp_url)
                         else:
-                            bak_temp_url = (
-                                "https://"
-                                + host
-                                + ":"
-                                + str(i)
-                                + "/"
-                                + str(urlpath).lstrip("/")
-                            )
+                            bak_temp_url = ("https://" + host + ":" + str(i) + "/"+ str(urlpath).lstrip("/"))
                             getattr(this_module, mf)(bak_temp_url)
                     elif "//" not in url and ":" in url and "/" in url:
 
@@ -8455,54 +8510,24 @@ def encapsulation_before_tscan(
                                 url.split(":")[1].split("/")[0],
                                 url.split(":")[1].split("/")[1],
                             )
-                        bak_temp_url = (
-                            "http://"
-                            + host
-                            + ":"
-                            + str(i)
-                            + "/"
-                            + str(urlpath).lstrip("/")
-                        )
+                        bak_temp_url = ("http://" + host + ":" + str(i) + "/" + str(urlpath).lstrip("/"))
                         getattr(this_module, mf)(bak_temp_url)
                         if tag:
                             # default with port to Do not repeat the loop with the built-in port
 
-                            bak_temp_url = (
-                                "http://"
-                                + host
-                                + ":"
-                                + port
-                                + "/"
-                                + str(urlpath).lstrip("/")
-                            )
+                            bak_temp_url = ("http://" + host + ":" + port + "/" + str(urlpath).lstrip("/"))
                             getattr(this_module, mf)(bak_temp_url)
 
-                            bak_temp_url = (
-                                "https://"
-                                + host
-                                + ":"
-                                + port
-                                + "/"
-                                + str(urlpath).lstrip("/")
-                            )
+                            bak_temp_url = ("https://" + host + ":" + port + "/" + str(urlpath).lstrip("/"))
                             getattr(this_module, mf)(bak_temp_url)
                             tag = False
                         if i == "443":
 
-                            bak_temp_url = (
-                                "https://" + host + "/" + str(urlpath).lstrip("/")
-                            )
+                            bak_temp_url = ("https://" + host + "/" + str(urlpath).lstrip("/"))
                             getattr(this_module, mf)(bak_temp_url)
                         else:
 
-                            bak_temp_url = (
-                                "https://"
-                                + host
-                                + ":"
-                                + str(i)
-                                + "/"
-                                + str(urlpath).lstrip("/")
-                            )
+                            bak_temp_url = ("https://" + host + ":" + str(i) + "/" + str(urlpath).lstrip("/"))
                             getattr(this_module, mf)(bak_temp_url)
                     elif "//" in url and len(url.split(":")) > 2 and "/" in url:
 
@@ -8522,36 +8547,15 @@ def encapsulation_before_tscan(
                                 url.split(":")[1].split("/")[1],
                             )
 
-                        bak_temp_url = (
-                            "http://"
-                            + host
-                            + ":"
-                            + str(i)
-                            + "/"
-                            + str(urlpath).lstrip("/")
-                        )
+                        bak_temp_url = ("http://" + host + ":" + str(i) + "/" + str(urlpath).lstrip("/"))
                         getattr(this_module, mf)(bak_temp_url)
                         if tag:
                             # default with port to Do not repeat the loop with the built-in port
 
-                            bak_temp_url = (
-                                "http://"
-                                + host
-                                + ":"
-                                + port
-                                + "/"
-                                + str(urlpath).lstrip("/")
-                            )
+                            bak_temp_url = ("http://" + host + ":" + port + "/" + str(urlpath).lstrip("/"))
                             getattr(this_module, mf)(bak_temp_url)
 
-                            bak_temp_url = (
-                                "https://"
-                                + host
-                                + ":"
-                                + port
-                                + "/"
-                                + str(urlpath).lstrip("/")
-                            )
+                            bak_temp_url = ("https://" + host + ":" + port + "/" + str(urlpath).lstrip("/"))
                             getattr(this_module, mf)(bak_temp_url)
                             tag = False
                         if i == "443":
@@ -8562,14 +8566,7 @@ def encapsulation_before_tscan(
                             getattr(this_module, mf)(bak_temp_url)
                         else:
 
-                            bak_temp_url = (
-                                "https://"
-                                + host
-                                + ":"
-                                + str(i)
-                                + "/"
-                                + str(urlpath).lstrip("/")
-                            )
+                            bak_temp_url = ("https://" + host + ":" + str(i) + "/" + str(urlpath).lstrip("/"))
                             getattr(this_module, mf)(bak_temp_url)
                     elif "//" in url and len(url.split(":")) == 2 and "/" in url:
                         url = url.replace("http://", "").replace("https://", "")
@@ -8586,14 +8583,7 @@ def encapsulation_before_tscan(
                             host, urlpath = url.split("/")[0], url.split("/")[1]
                         urlpath = urlpath.strip()
 
-                        bak_temp_url = (
-                            "http://"
-                            + host
-                            + ":"
-                            + str(i)
-                            + "/"
-                            + str(urlpath).lstrip("/")
-                        )
+                        bak_temp_url = ("http://" + host + ":" + str(i) + "/" + str(urlpath).lstrip("/"))
                         getattr(this_module, mf)(bak_temp_url)
                         if i == "443":
 
@@ -8603,14 +8593,7 @@ def encapsulation_before_tscan(
                             getattr(this_module, mf)(bak_temp_url)
                         else:
 
-                            bak_temp_url = (
-                                "https://"
-                                + host
-                                + ":"
-                                + str(i)
-                                + "/"
-                                + str(urlpath).lstrip("/")
-                            )
+                            bak_temp_url = ("https://" + host + ":" + str(i) + "/" + str(urlpath).lstrip("/"))
                             getattr(this_module, mf)(bak_temp_url)
                     else:
                         # http://www.example.com
@@ -8647,12 +8630,7 @@ def encapsulation_before_tscan(
                             )
                             getattr(this_module, mf)(bak_temp_url)
 
-                            bak_temp_url = (
-                                "https://"
-                                + url.split(":")[0]
-                                + "/"
-                                + str(upath).lstrip("/")
-                            )
+                            bak_temp_url = ("https://" + url.split(":")[0] + "/" + str(upath).lstrip("/"))
                             getattr(this_module, mf)(bak_temp_url)
                         else:
                             bak_temp_url = (
@@ -8675,14 +8653,7 @@ def encapsulation_before_tscan(
                     for upath in urlpath:
                         if "/" not in url and "//" not in url and ":" not in url:
                             # www.example.com
-                            bak_temp_url = (
-                                "http://"
-                                + url
-                                + ":"
-                                + str(i)
-                                + "/"
-                                + str(upath).lstrip("/")
-                            )
+                            bak_temp_url = ("http://" + url + ":" + str(i) + "/" + str(upath).lstrip("/"))
                             getattr(this_module, mf)(bak_temp_url)
                             if i == "443":
 
@@ -8692,40 +8663,19 @@ def encapsulation_before_tscan(
                                 getattr(this_module, mf)(bak_temp_url)
                             else:
 
-                                bak_temp_url = (
-                                    "https://"
-                                    + url
-                                    + ":"
-                                    + str(i)
-                                    + "/"
-                                    + str(upath).lstrip("/")
-                                )
+                                bak_temp_url = ("https://" + url + ":" + str(i) + "/" + str(upath).lstrip("/"))
                                 getattr(this_module, mf)(bak_temp_url)
                         elif "/" not in url and "//" not in url and ":" in url:
                             # if www.example.com:8080
 
                             host, port = url.split(":")[0], url.split(":")[1]
 
-                            bak_temp_url = (
-                                "http://"
-                                + host
-                                + ":"
-                                + str(i)
-                                + "/"
-                                + str(upath).lstrip("/")
-                            )
+                            bak_temp_url = ("http://" + host + ":" + str(i) + "/" + str(upath).lstrip("/"))
                             getattr(this_module, mf)(bak_temp_url)
                             if tag:
                                 # Avoid repeating the loop with the built-in port which from input
 
-                                bak_temp_url = (
-                                    "http://"
-                                    + host
-                                    + ":"
-                                    + port
-                                    + "/"
-                                    + str(upath).lstrip("/")
-                                )
+                                bak_temp_url = ("http://" + host + ":" + port + "/" + str(upath).lstrip("/"))
                                 getattr(this_module, mf)(bak_temp_url)
                                 tag = False
                             if i == "443":
@@ -8736,14 +8686,7 @@ def encapsulation_before_tscan(
                                 getattr(this_module, mf)(bak_temp_url)
 
                             else:
-                                bak_temp_url = (
-                                    "https://"
-                                    + host
-                                    + ":"
-                                    + str(i)
-                                    + "/"
-                                    + str(upath).lstrip("/")
-                                )
+                                bak_temp_url = ("https://" + host + ":" + str(i) + "/" + str(upath).lstrip("/"))
                                 getattr(this_module, mf)(bak_temp_url)
 
                         elif "//" not in url and ":" not in url and "/" in url:
@@ -8761,16 +8704,7 @@ def encapsulation_before_tscan(
                                     inurlpath += "/" + o
                             else:
                                 host, inurlpath = url.split("/")[0], url.split("/")[1]
-                            bak_temp_url = (
-                                "http://"
-                                + host
-                                + ":"
-                                + str(i)
-                                + "/"
-                                + str(inurlpath).lstrip("/")
-                                + "/"
-                                + str(upath).lstrip("/")
-                            )
+                            bak_temp_url = ("http://" + host + ":" + str(i) + "/" + str(inurlpath).lstrip("/") + "/" + str(upath).lstrip("/"))
                             getattr(this_module, mf)(bak_temp_url)
 
                             if i == "443":
@@ -8779,14 +8713,7 @@ def encapsulation_before_tscan(
                                 )
                                 getattr(this_module, mf)(bak_temp_url)
                             else:
-                                bak_temp_url = (
-                                    "https://"
-                                    + host
-                                    + ":"
-                                    + str(i)
-                                    + "/"
-                                    + str(inurlpath).lstrip("/")
-                                )
+                                bak_temp_url = ("https://" + host + ":" + str(i) + "/" + str(inurlpath).lstrip("/"))
                                 getattr(this_module, mf)(bak_temp_url)
                         elif "//" not in url and ":" in url and "/" in url:
                             # www.example.com:8080/login
@@ -8799,44 +8726,17 @@ def encapsulation_before_tscan(
                                 for o in url.split("/")[1:]:
                                     inurlpath += "/" + o
                             else:
-                                host, port, inurlpath = (
-                                    url.split(":")[0],
-                                    url.split(":")[1].split("/")[0],
-                                    url.split(":")[1].split("/")[1],
-                                )
+                                host, port, inurlpath = (url.split(":")[0], url.split(":")[1].split("/")[0], url.split(":")[1].split("/")[1])
 
-                            bak_temp_url = (
-                                "http://"
-                                + host
-                                + ":"
-                                + str(i)
-                                + "/"
-                                + str(inurlpath).lstrip("/")
-                                + "/"
-                                + str(upath).lstrip("/")
-                            )
+                            bak_temp_url = ("http://" + host + ":" + str(i) + "/" + str(inurlpath).lstrip("/") + "/" + str(upath).lstrip("/"))
                             getattr(this_module, mf)(bak_temp_url)
                             if tag:
                                 # Avoid repeating the loop with the built-in port which from input
 
-                                bak_temp_url = (
-                                    "http://"
-                                    + host
-                                    + ":"
-                                    + port
-                                    + "/"
-                                    + str(inurlpath).lstrip("/")
-                                )
+                                bak_temp_url = ("http://" + host + ":" + port + "/" + str(inurlpath).lstrip("/"))
                                 getattr(this_module, mf)(bak_temp_url)
 
-                                bak_temp_url = (
-                                    "https://"
-                                    + host
-                                    + ":"
-                                    + port
-                                    + "/"
-                                    + str(inurlpath).lstrip("/")
-                                )
+                                bak_temp_url = ("https://" + host + ":" + port + "/" + str(inurlpath).lstrip("/"))
                                 getattr(this_module, mf)(bak_temp_url)
 
                                 tag = False
@@ -8848,14 +8748,7 @@ def encapsulation_before_tscan(
                                 getattr(this_module, mf)(bak_temp_url)
                             else:
 
-                                bak_temp_url = (
-                                    "https://"
-                                    + host
-                                    + ":"
-                                    + str(i)
-                                    + "/"
-                                    + str(inurlpath).lstrip("/")
-                                )
+                                bak_temp_url = ("https://" + host + ":" + str(i) + "/" + str(inurlpath).lstrip("/"))
                                 getattr(this_module, mf)(bak_temp_url)
                         elif "//" in url and len(url.split(":")) > 2 and "/" in url:
 
@@ -8875,38 +8768,15 @@ def encapsulation_before_tscan(
                                     url.split(":")[1].split("/")[1],
                                 )
 
-                            bak_temp_url = (
-                                "http://"
-                                + host
-                                + ":"
-                                + str(i)
-                                + "/"
-                                + str(inurlpath).lstrip("/")
-                                + "/"
-                                + str(upath).lstrip("/")
-                            )
+                            bak_temp_url = ("http://" + host + ":" + str(i) + "/" + str(inurlpath).lstrip("/") + "/" + str(upath).lstrip("/"))
                             getattr(this_module, mf)(bak_temp_url)
                             if tag:
                                 # Avoid repeating the loop with the built-in port which from input
 
-                                bak_temp_url = (
-                                    "http://"
-                                    + host
-                                    + ":"
-                                    + port
-                                    + "/"
-                                    + str(inurlpath).lstrip("/")
-                                )
+                                bak_temp_url = ("http://" + host + ":" + port + "/" + str(inurlpath).lstrip("/"))
                                 getattr(this_module, mf)(bak_temp_url)
 
-                                bak_temp_url = (
-                                    "https://"
-                                    + host
-                                    + ":"
-                                    + port
-                                    + "/"
-                                    + str(inurlpath).lstrip("/")
-                                )
+                                bak_temp_url = ("https://" + host + ":" + port + "/" + str(inurlpath).lstrip("/"))
                                 getattr(this_module, mf)(bak_temp_url)
                                 tag = False
                             if i == "443":
@@ -8915,14 +8785,7 @@ def encapsulation_before_tscan(
                                 )
                                 getattr(this_module, mf)(bak_temp_url)
                             else:
-                                bak_temp_url = (
-                                    "https://"
-                                    + host
-                                    + ":"
-                                    + str(i)
-                                    + "/"
-                                    + str(inurlpath).lstrip("/")
-                                )
+                                bak_temp_url = ("https://" + host + ":" + str(i) + "/" + str(inurlpath).lstrip("/"))
                                 getattr(this_module, mf)(bak_temp_url)
                         elif "//" in url and len(url.split(":")) == 2 and "/" in url:
                             url = url.replace("http://", "").replace("https://", "")
@@ -8939,16 +8802,7 @@ def encapsulation_before_tscan(
                                 host, inurlpath = url.split("/")[0], url.split("/")[1]
                             inurlpath = inurlpath.strip()
 
-                            bak_temp_url = (
-                                "http://"
-                                + host
-                                + ":"
-                                + str(i)
-                                + "/"
-                                + str(inurlpath).lstrip("/")
-                                + "/"
-                                + str(upath).lstrip("/")
-                            )
+                            bak_temp_url = ("http://" + host + ":" + str(i) + "/" + str(inurlpath).lstrip("/") + "/" + str(upath).lstrip("/"))
                             getattr(this_module, mf)(bak_temp_url)
                             if i == "443":
                                 bak_temp_url = (
@@ -8956,14 +8810,7 @@ def encapsulation_before_tscan(
                                 )
                                 getattr(this_module, mf)(bak_temp_url)
                             else:
-                                bak_temp_url = (
-                                    "https://"
-                                    + host
-                                    + ":"
-                                    + str(i)
-                                    + "/"
-                                    + str(inurlpath).lstrip("/")
-                                )
+                                bak_temp_url = ("https://" + host + ":" + str(i) + "/" + str(inurlpath).lstrip("/"))
                                 getattr(this_module, mf)(bak_temp_url)
                         else:
                             # http://www.example.com
@@ -8987,7 +8834,6 @@ def encapsulation_before_tscan(
 
 
 # ==============================
-
 
 def aliveThreadControl(
     hr,
@@ -9051,6 +8897,10 @@ def aliveThreadControl(
         # Use tscan to get title from result of fofa scan
         # Add model of subscan and fofa scan --- sfscan
 
+        if urlpath is None:
+            print(bingo("-") + " lack of specific a fofa query string")
+            urlpath = ""
+
         if platform.system() == "Windows" and PYVERSION < "3.0":
             urlpath = urlpath.decode("gbk")
             urlpath = urlpath.encode("utf-8")
@@ -9065,10 +8915,7 @@ def aliveThreadControl(
 
         email, token = Account().Fofakey()
         # get top of 10000 results
-        api_request = (
-            "https://fofa.info/api/v1/search/all?email=%s&size=%d&key=%s&qbase64=%s"
-            % (email, fofa_size, token, domains)
-        )
+        api_request = ("https://fofa.info/api/v1/search/all?email=%s&size=%d&key=%s&qbase64=%s" % (email, args.fs, token, domains))
 
         print(info("Waiting for fofa ..."))
         try:
@@ -9091,8 +8938,8 @@ def aliveThreadControl(
                 if fofa_result["results"] == []:
                     print(bingo("There no result!"))
                 else:
-                    if total > fofa_size:
-                        pages_total = total // fofa_size
+                    if total > args.fs:
+                        pages_total = total // args.fs
                         pages_total += 1
                     else:
                         pages_total = 1
@@ -9102,7 +8949,7 @@ def aliveThreadControl(
                                 break
                             api_request = (
                                 "https://fofa.info/api/v1/search/all?email=%s&key=%s&page=%s&size=%d&qbase64=%s"
-                                % (email, token, page, fofa_size, domains)
+                                % (email, token, page, args.fs, domains)
                             )
                             json_result = urllib2.urlopen(api_request, timeout=20)
                             result = json_result.read()
@@ -9117,27 +8964,11 @@ def aliveThreadControl(
                                 fdomain = mclists[0]
                                 fhost = mclists[1]
                                 fport = mclists[2]
-                                print(
-                                    info("[ ")
-                                    + PASSAT(fdomain)
-                                    + " | "
-                                    + fhost
-                                    + " | "
-                                    + Huskie(fport)
-                                    + info(" ]")
-                                )
+                                print(info("[ ") + PASSAT(fdomain) + " | " + fhost + " | " + Huskie(fport) + info(" ]"))
                                 if platform.system() == "Windows":
                                     try:
                                         f = open("fofa_result.txt", "a+")
-                                        fofainfo = (
-                                            "[ "
-                                            + fdomain
-                                            + " | "
-                                            + fhost
-                                            + " | "
-                                            + fport
-                                            + " ]"
-                                        )
+                                        fofainfo = ("[ " + fdomain + " | " + fhost + " | " + fport + " ]")
                                         f.write(fofainfo)
                                         f.write("\n")
                                         f.flush()
@@ -9146,55 +8977,25 @@ def aliveThreadControl(
                                         pass
 
                                 # filter http and https
-                                fdomain = fdomain.replace("http://", "").replace(
-                                    "https://", ""
-                                )
+                                fdomain = fdomain.replace("http://", "").replace("https://", "")
                                 fdomain = fdomain.split(":")[0]
                                 if args.u:
                                     for path in args.u:
                                         if listPort[0] == "":
-                                            queue.put(
-                                                "http://" + fdomain + ":" + fport + path
-                                            )
+                                            queue.put("http://" + fdomain + ":" + fport + path)
                                             if fport == "443":
                                                 queue.put("https://" + fdomain + path)
                                             else:
-                                                queue.put(
-                                                    "https://"
-                                                    + fdomain
-                                                    + ":"
-                                                    + fport
-                                                    + path
-                                                )
+                                                queue.put("https://" + fdomain + ":" + fport + path)
                                             progress_num += 2
                                         else:
                                             for port in listPort:
                                                 if port == "443":
-                                                    queue.put(
-                                                        "https://" + fdomain + path
-                                                    )
-                                                    queue.put(
-                                                        "http://"
-                                                        + fdomain
-                                                        + ":"
-                                                        + port
-                                                        + path
-                                                    )
+                                                    queue.put("https://" + fdomain + path)
+                                                    queue.put("http://" + fdomain + ":" + port + path)
                                                 else:
-                                                    queue.put(
-                                                        "http://"
-                                                        + fdomain
-                                                        + ":"
-                                                        + port
-                                                        + path
-                                                    )
-                                                    queue.put(
-                                                        "https://"
-                                                        + fdomain
-                                                        + ":"
-                                                        + port
-                                                        + path
-                                                    )
+                                                    queue.put("http://" + fdomain + ":" + port + path)
+                                                    queue.put("https://" + fdomain + ":" + port + path)
                                                 progress_num += 2
                                 else:
                                     if listPort[0] == "":
@@ -9202,24 +9003,16 @@ def aliveThreadControl(
                                         if fport == "443":
                                             queue.put("https://" + fdomain)
                                         else:
-                                            queue.put(
-                                                "https://" + fdomain + ":" + fport
-                                            )
+                                            queue.put("https://" + fdomain + ":" + fport)
                                         progress_num += 2
                                     else:
                                         for port in listPort:
                                             if port == "443":
                                                 queue.put("https://" + fdomain)
-                                                queue.put(
-                                                    "http://" + fdomain + ":" + port
-                                                )
+                                                queue.put("http://" + fdomain + ":" + port)
                                             else:
-                                                queue.put(
-                                                    "http://" + fdomain + ":" + port
-                                                )
-                                                queue.put(
-                                                    "https://" + fdomain + ":" + port
-                                                )
+                                                queue.put("http://" + fdomain + ":" + port)
+                                                queue.put("https://" + fdomain + ":" + port)
                                             progress_num += 2
 
                             if platform.system() == "Windows":
@@ -9242,7 +9035,6 @@ def aliveThreadControl(
 
         except Exception as e:
             print(bingo("-") + " " + repr(e))
-            pass
 
         if method == "fscan":
             method = "tscan"
@@ -9271,11 +9063,14 @@ def aliveThreadControl(
         if type(hr) == str:
             hr = [hr]
 
+        if len(hr) < 2:
+            hr = hr[0].split(",")
+
         sum_sub_result = []
-        for sdomain in hr[0].split(","):
+        for sdomain in hr:
             subs = subscanProcess(sdomain)
 
-            bing_results = subs.bing_domain()
+            # bing_results = subs.bing_domain()
 
             try:
                 pdns_results = subs.passivetotal_get("/v2/enrichment/subdomains")
@@ -9305,25 +9100,14 @@ def aliveThreadControl(
             # you should input ["www","a","b"]
             # duplicate remove for domain
 
-            sub_result = duprm(
-                pdns_results["subdomains"], cert_results, vts_results, bing_results
-            )
+            sub_result = duprm(pdns_results["subdomains"], cert_results, vts_results)
 
             # add host name to sub_result
             for k, i in enumerate(sub_result):
                 sub_result[k] = i + "." + sdomain
             sum_sub_result += sub_result
 
-        encapsulation_before_tscan(
-            "subscan_core",
-            sum_sub_result,
-            task_list,
-            method,
-            listport,
-            threadnum,
-            outfile,
-            urlpath,
-        )
+        encapsulation_before_tscan("subscan_core", sum_sub_result, task_list, method, listport, threadnum, outfile, urlpath)
 
     elif method == "bakscan":
         encapsulation_before_tscan(
@@ -9499,6 +9283,10 @@ if __name__ == "__main__":
         "\npython AlliN.py --host 10.1.1.1-10.2.2.2 -p 80 -t 100 -o asd.txt"
         "\npython AlliN.py --host 10.1.1.1-10.2.2.2 -p 80,443,8080 -t 100 -o asd.txt"
         "\npython AlliN.py --host 10.1.1.1-10.2.2.2 -p 80,443,8000-9000 -t 100 -o asd.txt"
+        "\npython AlliN.py --host [2001:4860:4860::8888] -p 80,443"
+        "\npython AlliN.py --host [2001:4860:4860::8888]/126 -p 80,443"
+        "\npython AlliN.py --host 2001:db8::/126 -p 80,443"
+        "\npython AlliN.py --host 2001:db8::1-2001:db8::5 -p 80,443"
         "\npython AlliN.py -f url.list -p 80,443,8000-9000 -t 100 -o asd.txt"
         '\npython AlliN.py -u "/login/index.jsp" -p 80,443,8000-9000 -t 100'
         "\npython AlliN.py -f xxx.list -t 100 # xxx.list 192.168.1.1:80"
@@ -9719,7 +9507,6 @@ if __name__ == "__main__":
         proxy_type, proxy_host = args.proxy.split("://")
         if "socks5" in proxy_type.lower():
             try:
-                # TODO: independence pysocks
                 import socks
                 from sockshandler import SocksiPyHandler
             except ImportError:
@@ -9769,7 +9556,14 @@ if __name__ == "__main__":
         if args.m == "sscan":
             args.m = "tscan"
         print(info("\t\t[+] " + args.m + " mode"))
-        AG3(args.f, args.m, listPort, args.t, "file", args.o, args.u)
+        if args.m == "sfscan":
+            AG3(args.f, args.m, listPort, args.t, "file", args.o, args.q)
+            sys.exit()
+
+        else:
+            AG3(args.f, args.m, listPort, args.t, "file", args.o, args.u)
+
+
     if args.m == "uncd":
         hcode(args.e, args.s)
 
@@ -9784,16 +9578,12 @@ if __name__ == "__main__":
 
             """
         )
-        fofa_size = args.fs
 
         if type(args.u) == str:
             args.u = [args.u]
         if args.m == "sfscan":
             hostlist = args.host
-        if platform.system() == "Windows":
-            AG3(hostlist, args.m, listPort, args.t, "list", args.o, args.q)
-        else:
-            AG3(hostlist, args.m, listPort, args.t, "list", args.o, args.q)
+        AG3(hostlist, args.m, listPort, args.t, "list", args.o, args.q)
 
     elif args.host:
         # main channel
