@@ -105,7 +105,9 @@ pscan 模块专用的timeout，默认为0.5，与timeout参数区分开来
 
 ```
 --proxy http://127.0.0.1:8081
+--proxy http://user:pass@127.0.0.1:8801
 --proxy socks5://127.0.0.1:1080
+--proxy socks5://user:pass@127.0.0.1:1080
 ```
 
 可以与Xray联动，但是线程需要设置为5，否则超过Xray最大队列数

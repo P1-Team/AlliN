@@ -107,7 +107,9 @@ Timeout of pscan, default is 0.5
 
 ```
 --proxy http://127.0.0.1:8081
+--proxy http://user:pass@127.0.0.1:8801
 --proxy socks5://127.0.0.1:1080
+--proxy socks5://user:pass@127.0.0.1:1080
 ```
 
 `pip install PySocks` before using it

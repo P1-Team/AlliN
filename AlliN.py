@@ -7934,7 +7934,7 @@ class DatamineThread(threading.Thread):
                 if is_visible:
                     if self.args.hiddensize:
                         hiddensize = [
-                            str(i) for i in parse_range_int(args.hiddensize)
+                            str(i) for i in parse_range_int(self.args.hiddensize)
                         ]
                         # 1-10 return int
                         if response_code in hiddensize:
@@ -9262,7 +9262,7 @@ def pring_logo():
     /   \     |  |     |  |     |  | |  \ |  | 
    /  ^  \    |  |     |  |     |  | |   \|  | 
   /  /_\  \   |  |     |  |     |  | |  . `  | 
- /  _____  \  |  `----.|  `----.|  | |  |\   |  v2.4.2 #{0}
+ /  _____  \  |  `----.|  `----.|  | |  |\   |  v2.4.3 #{0}
 /__/     \__\ |_______||_______||__| |__| \__| 
 
 """.format(
@@ -9274,7 +9274,7 @@ def pring_logo():
  █████╗ ██╗     ██╗     ██╗███╗   ██╗
 ██╔══██╗██║     ██║     ██║████╗  ██║
 ███████║██║     ██║     ██║██╔██╗ ██║
-██╔══██║██║     ██║     ██║██║╚██╗██║   v2.4.2 #{0}
+██╔══██║██║     ██║     ██║██║╚██╗██║   v2.4.3 #{0}
 ██║  ██║███████╗███████╗██║██║ ╚████║
 ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝╚═╝  ╚═══╝
 """.format(
@@ -9316,7 +9316,7 @@ if __name__ == "__main__":
         "\npython AlliN.py --host 192.168.1.1/24 --nobar"
         "\npython AlliN.py -q \"domain='xx.com'\" --host xxx.com -m sfscan"
         "\npython AlliN.py --host 192.168.1.1/24 -p 7001 -m t3scan",
-        version="%prog 2.4.2",
+        version="%prog 2.4.3",
     )
     parse.add_option(
         "--host",
@@ -9520,8 +9520,18 @@ if __name__ == "__main__":
             except ImportError:
                 print("No module named socks, please install socks first")
                 sys.exit(0)
-            proxy_h, proxy_port = proxy_host.split(":")
-            socks.set_default_proxy(socks.SOCKS5, proxy_h, int(proxy_port))
+
+            if "@" in proxy_host:
+                proxy_account, proxy_host = proxy_host.split("@")
+                proxy_user, proxy_pass = proxy_account.split(":")
+                proxy_h, proxy_port = proxy_host.split(":")
+                socks.set_default_proxy(socks.SOCKS5,
+                    proxy_h, int(proxy_port),
+                    username=proxy_user, password=proxy_pass)
+
+            else:
+                proxy_h, proxy_port = proxy_host.split(":")
+                socks.set_default_proxy(socks.SOCKS5, proxy_h, int(proxy_port))
             socket.socket = socks.socksocket
 
         elif "socks4" in proxy_type.lower():
@@ -9531,8 +9541,17 @@ if __name__ == "__main__":
             except ImportError:
                 print("No module named socks, please install socks first")
                 sys.exit(0)
-            proxy_h, proxy_port = proxy_host.split(":")
-            socks.set_default_proxy(socks.SOCKS4, proxy_h, int(proxy_port))
+
+            if "@" in proxy_host:
+                proxy_account, proxy_host = proxy_host.split("@")
+                proxy_user, proxy_pass = proxy_account.split(":")
+                proxy_h, proxy_port = proxy_host.split(":")
+                socks.set_default_proxy(socks.SOCKS4,
+                    proxy_h, int(proxy_port),
+                    username=proxy_user, password=proxy_pass)
+            else:
+                proxy_h, proxy_port = proxy_host.split(":")
+                socks.set_default_proxy(socks.SOCKS4, proxy_h, int(proxy_port))
             socket.socket = socks.socksocket
         else:
             proxy = urllib2.ProxyHandler(
