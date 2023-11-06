@@ -7937,7 +7937,7 @@ class DatamineThread(threading.Thread):
                             str(i) for i in parse_range_int(self.args.hiddensize)
                         ]
                         # 1-10 return int
-                        if response_code in hiddensize:
+                        if str(lenres) in hiddensize:
                             self.out_queue.task_done()
                             continue
                 else:
