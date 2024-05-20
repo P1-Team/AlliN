@@ -7119,7 +7119,7 @@ class ThreadUrl(threading.Thread):
 
                         if r.info().getheader("via"):
                             if "CHN-" in r.info().getheader("via"):
-                                cdntype = inf("Huawei CDN")
+                                cdntype = info("Huawei CDN")
                             if "cloudfront" in r.info().getheader("via"):
                                 cdntype = info("Cloudfront CDN")
 
