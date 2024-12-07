@@ -4382,7 +4382,7 @@ class coding:
             print(info("[*]") + "String to decode: %s\n" % encoded_string)
             if encoded_string.startswith("rd"):
                 f5pattern = re.compile(
-                    "rd(\d*)o00000000000000000000ffff([0-9a-fA-F]*)o(\d*)"
+                    r"rd(\d*)o00000000000000000000ffff([0-9a-fA-F]*)o(\d*)"
                 )
                 result = f5pattern.findall(encoded_string)
                 if len(result) != 0 and result[0] != None and len(result[0]) == 3:
@@ -4906,9 +4906,9 @@ class subscanProcess:
             crt_result = crt.open(req, timeout=30).read()
             crt_result = crt_result.decode("utf-8")
             for cert, domain in re.findall(
-                '<tr>(?:\s|\S)*?href="\?id=([0-9]+?)"(?:\s|\S)*?<td>([*_a-zA-Z0-9.-]+?\.'
+                r'<tr>(?:\s|\S)*?href="\?id=([0-9]+?)"(?:\s|\S)*?<td>([*_a-zA-Z0-9.-]+?\.'
                 + re.escape(self.query)
-                + ")</td>(?:\s|\S)*?</tr>",
+                + r")</td>(?:\s|\S)*?</tr>",
                 crt_result,
                 re.IGNORECASE,
             ):
@@ -5768,7 +5768,7 @@ class FaviconDetect:
     def query(self, value):
         favicon_base64 = codecs.encode(value, "base64")
         if PYVERSION > "3.0":
-            favicon_base64 =favicon_base64.decode("utf-8")
+            favicon_base64 = favicon_base64.decode("utf-8")
 
         key = self.mmm3_hash(favicon_base64)
         if key in self.fin:
@@ -7217,7 +7217,7 @@ class ThreadUrl(threading.Thread):
                     try:
                         if "charset" not in str(r.info().getheader("Content-Type")):
                             p1 = re.compile(
-                                "charset=[\"']?(.*?)[\"']?[\"\>'\s]", re.IGNORECASE
+                                r"charset=[\"']?(.*?)[\"']?[\"\>'\s]", re.IGNORECASE
                             )
                             target1 = re.findall(p1, resp)
                             if len(target1) == 0:
@@ -7235,18 +7235,18 @@ class ThreadUrl(threading.Thread):
                             + "-------------Get charset error! But don't  worry !"
                         )
 
-                    p2 = re.compile("<title[\s\S]*?>([\s\S]*?)</title>", re.IGNORECASE)
+                    p2 = re.compile(r"<title[\s\S]*?>([\s\S]*?)</title>", re.IGNORECASE)
                     p3 = 'Description.*content="(.*)"'
                     p4 = re.compile(
                         '<meta name="keywords" content="(.*?)".*?>', re.IGNORECASE
                     )
                     # this is to not redirct because js
                     p5 = re.compile(
-                        "window.location=[jqwekwqklejqkwejjwqlkeqjlkqwjsdljasldjalksd|kjasdjasldjlaksdjlasjdlqwiueouqwoejkaskgvhdushijdskfhbj|<meta[\s\S]*?HTTP-EQUIV=[\"']REFRESH[\"'][\s\S]*?url=(.*)[\"'][\s\S]*?>",
+                        r"window.location=[jqwekwqklejqkwejjwqlkeqjlkqwjsdljasldjalksd|kjasdjasldjlaksdjlasjdlqwiueouqwoejkaskgvhdushijdskfhbj|<meta[\s\S]*?HTTP-EQUIV=[\"']REFRESH[\"'][\s\S]*?url=(.*)[\"'][\s\S]*?>",
                         re.IGNORECASE,
                     )
                     p6 = re.compile("document.title(.*?);", re.IGNORECASE)
-                    p7 = re.compile("Copyright.*\.? ", re.IGNORECASE)
+                    p7 = re.compile(r"Copyright.*\.? ", re.IGNORECASE)
                     p8 = re.compile("<h1.*?>(.*?)</h1>", re.IGNORECASE)
                     self.p9 = len(resp)
                     # this is to not redirct because js
@@ -7948,7 +7948,7 @@ class DatamineThread(threading.Thread):
                 # init parameters of hidden
                 
 
-                p = re.compile("<title[\s\S]*?>([\s\S]*?)</title>", re.IGNORECASE)
+                p = re.compile(r"<title[\s\S]*?>([\s\S]*?)</title>", re.IGNORECASE)
                 try:
                     # print response
                     target = re.findall(p, response)
@@ -8882,11 +8882,11 @@ def aliveThreadControl(
 
     for i in range(threadnum):
         t = ThreadUrl(queue, method, out_queue, locks, outfile, Wa, Trie)
-        t.setDaemon(True)
+        t.daemon = True
         t.start()
 
         dt = DatamineThread(out_queue, method, locks, outfile, Wa)
-        dt.setDaemon(True)
+        dt.daemon = True
         threads_wait.append(dt)
         dt.start()
 
