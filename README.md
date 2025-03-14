@@ -312,6 +312,9 @@ python AlliN.py --host 192.168.1.1/24 --tp
 Size of each result number by fofa scan, default is 10,000
 
 
+### --hts
+Total results of hunter scan, default is 100
+
 ### -m
 
 Method of scan, default is tscan
@@ -428,6 +431,20 @@ Sample:
 
 
 `python AlliN.py -q domain="baidu.com" -m fscan --fs 200`
+
+#### htscan
+
+Hunter scan, reference [https://hunter.qianxin.com/](https://hunter.qianxin.com/)
+
+```
+--hts # default is 100
+```
+
+Sample:
+
+
+`python AlliN.py -q domain="baidu.com" -m htscan --hts 150`
+
 
 #### pscan
 

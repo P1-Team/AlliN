@@ -121,6 +121,14 @@ class Account:
         fofa_token = ""
         return email, fofa_token
 
+    def Hunterkey(self):
+        """
+        url: https://hunter.qianxin.com/
+        """
+
+        hunter_token = ""
+        return hunter_token
+
     def Shodankey(self):
         """
         url: https://www.shodan.io/
@@ -6620,6 +6628,9 @@ class ThreadUrl(threading.Thread):
                 self.method = "tscan"
             elif self.method == "bakscan":
                 self.method = "tscan"
+            elif self.method == "htscan":
+                self.method = "tscan"
+
 
             if self.method == "pscan":
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -7899,6 +7910,7 @@ class DatamineThread(threading.Thread):
                 or self.method == "fscan"
                 or self.method == "sfscan"
                 or self.method == "hostscan"
+                or self.method == "htscan"
             ):
 
                 """
@@ -8937,7 +8949,7 @@ def aliveThreadControl(
         try:
             # json format read
             fofa_result = json.loads(result)
-            if fofa_result["error"] == "true":
+            if fofa_result["error"]:
                 print(bingo(fofa_result["errmsg"]))
             else:
                 total = fofa_result["size"]
@@ -8951,100 +8963,248 @@ def aliveThreadControl(
                         pages_total += 1
                     else:
                         pages_total = 1
-                    for page in range(1, pages_total + 1):
-                        if page > 1:
-                            if 1:
-                                break
-                            api_request = (
-                                "https://fofa.info/api/v1/search/all?email=%s&key=%s&page=%s&size=%d&qbase64=%s"
-                                % (email, token, page, args.fs, domains)
-                            )
-                            json_result = urllib2.urlopen(api_request, timeout=20)
-                            result = json_result.read()
-                            fofa_result = json.loads(result)
-                            if fofa_result["error"] == "true":
-                                print(bingo(fofa_result["errmsg"]))
-                            if fofa_result["error"] == "true":
-                                print(bingo(fofa_result["errmsg"]))
-                        try:
-                            locks.acquire(1)
-                            for mclists in fofa_result["results"]:
-                                fdomain = mclists[0]
-                                fhost = mclists[1]
-                                fport = mclists[2]
-                                print(info("[ ") + PASSAT(fdomain) + " | " + fhost + " | " + Huskie(fport) + info(" ]"))
-                                if platform.system() == "Windows":
-                                    try:
-                                        f = open("fofa_result.txt", "a+")
-                                        fofainfo = ("[ " + fdomain + " | " + fhost + " | " + fport + " ]")
-                                        f.write(fofainfo)
-                                        f.write("\n")
-                                        f.flush()
-                                        f.close()
-                                    except Exception as e:
-                                        pass
+                    try:
+                        locks.acquire(1)
+                        for mclists in fofa_result["results"]:
+                            fdomain = mclists[0]
+                            fhost = mclists[1]
+                            fport = mclists[2]
+                            print(info("[ ") + PASSAT(fdomain) + " | " + fhost + " | " + Huskie(fport) + info(" ]"))
+                            try:
+                                f = open("fofa_result.txt", "a+")
+                                fofainfo = ("[ " + fdomain + " | " + fhost + " | " + fport + " ]")
+                                f.write(fofainfo)
+                                f.write("\n")
+                                f.flush()
+                                f.close()
+                            except Exception as e:
+                                pass
 
-                                # filter http and https
-                                fdomain = fdomain.replace("http://", "").replace("https://", "")
-                                fdomain = fdomain.split(":")[0]
-                                if args.u:
-                                    for path in args.u:
-                                        if listPort[0] == "":
-                                            queue.put("http://" + fdomain + ":" + fport + path)
-                                            if fport == "443":
-                                                queue.put("https://" + fdomain + path)
-                                            else:
-                                                queue.put("https://" + fdomain + ":" + fport + path)
-                                            progress_num += 2
-                                        else:
-                                            for port in listPort:
-                                                if port == "443":
-                                                    queue.put("https://" + fdomain + path)
-                                                    queue.put("http://" + fdomain + ":" + port + path)
-                                                else:
-                                                    queue.put("http://" + fdomain + ":" + port + path)
-                                                    queue.put("https://" + fdomain + ":" + port + path)
-                                                progress_num += 2
-                                else:
+                            # filter http and https
+                            fdomain = fdomain.replace("http://", "").replace("https://", "")
+                            fdomain = fdomain.split(":")[0]
+                            if args.u:
+                                for path in args.u:
                                     if listPort[0] == "":
-                                        queue.put("http://" + fdomain + ":" + fport)
+                                        queue.put("http://" + fdomain + ":" + fport + path)
                                         if fport == "443":
-                                            queue.put("https://" + fdomain)
+                                            queue.put("https://" + fdomain + path)
                                         else:
-                                            queue.put("https://" + fdomain + ":" + fport)
+                                            queue.put("https://" + fdomain + ":" + fport + path)
                                         progress_num += 2
                                     else:
                                         for port in listPort:
                                             if port == "443":
-                                                queue.put("https://" + fdomain)
-                                                queue.put("http://" + fdomain + ":" + port)
+                                                queue.put("https://" + fdomain + path)
+                                                queue.put("http://" + fdomain + ":" + port + path)
                                             else:
-                                                queue.put("http://" + fdomain + ":" + port)
-                                                queue.put("https://" + fdomain + ":" + port)
+                                                queue.put("http://" + fdomain + ":" + port + path)
+                                                queue.put("https://" + fdomain + ":" + port + path)
                                             progress_num += 2
+                            else:
+                                if listPort[0] == "":
+                                    queue.put("http://" + fdomain + ":" + fport)
+                                    if fport == "443":
+                                        queue.put("https://" + fdomain)
+                                    else:
+                                        queue.put("https://" + fdomain + ":" + fport)
+                                    progress_num += 2
+                                else:
+                                    for port in listPort:
+                                        if port == "443":
+                                            queue.put("https://" + fdomain)
+                                            queue.put("http://" + fdomain + ":" + port)
+                                        else:
+                                            queue.put("http://" + fdomain + ":" + port)
+                                            queue.put("https://" + fdomain + ":" + port)
+                                        progress_num += 2
 
-                            if platform.system() == "Windows":
-                                try:
-                                    f = open("fofa_result.txt", "a+")
-                                    fofainfo = "Total have %s of results" % total
-                                    f.write(fofainfo)
-                                    f.write("\n")
-                                    f.flush()
-                                    f.close()
-                                except Exception as e:
-                                    pass
+                        # Eliminate the platform limit
+                        try:
+                            f = open("fofa_result.txt", "a+")
+                            fofainfo = "Total have %s of results" % total
+                            f.write(fofainfo)
+                            f.write("\n")
+                            f.flush()
+                            f.close()
+                        except Exception as e:
+                            pass
+                        locks.release()
+                    except Exception as e:
+                        try:
                             locks.release()
                         except Exception as e:
-                            try:
-                                locks.release()
-                            except Exception as e:
-                                pass
+                            pass
             print("\n")
 
         except Exception as e:
             print(bingo("-") + " " + repr(e))
 
         if method == "fscan":
+            method = "tscan"
+            hr = [hr]
+        else:
+            method = "subscan"
+            urlpath = None
+
+    elif method == "htscan":
+        # Use tscan to get title from result of fofa scan
+        # Add model of subscan and fofa scan --- sfscan
+
+        if urlpath is None:
+            print(bingo("-") + " lack of specific a hunter query string")
+            urlpath = ""
+
+        if platform.system() == "Windows" and PYVERSION < "3.0":
+            urlpath = urlpath.decode("gbk")
+            urlpath = urlpath.encode("utf-8")
+        urlpath = urlpath.replace("'", '"')
+
+        # Adapter for python3
+        try:
+            domains = urlpath.encode("base64").replace("\r", "").replace("\n", "")
+        except LookupError:
+            domains = base64.b64encode(urlpath.encode("utf-8")).decode("utf-8")
+            domains = domains.replace("\r", "").replace("\n", "")
+
+        token = Account().Hunterkey()
+
+        total_number = args.hts
+        page_size = 0
+        if args.hts < 100:
+            page_size = args.hts
+        else:
+            page_size = 100
+        api_request = ("https://hunter.qianxin.com/openApi/search?api-key=%s&search=%s&page=1&page_size=%s" % (token, domains, page_size))
+
+        print(info("Waiting for %d results of hunter ..." % args.hts))
+        try:
+            json_result = urllib2.urlopen(api_request)
+            result = json_result.read()
+            total_number -= page_size
+
+        except Exception as e:
+            print(bingo("-") + " " + repr(e))
+            print("No result of htscan")
+
+        try:
+            # json format read
+            hunter_result = json.loads(result)
+            if hunter_result["code"] != 200:
+                print(bingo(hunter_result["message"]))
+            else:
+                hunter_data = hunter_result["data"]
+                total = hunter_data["total"]
+                total = int(total)
+                # judge wether size of result of the fofa scan is more than 200
+                if hunter_data["arr"] == []:
+                    print(bingo("There no result!"))
+                else:
+                    if total > page_size:
+                        pages_total = total // page_size
+                        pages_total += 1
+                    else:
+                        pages_total = 1
+                    for page in range(1, pages_total + 1):
+                        if page > 1:
+                            if page_size > total_number:
+                                page_size = total_number
+
+                            time.sleep(3)
+                            api_request = (
+                                "https://hunter.qianxin.com/openApi/search?api-key=%s&search=%s&page=%s&page_size=%s"
+                                % (token, domains, page, page_size)
+                            )
+                            json_result = urllib2.urlopen(api_request, timeout=20)
+                            result = json_result.read()
+                            hunter_result = json.loads(result)
+                            if hunter_result["code"] != 200:
+                                print(bingo(hunter_result["message"]))
+
+                            total_number -= page_size
+                        try:
+                            locks.acquire(1)
+                            hunter_data = hunter_result["data"]
+                            for mclists in hunter_data["arr"]:
+                                htdomain = mclists["url"]
+                                hthost = mclists["ip"]
+                                htport = str(mclists["port"])
+                                print(info("[ ") + PASSAT(htdomain) + " | " + hthost + " | " + Huskie(htport) + info(" ]"))
+                                # Eliminate the platform limitation
+                                try:
+                                    f = open("hunter_result.txt", "a+")
+                                    hunterinfo = ("[ " + htdomain + " | " + hthost + " | " + htport + " ]")
+                                    f.write(hunterinfo)
+                                    f.write("\n")
+                                    f.flush()
+                                    f.close()
+                                except Exception as e:
+                                    pass
+
+                                # filter http and https
+                                htdomain = htdomain.replace("http://", "").replace("https://", "")
+                                htdomain = htdomain.split(":")[0]
+                                if args.u:
+                                    for path in args.u:
+                                        if listPort[0] == "":
+                                            queue.put("http://" + htdomain + ":" + htport + path)
+                                            if htport == "443":
+                                                queue.put("https://" + htdomain + path)
+                                            else:
+                                                queue.put("https://" + htdomain + ":" + htport + path)
+                                            progress_num += 2
+                                        else:
+                                            for port in listPort:
+                                                if port == "443":
+                                                    queue.put("https://" + htdomain + path)
+                                                    queue.put("http://" + htdomain + ":" + port + path)
+                                                else:
+                                                    queue.put("http://" + htdomain + ":" + port + path)
+                                                    queue.put("https://" + htdomain + ":" + port + path)
+                                                progress_num += 2
+                                else:
+                                    if listPort[0] == "":
+                                        queue.put("http://" + htdomain + ":" + htport)
+                                        if htport == "443":
+                                            queue.put("https://" + htdomain)
+                                        else:
+                                            queue.put("https://" + htdomain + ":" + htport)
+                                        progress_num += 2
+                                    else:
+                                        for port in listPort:
+                                            if port == "443":
+                                                queue.put("https://" + htdomain)
+                                                queue.put("http://" + htdomain + ":" + port)
+                                            else:
+                                                queue.put("http://" + htdomain + ":" + port)
+                                                queue.put("https://" + htdomain + ":" + port)
+                                            progress_num += 2
+
+                            # Eliminate the platform limitation
+                            try:
+                                f = open("hunter_result.txt", "a+")
+                                hunterinfo = "Total have %s of results" % total
+                                f.write(hunterinfo)
+                                f.write("\n")
+                                f.flush()
+                                f.close()
+                            except Exception as e:
+                                pass
+                            locks.release()
+                        except Exception as e:
+                            try:
+                                locks.release()
+                            except Exception as e:
+                                pass
+
+                        if total_number <= 0:
+                            break
+            print("\n")
+
+        except Exception as e:
+            print(bingo("-") + " " + repr(e))
+
+        if method == "htscan":
             method = "tscan"
             hr = [hr]
         else:
@@ -9262,7 +9422,7 @@ def pring_logo():
     /   \     |  |     |  |     |  | |  \ |  | 
    /  ^  \    |  |     |  |     |  | |   \|  | 
   /  /_\  \   |  |     |  |     |  | |  . `  | 
- /  _____  \  |  `----.|  `----.|  | |  |\   |  v2.4.3 #{0}
+ /  _____  \  |  `----.|  `----.|  | |  |\   |  v2.4.4 #{0}
 /__/     \__\ |_______||_______||__| |__| \__| 
 
 """.format(
@@ -9274,7 +9434,7 @@ def pring_logo():
  █████╗ ██╗     ██╗     ██╗███╗   ██╗
 ██╔══██╗██║     ██║     ██║████╗  ██║
 ███████║██║     ██║     ██║██╔██╗ ██║
-██╔══██║██║     ██║     ██║██║╚██╗██║   v2.4.3 #{0}
+██╔══██║██║     ██║     ██║██║╚██╗██║   v2.4.4 #{0}
 ██║  ██║███████╗███████╗██║██║ ╚████║
 ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝╚═╝  ╚═══╝
 """.format(
@@ -9305,6 +9465,7 @@ if __name__ == "__main__":
         "\npython AlliN.py -m uncd -e f5 -s 185903296.21520.0000"
         "\npython AlliN.py -q domain='example.com' -m fscan # fofa scan"
         "\npython AlliN.py -q domain='example.com' -m fscan --fs 200 # fofa scan with size"
+        "\npython AlliN.py -q domain='example.com' -m htscan --hts 150  # total number of results  after hunter scan"
         "\npython AlliN.py -m icmpt (establish a server conncat in your vps)"
         "\npython AlliN.py -m icmpt --sip vps --cip 127.0.0.1 --cport 80 (forward you connect to your vps network)"
         "\npython AlliN.py --host ww[fuzz].xxx.com -m ddscan (subdomain fuzz)"
@@ -9316,7 +9477,7 @@ if __name__ == "__main__":
         "\npython AlliN.py --host 192.168.1.1/24 --nobar"
         "\npython AlliN.py -q \"domain='xx.com'\" --host xxx.com -m sfscan"
         "\npython AlliN.py --host 192.168.1.1/24 -p 7001 -m t3scan",
-        version="%prog 2.4.3",
+        version="%prog 2.4.4",
     )
     parse.add_option(
         "--host",
@@ -9392,6 +9553,13 @@ if __name__ == "__main__":
         default=10000,
         help="Size of each result number of fofa scan",
     )
+    parse.add_option(
+        "--hts",
+        dest="hts",
+        type="int",
+        default=100,
+        help="Total results of hunter scan",
+    )
     parse.add_option("--dd", dest="dd", action="store_true", help="Open head request")
     parse.add_option("--tp", dest="tp", action="store_true", help="Title plus mode, add an extra favicon.ico scan")
     parse.add_option("--nocert", dest="nocert", action="store_true", help="Close show cert url")
@@ -9442,6 +9610,7 @@ if __name__ == "__main__":
                                                                    dpscan -> doublepulsar backdoor check
                                                                    shscan -> shiro scan
                                                                    t3scan -> weblogic information scanning
+                                                                   htscan -> hunter scan
                                                                    
                                                                    default is tscan
                                                                    ————————————————
@@ -9610,6 +9779,20 @@ if __name__ == "__main__":
             args.u = [args.u]
         if args.m == "sfscan":
             hostlist = args.host
+        AG3(hostlist, args.m, listPort, args.t, "list", args.o, args.q)
+
+    elif args.m == "htscan":
+        print(
+            r"""
+                .__     __                               
+                |  |___/  |_  ______ ____ _____    ____  
+                |  |  \   __\/  ___// ___\\__  \  /    \ 
+                |   Y  \  |  \___ \\  \___ / __ \|   |  \
+                |___|  /__| /____  >\___  >____  /___|  /
+                     \/          \/     \/     \/     \/ 
+            """
+        )
+
         AG3(hostlist, args.m, listPort, args.t, "list", args.o, args.q)
 
     elif args.host:

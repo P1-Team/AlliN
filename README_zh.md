@@ -427,6 +427,17 @@ python AlliN.py -m vhostscan -f dict.txt --domain example.com --nocert
 
 `python AlliN.py -q domain="baidu.com" -m fscan --fs 200`
 
+#### htscan
+指利用hunter扫描
+
+```
+--hts 一次hunter的查询量，默认为100条
+```
+
+样例：
+
+`python AlliN.py -q domain="chaitin.cn" -m htscan --hts 150`
+
 #### pscan
 
 指端口扫描
