@@ -8980,55 +8980,57 @@ def aliveThreadControl(
                             except Exception as e:
                                 pass
 
-                            # filter http and https
-                            fdomain = fdomain.replace("http://", "").replace("https://", "")
-                            fdomain = fdomain.split(":")[0]
-                            if args.u:
-                                for path in args.u:
-                                    if listPort[0] == "":
-                                        queue.put("http://" + fdomain + ":" + fport + path)
-                                        if fport == "443":
-                                            queue.put("https://" + fdomain + path)
+                            if not args.noscan:
+                                # filter http and https
+                                fdomain = fdomain.replace("http://", "").replace("https://", "")
+                                fdomain = fdomain.split(":")[0]
+                                if args.u:
+                                    for path in args.u:
+                                        if listPort[0] == "":
+                                            queue.put("http://" + fdomain + ":" + fport + path)
+                                            if fport == "443":
+                                                queue.put("https://" + fdomain + path)
+                                            else:
+                                                queue.put("https://" + fdomain + ":" + fport + path)
+                                            progress_num += 2
                                         else:
-                                            queue.put("https://" + fdomain + ":" + fport + path)
+                                            for port in listPort:
+                                                if port == "443":
+                                                    queue.put("https://" + fdomain + path)
+                                                    queue.put("http://" + fdomain + ":" + port + path)
+                                                else:
+                                                    queue.put("http://" + fdomain + ":" + port + path)
+                                                    queue.put("https://" + fdomain + ":" + port + path)
+                                                progress_num += 2
+                                else:
+                                    if listPort[0] == "":
+                                        queue.put("http://" + fdomain + ":" + fport)
+                                        if fport == "443":
+                                            queue.put("https://" + fdomain)
+                                        else:
+                                            queue.put("https://" + fdomain + ":" + fport)
                                         progress_num += 2
                                     else:
                                         for port in listPort:
                                             if port == "443":
-                                                queue.put("https://" + fdomain + path)
-                                                queue.put("http://" + fdomain + ":" + port + path)
+                                                queue.put("https://" + fdomain)
+                                                queue.put("http://" + fdomain + ":" + port)
                                             else:
-                                                queue.put("http://" + fdomain + ":" + port + path)
-                                                queue.put("https://" + fdomain + ":" + port + path)
+                                                queue.put("http://" + fdomain + ":" + port)
+                                                queue.put("https://" + fdomain + ":" + port)
                                             progress_num += 2
-                            else:
-                                if listPort[0] == "":
-                                    queue.put("http://" + fdomain + ":" + fport)
-                                    if fport == "443":
-                                        queue.put("https://" + fdomain)
-                                    else:
-                                        queue.put("https://" + fdomain + ":" + fport)
-                                    progress_num += 2
-                                else:
-                                    for port in listPort:
-                                        if port == "443":
-                                            queue.put("https://" + fdomain)
-                                            queue.put("http://" + fdomain + ":" + port)
-                                        else:
-                                            queue.put("http://" + fdomain + ":" + port)
-                                            queue.put("https://" + fdomain + ":" + port)
-                                        progress_num += 2
 
-                        # Eliminate the platform limit
-                        try:
-                            f = open("fofa_result.txt", "a+")
-                            fofainfo = "Total have %s of results" % total
-                            f.write(fofainfo)
-                            f.write("\n")
-                            f.flush()
-                            f.close()
-                        except Exception as e:
-                            pass
+                        if not args.noscan:
+                            # Eliminate the platform limit
+                            try:
+                                f = open("fofa_result.txt", "a+")
+                                fofainfo = "Total have %s of results" % total
+                                f.write(fofainfo)
+                                f.write("\n")
+                                f.flush()
+                                f.close()
+                            except Exception as e:
+                                pass
                         locks.release()
                     except Exception as e:
                         try:
@@ -9039,7 +9041,11 @@ def aliveThreadControl(
 
         except Exception as e:
             print(bingo("-") + " " + repr(e))
-
+            
+        if args.noscan:
+            print(bingo("Noscan mode enabled. FOFA results saved to fofa_result.txt"))
+            sys.exit(0)
+            
         if method == "fscan":
             method = "tscan"
             hr = [hr]
@@ -9583,6 +9589,8 @@ if __name__ == "__main__":
         type="string",
         help='Domain for fofa example: domain="baidu.com"',
     )
+    parse.add_option("--noscan", action="store_true", dest="noscan", default=False,
+                  help="Only fetch FOFA results without performing any scanning")
     parse.add_option("-H", dest="H", type="string", help='set header, example: -H "key: value"')
     parse.add_option(
         "-m",
@@ -10002,3 +10010,4 @@ if __name__ == "__main__":
     endtime = time.time()
 
     print("Total time taken %f seconds" % (endtime - starttime))
+
