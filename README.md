@@ -311,6 +311,10 @@ python AlliN.py --host 192.168.1.1/24 --tp
 
 Size of each result number by fofa scan, default is 10,000
 
+### --noscan
+
+Fetch the fofa result only without scanning
+
 
 ### --hts
 Total results of hunter scan, default is 100

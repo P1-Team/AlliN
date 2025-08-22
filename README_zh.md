@@ -306,6 +306,12 @@ Size of each result number of fofa scan
 
 用于设置fofa 请求size 大小设置，最大为1w，默认情况下 超过1w需要花钱的。这个选项一般也不会用。
 
+### --noscan
+
+Fetch the fofa result only without scanning
+只获取fscan的结果，不对结果进行额外扫描。
+
+
 ### -m
 
 如果不加-m 参数，默认以tscan方式进行。
